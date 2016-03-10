@@ -8,13 +8,6 @@ define(function(require) {
 
 		el: '.location-title',
 
-		events: {
-	      'click button.publish'	: 'downloadProject',
-	      'click button.preview'	: 'previewProject',
-	      'click button.save'		: 'saveComponent',
-	      'click button.cancel'		: 'cancelComponent'
-	    },
-
 		initialize: function() {
 			this.listenTo(Origin, 'location:title:update', this.render);
 			this.listenTo(Origin, 'location:title:hide', this.onHideTitle);
@@ -37,26 +30,9 @@ define(function(require) {
 
 		onHideTitle: function() {
 			this.$el.addClass('display-none');
-		},
+		}
 
-	    downloadProject: function() {
-	    	Origin.trigger('editorCommon:download');
-	    },
-
-	    previewProject: function() {
-	    	Origin.trigger('editorCommon:preview');
-	    },
-
-	    saveComponent: function() {
-	    	console.log('save');
-	    },
-
-	    cancelComponent: function() {
-	    	console.log('cancel');
-	    },
-
-	}, 
-	{
+	}, {
 		template: 'locationTitle'
 	});
 

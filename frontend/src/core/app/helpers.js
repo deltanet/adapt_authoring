@@ -2,7 +2,6 @@
 define(function(require){
     var Handlebars = require('handlebars');
     var Origin = require('coreJS/app/origin');
-    var moment = require('moment');
 
     var helpers = {
         console: function(context) {
@@ -55,13 +54,6 @@ define(function(require){
           }
 
           return noDisplay;
-        },
-        momentFormat: function(date, format) {
-          if (typeof date == 'undefined') {
-            return '-';
-          }
-          
-          return moment(date).format(format);
         },
         formatDuration: function(duration) {
           var zero = '0', hh, mm, ss;

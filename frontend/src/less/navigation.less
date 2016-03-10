@@ -1,14 +1,24 @@
 @import 'variables.less';
+@import 'fonts.less';
 
 .navigation {
-    background-color:@navigation-color;
-    border-bottom:1px solid #3e4a5f;
+    background:url("assets/login_bg.jpg");
+    border-bottom:1px solid rgba(0,0,0,0.15);
+    font-family: @font-raleway-semibold;
+    font-size: 15px;
     a {
-        transition:all 0.3s;
+        // transition:all 0.3s;
         &:hover {
             color:@navigation-hover-text-color;
+            &.navigation-user-logout {
+                color:@button-white-hollow-hover-text-color;
+            }
         }
     }
+}
+
+.navigation-inner {
+    padding-top: 15px;
 }
 
 .navigation-item {
@@ -16,13 +26,26 @@
 }
 
 .navigation-left {
-    a {
-        border-right:1px solid #3e4a5f;
+    .navigation-loading-bar {
+        width: 120px;
+        height: 20px;
+        padding: 0;
+        margin-top: 7px;
+        radius: @button-radius;
+        background: darken(@navigation-hover-text-color,10%);
+        border: 1px solid @navigation-hover-text-color;
+        &.display-none {
+            display: none;
+        }
+    }
+    .navigation-loading-progress {
+        height:20px;
+        background-color:@secondary-color;
     }
 }
 
 .navigation-right {
-    a {
-        border-left:1px solid #3e4a5f;
+    .navigation-user-logout {
+        padding: 0px 25px;
     }
 }

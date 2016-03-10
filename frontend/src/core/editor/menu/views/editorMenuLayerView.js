@@ -16,10 +16,7 @@ define(function(require) {
         'click button.editor-menu-layer-add-page' : 'addPage',
         'click button.editor-menu-layer-add-menu' : 'addMenu',
         'click .editor-menu-layer-paste'          : 'pasteMenuItem',
-        'click .editor-menu-layer-paste-cancel'   : 'cancelPasteMenuItem',
-        'click button.location-button-primary'    : 'previewProject',
-        'click button.location-button-secondary'  : 'downloadProject'
-
+        'click .editor-menu-layer-paste-cancel'   : 'cancelPasteMenuItem'
       },
 
       preRender: function(options) {
@@ -139,7 +136,7 @@ define(function(require) {
 
         newChildModel.save({
           title: newChildTitle,
-          displayTitle: (typeToAdd == 'block') ? '' : newChildTitle,
+          displayTitle: newChildTitle,
           body: '',
           _parentId: model.get('_id'),
           _courseId: Origin.editor.data.course.get('_id')
@@ -189,21 +186,14 @@ define(function(require) {
 
       cancelPasteMenuItem: function(event) {
         event.preventDefault();
+        $('.add-zone').css('visibility','visible');
         var parentId = this._parentId;
         var target = new EditorContentObjectModel({
           _parentId: parentId,
           _courseId: Origin.editor.data.course.get('_id')
         });
         Origin.trigger('editorView:pasteCancel', target);
-      },
-
-      downloadProject: function() {
-        Origin.trigger('editorCommon:download');
-      },
-
-      previewProject: function() {
-        Origin.trigger('editorCommon:preview');
-      } 
+      }
 
   	}, {
   		template: 'editorMenuLayer'

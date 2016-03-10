@@ -287,15 +287,13 @@ define(function(require) {
 
           var componentDisplayName = (componentType) ? componentType.get('displayName').toLowerCase() : '';
 
-          Origin.trigger('location:title:update', {title: 'Editing ' + componentDisplayName + ' component - ' + componentModel.get('title'), cancel: 'Cancel', save: 'Save'});
+          Origin.trigger('location:title:update', {title: 'Editing ' + componentDisplayName + ' component - ' + componentModel.get('title')});
           Origin.sidebar.addView(new EditorComponentEditSidebarView({model: componentModel, form:form}).$el);
           Origin.editingOverlay.addView(new EditorComponentEditView({model: componentModel, form:form}).$el);
         }
       });
       return;
     }
-
-    var pageTitle = Origin.data
 
     switch (route2) {
       case 'settings':
@@ -405,7 +403,7 @@ define(function(require) {
         Origin.editor.currentContentObjectId = (route3) ? route3 : undefined;
 
         // Update page title
-        Origin.trigger('location:title:update', {title: Origin.editor.data.course.attributes.displayTitle, subTitle: 'Projects', publish: 'Publish', preview: 'Preview'});
+        Origin.trigger('location:title:update', {title: 'Menu editor'});
 
         Origin.editor.scrollTo = 0;
         // Create Editor menu view
@@ -439,7 +437,7 @@ define(function(require) {
           return;
         }
         // Update page title
-        Origin.trigger('location:title:update', {title: 'Page editor', secondary: 'Secondary', primary: 'Primary'});
+        Origin.trigger('location:title:update', {title: 'Page editor'});
 
         // Create Editor page view
         // Origin.editor.scrollTo = 0;

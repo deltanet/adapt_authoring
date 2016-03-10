@@ -5,9 +5,19 @@
 <div class="navigation-left">
 {{/if}}
     {{#if isAuthenticated}}
-    <a href="#" class="navigation-item navigation-global-menu" data-event="globalMenu:toggle"><i class="fa fa-bars"></i></a>
+    <a href="#" class="navigation-item navigation-global-menu" data-event="globalMenu:toggle">
+      {{!-- <i class="fa fa-bars"></i> --}}
+      <div id="global-menu-icon">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </a>
     <div href="#" class="navigation-item navigation-product-name">{{t 'app.productname'}}</div>
     {{/if}}
+    <div class="navigation-item navigation-loading-bar display-none">
+      <div class="navigation-loading-progress" style="width:0px"/>
+    </div>
   </div>
 {{#if _canRevert}}
 <div class="navigation-right navigation-loginas-background">
@@ -22,7 +32,7 @@
     <a href="#" class="navigation-item navigation-profile" data-event="user:profile">
       <span>{{email}}</span>
     </a>
-    <a href="#" class="navigation-item navigation-user-logout" data-event="user:logout">
+    <a href="#" class="navigation-item navigation-user-logout btn btn-white-hollow" data-event="user:logout">
       <span>{{t 'app.logout'}}</span>
     </a>
     {{/if}}

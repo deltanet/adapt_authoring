@@ -6,6 +6,7 @@ define(function(require){
   var EditorContentObjectModel = require('editorMenu/models/editorContentObjectModel');
   var EditorMenuLayerView = require('editorMenu/views/editorMenuLayerView');
   var EditorMenuItemView = require('editorMenu/views/editorMenuItemView');
+  var touchPunch = require("editorMenu/views/jquery.ui.touch-punch.min");
   
   var EditorMenuView = EditorOriginView.extend({
 

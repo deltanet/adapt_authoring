@@ -1,15 +1,4 @@
 @import '../../../less/variables.less';
-
-.sidebar-hide {
-    #app {
-        margin-left: 0px;
-    }
-
-    .sidebar {
-        display: none;
-    }
-}
-
 .sidebar {
     position:fixed;
     top:30px;
@@ -32,7 +21,22 @@
         color: @sidebar-input-text-color;
     }
 
+    .sidebar-item-container {
+        position: absolute;
+        height: 70%;
+        width: 100%;
+        top: 120px;
+    }
 
+.sidebar-hide {
+    #app {
+        margin-left: 0px;
+    }
+
+    .sidebar {
+        display: none;
+    }
+}
 
     .btn-primary, .btn-primary-hollow, .btn-secondary, 
     .btn-tertiary, .btn-quaternary, .btn-invis {
@@ -74,12 +78,6 @@
         width: 20px;
         margin-right:8px;
     }
-}
-
-.sidebar-item-container {
-    position: absolute;
-    height: 70%;
-    top: 120px;
 }
 
 .sidebar-item {

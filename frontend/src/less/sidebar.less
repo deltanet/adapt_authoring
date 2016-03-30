@@ -1,4 +1,28 @@
 @import 'variables.less';
+@import 'buttons.less';
+
+// Used for editing the color of buttons in the sdiebar
+
+.sidebar-item-inner {
+    button {
+        &.action-primary, &.action-secondary {
+            margin: 10px 30px;
+            width: 200px;
+            height: 50px;
+            border:@button-border;
+            border-radius:@button-radius;
+            font-size: 15px;
+            text-align: center;
+        }
+        // Use these attributes to easily configure the sidebar buttons
+        &.action-primary {
+            .secondary;
+        }
+        &.action-secondary {
+            .primary-hollow;
+        }
+    }
+}
 
 .sidebar {
     background-color:@sidebar-color;
@@ -16,6 +40,7 @@
     background-color:@sidebar-color;
     color:@sidebar-title-text-color;
 }
+
 
 .sidebar-progress {
     z-index: 1;

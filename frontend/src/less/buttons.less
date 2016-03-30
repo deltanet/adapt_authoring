@@ -9,15 +9,6 @@ button {
         outline:none;
     }
 
-    &.secondary-color {
-        background:@button-secondary-color!important;
-        color:@button-secondary-text-color!important;
-        &:hover {
-            background:@button-secondary-hover-color!important;
-            color:@button-secondary-hover-text-color!important; 
-        }
-    }
-
     &.warning-color {
         background:@button-warning-color!important;
         color:@button-warning-text-color!important;
@@ -54,7 +45,6 @@ button {
             color:@button-disabled-text-color!important; 
         }
     }
-
 }
 
 .btn {
@@ -82,175 +72,6 @@ button {
         margin:0 auto;
         text-align:center;
     }
-
-    &-primary {
-        background-color:@button-primary-color;
-        color:@button-primary-text-color;
-        border-color: @button-primary-color;
-        i {
-            color:@button-primary-text-color;
-            &:hover, &:focus {
-                color:@button-primary-hover-text-color;
-            }
-        }
-        &:hover, &:focus {
-            background-color:@button-primary-hover-color;
-            color:@button-primary-hover-text-color;
-            border-color:@button-primary-hover-color;
-        }
-    }
-
-    &-primary-hollow { 
-        background-color:@button-transparent;
-        color: @button-primary-color;
-        border-color:@button-primary-color;
-        i {
-            color:@button-primary-text-color;
-            &:hover, &:focus {
-                color:@button-primary-hover-text-color;
-            }
-        }
-        &:hover, &:focus {
-            color: @button-primary-text-color;
-            background-color: @button-primary-color;
-            border-color:@button-primary-color;
-        }        
-    }
-
-    &-secondary {
-        background-color:@button-secondary-color;
-        color:@button-secondary-text-color;
-        border-color:@button-secondary-color;
-        i {
-            color:@button-secondary-text-color;
-            &:hover, &:focus {
-                color:@button-secondary-hover-text-color;
-            }
-        }
-        &:hover, &:focus {
-            background-color:@button-secondary-hover-color;
-            color:@button-secondary-hover-text-color;
-            border-color:@button-secondary-hover-color;
-        }
-    }
-
-    &-secondary-hollow { 
-        background-color:@button-transparent;
-        color: @button-secondary-color;
-        border-color:@button-secondary-color;
-        i {
-            color:@button-secondary-text-color;
-            &:hover, &:focus {
-                color:@button-secondary-hover-text-color;
-            }
-        }
-        &:hover, &:focus {
-            color: @button-secondary-text-color;
-            background-color: @button-secondary-color;
-            border-color:@button-secondary-color;
-        }        
-    }
-
-    &-tertiary {
-        background-color:@button-tertiary-color;
-        color:@button-tertiary-text-color;
-        border-color:@button-tertiary-color;
-        i {
-            color:@button-tertiary-text-color;
-            &:hover, &:focus {
-                color:@button-tertiary-hover-text-color;
-            }
-        }
-        &:hover, &:focus {
-            background-color:@button-tertiary-hover-color;
-            color:@button-tertiary-hover-text-color;
-            border-color:@button-tertiary-hover-color;
-        }
-    }
-
-    &-tertiary-hollow { 
-        background-color:@button-transparent;
-        color:@button-tertiary-color;
-        border-color:@button-tertiary-color;
-        i {
-            color:@button-tertiary-text-color;
-            &:hover, &:focus {
-                color:@button-tertiary-hover-text-color;
-            }
-        }
-        &:hover, &:focus {
-            color: @button-tertiary-text-color;
-            background-color: @button-tertiary-color;
-            border-color:@button-tertiary-color;
-        }        
-    }    
-
-    &-quaternary {
-        background-color:@button-quaternary-color;
-        color:@button-quaternary-text-color;
-        border-color:@button-quaternary-color;
-        i {
-            color:@button-quaternary-text-color;
-            &:hover, &:focus {
-                color:@button-quaternary-hover-text-color;
-            }
-        }
-        &:hover, &:focus {
-            background-color:@button-quaternary-hover-color;
-            color:@button-quaternary-hover-text-color;
-            border-color:@button-quaternary-hover-color;
-        }
-    }
-
-    &-quaternary-hollow { 
-        background-color:@button-transparent;
-        color:@button-quaternary-color;
-        border-color:@button-quaternary-color;
-        i {
-            color:@button-quaternary-text-color;
-            &:hover, &:focus {
-                color:@button-quaternary-hover-text-color;
-            }
-        }
-        &:hover, &:focus {
-            color:@button-quaternary-text-color;
-            background-color:@button-quaternary-color;
-            border-color:@button-quaternary-color;
-        }        
-    }
-
-    &-white-hollow {
-        background-color:@button-transparent;
-        color:@button-white-hollow-text-color;
-        border-color:@button-white-hollow-text-color;
-        &:hover, &:focus {
-            color:@button-white-hollow-hover-text-color;
-            background-color:@button-white-hollow-hover-color;
-            border-color:@button-white-hollow-hover-color;
-        }
-    }    
-
-    &-warning {
-        background-color:@button-warning-color;
-        color:@button-warning-text-color;
-        border-color:@button-warning-color;
-        &:hover, &:focus {
-            background-color:@button-warning-hover-color;
-            color:@button-warning-text-color;
-            border-color:@button-warning-hover-color;
-        }
-    }
-
-    &-alert {
-        background-color:@button-alert-color;
-        color:@button-alert-text-color;
-        border-color:@button-alert-color;
-        &:hover, &:focus {
-            background-color:@button-alert-hover-color;
-            color:@button-alert-hover-text-color;
-            border-color:@button-alert-hover-color;
-        }
-    }
     
     &-fixed-width {
       width: 150px;
@@ -258,5 +79,174 @@ button {
     
     &-icon {
       padding-right: 16px;
+    }
+}
+
+.primary {
+    background-color:@button-primary-color;
+    color:@button-primary-text-color;
+    border-color: @button-primary-color;
+    i {
+        color:@button-primary-text-color;
+        &:hover, &:focus {
+            color:@button-primary-hover-text-color;
+        }
+    }
+    &:hover, &:focus {
+        background-color:@button-primary-hover-color;
+        color:@button-primary-hover-text-color;
+        border-color:@button-primary-hover-color;
+    }
+}
+
+.primary-hollow { 
+    background-color:@button-transparent;
+    color: @button-primary-color;
+    border-color:@button-primary-color;
+    i {
+        color:@button-primary-text-color;
+        &:hover, &:focus {
+            color:@button-primary-hover-text-color;
+        }
+    }
+    &:hover, &:focus {
+        color: @button-primary-text-color;
+        background-color: @button-primary-color;
+        border-color:@button-primary-color;
+    }        
+}
+
+.secondary {
+    background-color:@button-secondary-color;
+    color:@button-secondary-text-color;
+    border-color:@button-secondary-color;
+    i {
+        color:@button-secondary-text-color;
+        &:hover, &:focus {
+            color:@button-secondary-hover-text-color;
+        }
+    }
+    &:hover, &:focus {
+        background-color:@button-secondary-hover-color;
+        color:@button-secondary-hover-text-color;
+        border-color:@button-secondary-hover-color;
+    }
+}
+
+.secondary-hollow { 
+    background-color:@button-transparent;
+    color: @button-secondary-color;
+    border-color:@button-secondary-color;
+    i {
+        color:@button-secondary-text-color;
+        &:hover, &:focus {
+            color:@button-secondary-hover-text-color;
+        }
+    }
+    &:hover, &:focus {
+        color: @button-secondary-text-color;
+        background-color: @button-secondary-color;
+        border-color:@button-secondary-color;
+    }        
+}
+
+.tertiary {
+    background-color:@button-tertiary-color;
+    color:@button-tertiary-text-color;
+    border-color:@button-tertiary-color;
+    i {
+        color:@button-tertiary-text-color;
+        &:hover, &:focus {
+            color:@button-tertiary-hover-text-color;
+        }
+    }
+    &:hover, &:focus {
+        background-color:@button-tertiary-hover-color;
+        color:@button-tertiary-hover-text-color;
+        border-color:@button-tertiary-hover-color;
+    }
+}
+
+.tertiary-hollow { 
+    background-color:@button-transparent;
+    color:@button-tertiary-color;
+    border-color:@button-tertiary-color;
+    i {
+        color:@button-tertiary-text-color;
+        &:hover, &:focus {
+            color:@button-tertiary-hover-text-color;
+        }
+    }
+    &:hover, &:focus {
+        color: @button-tertiary-text-color;
+        background-color: @button-tertiary-color;
+        border-color:@button-tertiary-color;
+    }        
+}    
+
+.quaternary {
+    background-color:@button-quaternary-color;
+    color:@button-quaternary-text-color;
+    border-color:@button-quaternary-color;
+    i {
+        color:@button-quaternary-text-color;
+        &:hover, &:focus {
+            color:@button-quaternary-hover-text-color;
+        }
+    }
+    &:hover, &:focus {
+        background-color:@button-quaternary-hover-color;
+        color:@button-quaternary-hover-text-color;
+        border-color:@button-quaternary-hover-color;
+    }
+}
+
+.quaternary-hollow { 
+    background-color:@button-transparent;
+    color:@button-quaternary-color;
+    border-color:@button-quaternary-color;
+    i {
+        color:@button-quaternary-text-color;
+        &:hover, &:focus {
+            color:@button-quaternary-hover-text-color;
+        }
+    }
+    &:hover, &:focus {
+        color:@button-quaternary-text-color;
+        background-color:@button-quaternary-color;
+        border-color:@button-quaternary-color;
+    }        
+}
+
+.white-hollow {
+    background-color:@button-transparent;
+    color:@button-white-hollow-text-color;
+    border-color:@button-white-hollow-text-color;
+    &:hover, &:focus {
+        color:@button-white-hollow-hover-text-color;
+        background-color:@button-white-hollow-hover-color;
+        border-color:@button-white-hollow-hover-color;
+    }
+}
+
+.warning {
+    background-color:@button-warning-color;
+    color:@button-warning-text-color;
+    border-color:@button-warning-color;
+    &:hover, &:focus {
+        background-color:@button-warning-hover-color;
+        color:@button-warning-text-color;
+        border-color:@button-warning-hover-color;
+    }
+}
+
+.alert {
+    background-color:@button-alert-color;
+    color:@button-alert-text-color;
+    border-color:@button-alert-color;
+    &:hover, &:focus {
+        background-color:@button-alert-hover-color;
+        color:@button-alert-hover-text-color;
+        border-color:@button-alert-hover-color;
     }
 }

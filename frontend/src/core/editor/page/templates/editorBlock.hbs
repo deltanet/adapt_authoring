@@ -14,12 +14,11 @@
     </div>
 
     <div class="page-components clearfix"></div>
-    {{#if layoutOptions}}
-        <div class="add-control"> {{!-- {{t 'app.addcomponent'}} --}}
-            <a href="#" class="btn btn-secondary-hollow left add-component"><i class="fa fa-plus"></i>Left Component</a>
-            <a href="#" class="btn btn-secondary-hollow full add-component"><i class="fa fa-plus"></i>Full Component</a>
-            <a href="#" class="btn btn-secondary-hollow right add-component"><i class="fa fa-plus"></i>Right Component</a>
-        </div>
-    {{/if}}
 
 </div>
+
+{{#if layoutOptions}}
+<div class="add-control">
+    <a href="#" class="btn btn-primary add-component">{{t 'app.addcomponent'}}</a>
+</div>
+{{/if}}

@@ -1,4 +1,5 @@
 @import 'variables';
+@import 'buttons.less';
 
 .project-list-item {
     background-color:@white;
@@ -6,8 +7,13 @@
     text-align:center;
     &.selected {
         background-color:@primary-color;
-        .projects-details-label {
+        .projects-details-label, .project-detail-title-inner {
             color:#fff;
+        }
+        .projects-details-tags-button {
+            button {
+                .white-hollow;
+            }
         }
     }
     .open-context-icon {

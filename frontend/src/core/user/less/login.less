@@ -1,88 +1,85 @@
-@import '../../../less/fonts.less';
-
 .module-user {  
 	&.location-login, &.location-forgot {
 
         color: #fff;    
         background-image:url(assets/login_bg.jpg);
         background-size: 100%;
-		.sidebar, .navigation {
+		.sidebar, .navigation, .location-title {
 			display:none;
 		}
 		#app {
 			margin-left:0px;
 		}
 	}
-}
 
-.login-logo {
-    margin:120px 0 80px 140px;
-}
 
-.login-title {
-    padding-left: 153px;
-    padding-bottom: 10px;
-    font-size: 32px;
-}
+    .login-logo {
+        margin:120px 0 80px 140px;
+    }
 
-.error {
-    position: absolute;
-}
-    
-.login {
-    max-width:450px;
-    margin:0 auto;
-}
+    .login-title {
+        padding-left: 153px;
+        padding-bottom: 10px;
+        font-size: 32px;
+    }
 
-.login-form-submit {
-    width: 85%;
-    height: 65px;
-}
-
-.login-fields {
-    width: 500px;
-    margin: 20px 0 20px 0;
-
-    .login-input-username, .login-input-password{
-        font-size: 24px;
-        border-radius: 4px;
-        border: 0;
-        background-color: fade(#fff, 40%);
-        color: white;
-        margin-bottom: 5px;
-        height: 40px;
+    .error {
+        position: absolute;
+    }
+        
+    .login {
+        max-width:450px;
+        margin:0 auto;
     }
 
     .login-form-submit {
-        border-radius: 4px;
-        width: 421px;
+        width: 85%;
         height: 65px;
     }
-}
 
-.login-remember-me {
-    float: left;
-    padding: 10px 0px;
-}
+    .login-fields, .forgot-password-form {
+        width: 500px;
+        margin: 20px 0 20px 0;
 
-.remember-me-label {
-    padding-left: 10px;
-    display: inline;
-   font-family: @font-raleway-extralight;
-}
+        .login-input-username, .login-input-password, .input-username-email {
+            font-size: 24px;
+            border-radius: 4px;
+            border: 0;
+            background-color: fade(#fff, 40%);
+            color: white;
+            margin-bottom: 5px;
+            height: 40px;
+        }
 
-.login-forgot-password {
-    font-family: @font-raleway-extralight;
-    float: right;
-    margin-right:30px;
-    a {
-        color: white;
-        text-decoration: none;
+        button {
+            margin-bottom: 5px;
+            width: 421px;
+            height: 65px;
+        }
     }
-}
+
+    .login-remember-me {
+        float: left;
+        padding: 10px 0px;
+    }
+
+    .remember-me-label {
+        padding-left: 10px;
+        display: inline;
+    }
+
+    .login-forgot-password {
+        float: right;
+        margin-right:30px;
+        // a {
+        //     color: white;
+        //     text-decoration: none;
+        // }
+    }
 
 
-.login-already-logged-in {
-    text-align:center;
+    .login-already-logged-in {
+        text-align:center;
 
+    }
 }

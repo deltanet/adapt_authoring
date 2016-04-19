@@ -88,6 +88,18 @@ var configItems = [
     default: 27017
   },
   {
+    name: 'dbUser',
+    type: 'string',
+    description: 'Database username',
+    default: ''
+  },
+  {
+    name: 'dbPass',
+    type: 'string',
+    description: 'Database password',
+    default: ''
+  },
+  {
     name: 'dataRoot',
     type: 'string',
     description: 'Data directory path',

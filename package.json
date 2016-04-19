@@ -133,7 +133,6 @@
   },
   "scripts": {
     "postinstall": "grunt build",
-    "start": "node server.js",
     "test": "make test"
   },
   "devDependencies": {

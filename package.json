@@ -131,6 +131,8 @@
     "node": "^4.4.3"
   },
   "scripts": {
+    "postinstall": "grunt build",
+    "start": "node server.js",
     "test": "make test"
   },
   "devDependencies": {

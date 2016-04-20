@@ -63,7 +63,6 @@
     "url": "https://github.com/adaptlearning/adapt_authoring.git"
   },
   "dependencies": {
-    "adapt-cli": "^2.0.2",
     "archiver": "~0.16.0",
     "async": "0.2.5",
     "bcrypt-nodejs": "0.0.3",

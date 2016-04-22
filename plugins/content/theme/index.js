@@ -9,21 +9,12 @@ var origin = require('../../../'),
     rest = require('../../../lib/rest'),
     BowerPlugin = require('../bower'),
     ContentPlugin = contentmanager.ContentPlugin,
-    ContentTypeError = contentmanager.errors.ContentTypeError,
     configuration = require('../../../lib/configuration'),
     usermanager = require('../../../lib/usermanager'),
     database = require('../../../lib/database'),
     logger = require('../../../lib/logger'),
     defaultOptions = require('./defaults.json'),
-    bower = require('bower'),
-    rimraf = require('rimraf'),
-    async = require('async'),
-    fs = require('fs'),
-    ncp = require('ncp').ncp,
-    mkdirp = require('mkdirp'),
-    _ = require('underscore'),
-    util = require('util'),
-    path = require('path');
+    util = require('util');
 
 var bowerConfig = {
   type: 'themetype',

@@ -1,0 +1,46 @@
+// vars
+@padding: 30px;
+
+.theming-inner {
+  // shared styles
+  .title {
+    background-color: #e0e8f7;
+    padding: @padding;
+  }
+  .description {
+    padding: @padding;
+    padding-bottom: 0;
+  }
+
+  // custom styles
+  .live-view {
+    padding: @padding;
+    .tile {
+      width: 350px;
+      height: 200px;
+      display: inline-block;
+      background-color: #e0e8f7;
+    }
+    .thumb {
+      margin-right: 25px;
+    }
+  }
+  .theme-selector {
+    padding: @padding;
+    .tile {
+      label {
+        font-weight: bold;
+        padding-right: 5px;
+      }
+      padding-right: 25px;
+      display: inline-block;
+      select {
+        min-width: 150px;
+      }
+    }
+  }
+  .edit-form {
+    padding: @padding;
+    height: 500px;
+  }
+}

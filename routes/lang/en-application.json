@@ -152,7 +152,11 @@
   "app.projectsettings": "Project settings",
   "app.configurationsettings": "Configuration settings",
   "app.themesettings": "Theme settings",
-  "app.themepicker": "Theme picker",
+  "app.themepicker": "Theme Picker",
+
+  "app.theming": "Theming",
+  "app.setstyle": "Set the style for your course",
+
   "app.themecustomisation": "Theme customisation",
   "app.status": "Status",
   "app.lastupdated": "Last updated",

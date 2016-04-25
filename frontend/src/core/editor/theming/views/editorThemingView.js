@@ -4,8 +4,8 @@ define(function(require){
   var Handlebars = require('handlebars');
   var Origin = require('coreJS/app/origin');
   var OriginView = require('coreJS/app/views/originView');
-  var ThemeCollection = require('editorTheme/collections/editorThemeCollection');
   var PresetCollection = require('../collections/editorPresetCollection');
+  var ThemeCollection = require('editorTheme/collections/editorThemeCollection');
 
   var ThemingView = OriginView.extend({
     tagName: 'div',
@@ -26,6 +26,7 @@ define(function(require){
       this.loadCollections();
 
       this.listenTo(Origin, 'editorThemingSidebar:views:save', this.saveData);
+      this.listenTo(Origin, 'editorThemingSidebar:views:savePreset', this.savePreset);
     },
 
     postRender: function() {
@@ -77,6 +78,10 @@ define(function(require){
         select.append($('<option>', { value : item.get('_id') }).text(item.get('displayName')));
       }, this);
       select.attr('disabled', false);
+    },
+
+    savePreset: function() {
+
     },
 
     saveData: function(event) {

@@ -8,7 +8,10 @@
 	background-color:rgba(150,150,150,0.9);
 
 	&-sidebar {
-		width:1240px;	
+		width:1240px;
+		@media all and (max-width: 1207px) {
+			width: 920px;
+		}
 		height:85%;
 		margin: 100px auto;
 		background-color:#fff;
@@ -17,6 +20,7 @@
 	}
 
 	&-sidebar-exit {
+		color:#888;
 		float: right;
 		padding: 5px;
 
@@ -115,8 +119,8 @@
 .editor-component-list-item {
 	position:relative;
 	width: 210px;
-	height: 200px;
-	padding: 5px 25px;
+	height: 240px;
+	padding: 5px 20px;
 	margin: 5px 20px;
 	float:left;
 	overflow:hidden;

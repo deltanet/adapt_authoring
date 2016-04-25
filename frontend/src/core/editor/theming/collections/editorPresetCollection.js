@@ -3,7 +3,7 @@ define(function(require) {
   var Backbone = require('backbone');
 
   var PresetCollection = Backbone.Collection.extend({
-    url: 'api/presettype',
+    url: 'api/content/themepreset',
     comparator: 'parentTheme'
   });
 

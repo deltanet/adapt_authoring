@@ -5,6 +5,7 @@ define(function(require){
   var Origin = require('coreJS/app/origin');
   var OriginView = require('coreJS/app/views/originView');
   var ThemeCollection = require('editorTheme/collections/editorThemeCollection');
+  var PresetCollection = require('../collections/editorPresetCollection');
 
   var ThemingView = OriginView.extend({
     tagName: 'div',

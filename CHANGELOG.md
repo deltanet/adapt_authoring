@@ -2,18 +2,83 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.1.6] - 2016-03-29
+This version adds the ability to export the source code for a course that can be built using the Adapt Framework. It also fixes some important issues for installing using Vagrant.
+
+IMPORTANT: If upgrading from a previous installation, first remove the `node_modules` folder and run
+```javascript
+npm install --production
+```
+ to install the latest code dependencies, then run
+```javascript
+node upgrade
+```
+ to get the latest authoring tool and framework changes.
+
+### Added
+- Support for new Adapt Framework 'start page' functionality
+- Ability to export source code including plugins enabled for a course
+- Support for v2.0.8 of the Adapt Framework
+- Support for Google Analytics
+- Support for custom plugins in the plugins folder
+- Trigger for enabling extensions
+- Added support for Node.js v4.3.x LTS.
+
+### Changed
+- Support for Font Awesome 4.5.0
+
+### Fixed
+- Bug: Export doesn't auto download in Firefox
+- Bug: Vagrant setup on windows processes.json not found
+- Bug: Preview fails running vagrant on windows
+- Bug: Unable to delete blocks after copy and paste
+- Bug: Intermittent error in copy and pasting component
+
+## [0.1.5] - 2016-02-16
+This version aligns closely with the re-work on the Adapt Framework v2.0.7 release, with a focus on performance improvements around preview and downloading courses.
+
+IMPORTANT: If upgrading from a previous installation, first remove the `node_modules` folder and run
+```javascript
+npm install --production
+```
+ to install the latest code dependencies, then run
+```javascript
+node upgrade
+```
+ to get the latest authoring tool and framework changes.
+
+### Added
+- Support for v2.0.7 of the Adapt Framework
+- Optimised build process, i.e. only plugins used are bundled
+- Ability to copy the _id value of contentobjects, articles, blocks and components to clipboard
+- Ability to easily change component layouts without using drag and drop
+- Ability to export the source code of a particular course
+- Caching added to assets to improve performance
+
+### Changed
+- _isAvailableInEditor flag persisted when a new plugin is uploaded
+- Optimised performance of processing course assets in preview/download
+- Preview redirects to index.html rather than main.html
+- The count of failed logins is reset after a successful login
+- Turned off automatic population of Display Title for blocks
+
+### Fixed
+- Bug: Non-essential attributes removed from course.json
+- Bug: ACE JavaScript error when creating a new course
+- Bug: Hard 100kb limit on JSON payload
+- Bug: Corrected Project Details save issue
 
 ## [0.1.4] - 2015-11-25
 This version adds support for Node.js v4.2.2 LTS.  
 
 IMPORTANT: If upgrading from a previous installation, first remove the `node_modules` folder and run
-```javascript 
+```javascript
 npm install --production
 ```
  to install the latest code dependencies, then run
-```javascript 
+```javascript
 node upgrade
-``` 
+```
  to get the latest authoring tool and framework changes.
 
 ### Added
@@ -53,17 +118,17 @@ node upgrade
 - Bug: Problem with isAssetExternal()
 - Bug: Dashboard problems when a hero image is not set
 - Bug: Added validation for length of database name
-- Bug: Added validation to Confugration Settings 
+- Bug: Added validation to Confugration Settings
 
 ## [0.1.2] - 2015-09-30
 IMPORTANT: If upgrading from a previous installation, first remove the node_modules folder and run
-```javascript 
+```javascript
 npm install --production
 ```
  to install the latest code dependencies, then run
-```javascript 
+```javascript
 node upgrade
-``` 
+```
  to get the latest authoring tool and framework changes.
 
 ### Added
@@ -82,7 +147,7 @@ node upgrade
 
 ### Changed
 - Course now has a Display Title property
-- Default plugins are now taken from the framework adapt.json file, hard-coded references to plugins are 
+- Default plugins are now taken from the framework adapt.json file, hard-coded references to plugins are
 - Removed the dependency on adapt-cli
 - Added better logging for Validation Failed errors on database operations
 - Remove hard-coded references to core plugins
@@ -184,5 +249,3 @@ Changes below come from submissions by several developers:
 [0.1.2]: https://github.com/adaptlearning/adapt_authoring/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/adaptlearning/adapt_authoring/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/adaptlearning/adapt_authoring/tree/v0.1.0
-
-

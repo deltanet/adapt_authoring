@@ -2,7 +2,6 @@
 define(function(require) {
   var Backbone = require('backbone');
   var Origin = require('coreJS/app/origin');
-  var EditorPresetDialogView = require('./editorPresetDialogView');
   var SidebarItemView = require('coreJS/sidebar/views/sidebarItemView');
 
   var EditorThemingSidebarView = SidebarItemView.extend({
@@ -23,13 +22,6 @@ define(function(require) {
     savePreset: function(event) {
       event && event.preventDefault();
       Origin.trigger('editorThemingSidebar:views:savePreset');
-      if(this.dialogView === null) {
-        this.dialogView = new EditorPresetDialogView();
-        this.dialogView.$el.offset({
-          top: $(event.currentTarget).offset().top
-        });
-        $('body').append(this.dialogView.$el);
-      }
     },
 
     cancelEditing: function(event) {

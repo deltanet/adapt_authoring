@@ -9,9 +9,8 @@
   }
   .description {
     padding: @padding;
-    padding-bottom: 0;
+    padding-bottom: 20px;
   }
-
   // custom styles
   .live-view {
     padding: @padding;
@@ -27,6 +26,7 @@
   }
   .theme-selector {
     padding: @padding;
+    padding-top: 0;
     .tile {
       label {
         font-weight: bold;
@@ -39,8 +39,10 @@
       }
     }
   }
-  .edit-form {
-    padding: @padding;
-    height: 500px;
+  .form-container {
+    // HACK to hide fieldset titles
+    .legend {
+      display: none;
+    }
   }
 }

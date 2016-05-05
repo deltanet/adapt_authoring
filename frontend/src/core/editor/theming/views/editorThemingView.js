@@ -1,15 +1,19 @@
 // LICENCE https://github.com/adaptlearning/adapt_authoring/blob/master/LICENSE
 define(function(require){
   var Backbone = require('backbone');
+  var EditorOriginView = require('editorGlobal/views/editorOriginView');
   var Handlebars = require('handlebars');
   var Origin = require('coreJS/app/origin');
-  var OriginView = require('coreJS/app/views/originView');
   var PresetCollection = require('../collections/editorPresetCollection');
   var ThemeCollection = require('editorTheme/collections/editorThemeCollection');
 
-  var ThemingView = OriginView.extend({
+  var ThemingView = EditorOriginView.extend({
     tagName: 'div',
     className: 'theming',
+
+    settings: {
+      autoRender: false
+    },
 
     events: {
       'change .theme select': 'onThemeChanged',
@@ -20,21 +24,44 @@ define(function(require){
     * Overrides
     */
 
-    preRender: function() {
+    initialize: function() {
       Origin.trigger('location:title:update', { title: window.polyglot.t('app.setstyle') });
 
-      this.loadCollections();
-
+      this.listenTo(this, 'dataReady', this.render);
       this.listenTo(Origin, 'editorThemingSidebar:views:save', this.saveData);
       this.listenTo(Origin, 'editorThemingSidebar:views:savePreset', this.savePreset);
+      this.listenTo(Origin, 'editorThemingSidebar:views:cancel', this.remove);
+
+      this.loadCollections();
+    },
+
+    render: function() {
+      // set the selected theme flag
+      this.themes.findWhere({ name: this.model.get('_theme') }).set('_isSelected', true);
+
+      EditorOriginView.prototype.render.apply(this, arguments);
+      this.renderForm();
+    },
+
+    renderForm: function() {
+      // out with the old
+      this.$('.form-container').empty();
+
+      var selectedTheme = this.getSelectedTheme();
+      var themeHasProperties = selectedTheme.get('properties') && Object.keys(selectedTheme.get('properties')).length > 0;
+      if(selectedTheme && themeHasProperties) {
+        this.form = Origin.scaffold.buildForm({
+          model: selectedTheme,
+          schemaType: selectedTheme.get('theme')
+        });
+        this.$('.form-container').html(this.form.el);
+        this.$('.theme-customiser').show();
+      } else {
+        this.$('.theme-customiser').hide();
+      }
     },
 
     postRender: function() {
-      // wait for dataReady
-      if(!this.isDataLoaded()) {
-        return this.listenTo(this, 'dataReady', this.postRender);
-      }
-      // TODO select selected theme
       this.updateThemeSelect();
       this.updatePresetSelect();
       this.setViewToReady();
@@ -59,8 +86,10 @@ define(function(require){
       this.updateSelect(themeSelect, this.themes.models);
 
       // select current theme
-      var selectedTheme = this.themes.findWhere({ name: this.model.get('_theme') });
-      themeSelect.val(selectedTheme.get('_id'));
+      var selectedTheme = this.getSelectedTheme();
+      if(selectedTheme) {
+        themeSelect.val(selectedTheme.get('_id'));
+      }
     },
 
     updatePresetSelect: function() {
@@ -90,8 +119,8 @@ define(function(require){
       // TODO validation
       // TODO store variable data
 
-      var selectedTheme = this.themes.findWhere({_isSelected: true});
-      var selectedPreset = this.presets.findWhere({_isSelected: true});
+      var selectedTheme = this.getSelectedTheme();
+      var selectedPreset = this.getSelectedPreset();
 
       console.log('Apply', selectedTheme && selectedTheme.get('displayName') || 'NO THEME?!', selectedPreset && selectedPreset.get('displayName') || 'no preset');
 
@@ -129,6 +158,14 @@ define(function(require){
       return this.themes.ready === true && this.presets.ready === true;
     },
 
+    getSelectedTheme: function() {
+      return this.themes.findWhere({ '_isSelected': true });
+    },
+
+    getSelectedPreset: function() {
+      return this.presets.findWhere({ '_isSelected': true });
+    },
+
     /**
     * Event handling
     */
@@ -141,16 +178,20 @@ define(function(require){
     },
 
     onThemeChanged: function(event) {
+      // unset old
+      this.themes.findWhere({ _isSelected: true }).set("_isSelected", false);
+      // set new
       var themeId = this.$('.theme select').val();
-      var theme = this.themes.findWhere({ _id: themeId });
-      theme.set("_isSelected", true);
+      this.themes.findWhere({ _id: themeId }).set("_isSelected", true);
+
       this.updatePresetSelect();
+      this.renderForm();
     },
 
     onPresetChanged: function(event) {
+      // set _isSelected
       var presetId = $(event.currentTarget).val();
-      var preset = this.presets.findWhere({ _id: presetId });
-      preset.set("_isSelected", true);
+      this.presets.findWhere({ _id: presetId }).set("_isSelected", true);
     },
 
     onSaveError: function() {

@@ -23,36 +23,33 @@ function initialize () {
   app.on('serverStarted', function () {
     permissions.ignoreRoute(/^\/api\/themepreset\/?.*$/);
     // routes
-    app.rest.get('/themepreset/test', test);
     app.rest.post('/themepreset', createPreset);
     app.rest.delete('/themepreset', deletePreset);
   });
 };
 
-function test(req, res, next) {
-  console.log('Preset test');
+function createPreset(req, res, next) {
+  // TODO check permissions
   app.contentmanager.getContentPlugin('themepreset', function(error, plugin) {
-    if(error) return console.log(error);
-    plugin.create({
-      displayName: 'Preset 1',
-      parentTheme: '571789b4aace62088fe931ca',
-      properties: {
-        fontColour: '#000000',
-        fontInvertedColour: '#333333'
-      }
-    }, function(error, results) {
-      if(error) return console.log(error);
+    if(error) return sendResponse(error, res);
+    // TODO validation here (no themes with same display name & parent theme, same preset values)
+    // TODO support updates?
+    plugin.create(req.body, function(error, results) {
+      if(error) return sendResponse(error, res);
       console.log('Preset created!', results);
+      sendResponse(null, res);
     });
   });
 };
 
-function createPreset(req, res, next) {
-  console.log('Create preset', req.body);
+function deletePreset(req, res, next) {
+  // TODO check permissions
+  console.log('Delete preset', req.body);
 };
 
-function deletePreset(req, res, next) {
-  console.log('Delete preset', req.body);
+function sendResponse(error, res) {
+  if(error) return res.status(500).send(error);
+  else res.status(200).send('Preset created successfully');
 };
 
 initialize();

@@ -25,10 +25,11 @@ define(function(require){
 
       this.listenTo(this, 'dataReady', this.render);
       this.listenTo(Origin, 'editorThemingSidebar:views:save', this.saveData);
-      this.listenTo(Origin, 'editorThemingSidebar:views:savePreset', this.savePreset);
-      this.listenTo(Origin, 'editorThemingSidebar:views:cancel', this.remove);
+      this.listenTo(Origin, 'editorThemingSidebar:views:savePreset', this.onSavePresetClicked);
 
       this.loadCollections();
+
+      EditorOriginView.prototype.initialize.apply(this, arguments);
     },
 
     render: function() {
@@ -101,10 +102,6 @@ define(function(require){
       select.attr('disabled', false);
     },
 
-    savePreset: function() {
-
-    },
-
     saveData: function(event) {
       event && event.preventDefault();
 
@@ -138,6 +135,35 @@ define(function(require){
         .error(_.bind(this.onSaveError, this))
         .done(_.bind(this.onSaveSuccess, this));
       }
+    },
+
+    savePreset: function(presetName) {
+      // first, save the form data
+      this.form.commit();
+
+      $.ajax('api/themepreset', {
+        method: 'POST',
+        data: {
+          displayName: presetName,
+          parentTheme: this.getSelectedTheme().get('_id'),
+          properties: _.pick(this.form.model.attributes, Object.keys(this.form.model.get('properties')))
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+          Origin.Notify.alert({
+            type: 'error',
+            text: errorThrown
+          });
+        },
+        success: function(message, textStatus, jqXHR) {
+          console.log(message);
+          Origin.Notify.alert({
+            type: 'success',
+            text: message
+          });
+        }
+      });
+
+      return false;
     },
 
     navigateBack: function(event) {
@@ -184,6 +210,28 @@ define(function(require){
       // set _isSelected
       var presetId = $(event.currentTarget).val();
       this.presets.findWhere({ _id: presetId }).set("_isSelected", true);
+    },
+
+    onSavePresetClicked: function() {
+      var self = this;
+      var selectedPreset = this.getSelectedPreset();
+      if(selectedPreset) {
+        Origin.Notify.confirm({
+          text: 'By continuing, you will overwrite the saved settings for the ' + selectedPreset.displayName + ' preset',
+          callback: function() {
+            if(arguments[0] === true) self.savePreset(selectedPreset.displayName);
+          }
+        });
+      } else {
+        Origin.Notify.alert({
+          type: 'input',
+          text: 'Enter a name for new preset',
+          showCancelButton: true,
+          callback: function() {
+            self.savePreset(arguments[0]);
+          }
+        });
+      }
     },
 
     onSaveError: function() {

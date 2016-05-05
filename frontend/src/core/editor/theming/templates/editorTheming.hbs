@@ -1,29 +1,31 @@
 <div class="theming-inner">
-  <div class="description">You can see a live-preview of your chosen theme and preset below.</div>
+  <div class="description">{{{t 'app.themingdesc'}}}</div>
   <div class="live-view">
     <div class="thumb tile"></div>
     <div class="styles tile"></div>
   </div>
-  <div class="title">Choose a theme</div>
-  <div class="description">You can select your base theme, and apply a preset to your chosen theme using the dropdowns below.</div>
+  <div class="title">{{t 'app.choosethemetitle'}}</div>
+  <div class="description">{{{t 'app.choosethemedesc'}}}</div>
   <div class="theme-selector">
     <div class="theme tile">
-      <label>Base Theme:</label>
+      <label>{{t 'app.themeselectlabel'}}</label>
       <select disabled="true">
-        <option value="" disabled selected>Select a theme</option>
+        <option value="" disabled selected>{{t 'app.themeselectinstr'}}</option>
       </select>
     </div>
     <div class="preset tile">
-      <label>Preset:</label>
+      <label>{{t 'app.presetselectlabel'}}</label>
       <select disabled="true">
-        <option value="" disabled selected>Select a preset</option>
+        <option value="" disabled selected>{{t 'app.presetselectinstr'}}</option>
       </select>
     </div>
-    <span class="error display-none">You need to select a theme!</span>
+    <span class="error display-none">{{t 'app.themeselecterror'}}</span>
   </div>
   <div class="theme-customiser">
-    <div class="title">Customise your theme</div>
-    <div class="description">You can adjust a number of variables in your chosen theme below. <p><em><b>Tip:</b> You can also save your selections as a preset for quick access later.</em><p></div>
-    <div class="form-container"></div>
+    <div class="title">{{t 'app.customisethemetitle'}}</div>
+    <div class="description">{{{t 'app.customisethemedesc'}}}</div>
+    <div class="form-container">
+      {{! Leave this div empty, anything inside will be replaced with the form. }}
+    </div>
   </div>
 </div>

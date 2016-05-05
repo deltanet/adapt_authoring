@@ -21,7 +21,7 @@ define(function(require){
     },
 
     initialize: function() {
-      Origin.trigger('location:title:update', { title: window.polyglot.t('app.setstyle') });
+      Origin.trigger('location:title:update', { title: window.polyglot.t('app.themingtitle') });
 
       this.listenTo(this, 'dataReady', this.render);
       this.listenTo(Origin, 'editorThemingSidebar:views:save', this.saveData);
@@ -111,6 +111,7 @@ define(function(require){
       var selectedTheme = this.getSelectedTheme();
       var selectedPreset = this.getSelectedPreset();
 
+      // TODO remove
       console.log('Apply', selectedTheme && selectedTheme.get('displayName') || 'NO THEME?!', selectedPreset && selectedPreset.get('displayName') || 'no preset');
 
       if (selectedTheme === undefined) {
@@ -130,10 +131,13 @@ define(function(require){
         .done(_.bind(this.onSaveSuccess, this));
 
       if(selectedPreset) {
+        // TODO apply preset
+        /*
         var selectedPresetId = selectedTheme.get('_id');
         $.post('/api/preset/' + selectedThemeId + '/makeitso/' + this.model.get('_courseId'))
         .error(_.bind(this.onSaveError, this))
         .done(_.bind(this.onSaveSuccess, this));
+        */
       }
     },
 
@@ -217,7 +221,7 @@ define(function(require){
       var selectedPreset = this.getSelectedPreset();
       if(selectedPreset) {
         Origin.Notify.confirm({
-          text: 'By continuing, you will overwrite the saved settings for the ' + selectedPreset.displayName + ' preset',
+          text: window.polyglot.t('app.themeoverwrite', { preset: selectedPreset.displayName }),
           callback: function() {
             if(arguments[0] === true) self.savePreset(selectedPreset.displayName);
           }
@@ -225,7 +229,7 @@ define(function(require){
       } else {
         Origin.Notify.alert({
           type: 'input',
-          text: 'Enter a name for new preset',
+          text: window.polyglot.t('app.presetinputtext'),
           showCancelButton: true,
           callback: function() {
             self.savePreset(arguments[0]);

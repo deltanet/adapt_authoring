@@ -20,10 +20,6 @@ define(function(require){
       'change .preset select': 'onPresetChanged'
     },
 
-    /**
-    * Overrides
-    */
-
     initialize: function() {
       Origin.trigger('location:title:update', { title: window.polyglot.t('app.setstyle') });
 
@@ -66,10 +62,6 @@ define(function(require){
       this.updatePresetSelect();
       this.setViewToReady();
     },
-
-    /**
-    * Main funcs
-    */
 
     loadCollections: function() {
       this.themes = new ThemeCollection();

@@ -8,9 +8,9 @@ define(function(require) {
     dialogView: null,
 
     events: {
-      'click .editor-theming-sidebar-save'   : 'saveEditing',
-      'click .editor-theming-sidebar-savePreset'   : 'savePreset',
-      'click .editor-theming-sidebar-cancel' : 'cancelEditing'
+      'click .editor-theming-sidebar-save': 'saveEditing',
+      'click .editor-theming-sidebar-savePreset': 'savePreset',
+      'click .editor-theming-sidebar-cancel': 'cancelEditing'
     },
 
     saveEditing: function(event) {
@@ -25,7 +25,8 @@ define(function(require) {
     },
 
     cancelEditing: function(event) {
-        event.preventDefault();
+        event && event.preventDefault();
+        Origin.trigger('editorThemingSidebar:views:cancel');
         Backbone.history.history.back();
         Origin.trigger('editingOverlay:views:hide');
     }

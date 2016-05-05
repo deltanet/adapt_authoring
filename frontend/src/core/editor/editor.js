@@ -352,7 +352,7 @@ define(function(require) {
           success: function() {
             Origin.trigger('location:title:update', {title: 'Select theme'});
             Origin.sidebar.addView(new EditorThemingSidebarView().$el);
-            Origin.editingOverlay.addView(new EditorThemingView({model: configModel}).$el);
+            Origin.editingOverlay.addView(new EditorThemingView({ model: configModel }).$el);
           }
         });
         break;

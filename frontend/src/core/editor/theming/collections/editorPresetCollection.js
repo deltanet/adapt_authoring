@@ -1,10 +1,12 @@
 // LICENCE https://github.com/adaptlearning/adapt_authoring/blob/master/LICENSE
 define(function(require) {
   var Backbone = require('backbone');
+  var PresetModel = require('../models/editorPresetModel');
 
   var PresetCollection = Backbone.Collection.extend({
     url: 'api/content/themepreset',
-    comparator: 'parentTheme'
+    comparator: 'parentTheme',
+    model: PresetModel
   });
 
   return PresetCollection;

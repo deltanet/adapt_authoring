@@ -5,6 +5,8 @@ define(function(require){
   var Handlebars = require('handlebars');
   var Origin = require('coreJS/app/origin');
   var PresetCollection = require('../collections/editorPresetCollection');
+  var PresetEditView = require('./editorPresetEditView');
+  var PresetModel = require('../models/editorPresetModel');
   var ThemeCollection = require('editorTheme/collections/editorThemeCollection');
 
   var ThemingView = EditorOriginView.extend({
@@ -17,7 +19,8 @@ define(function(require){
 
     events: {
       'change .theme select': 'onThemeChanged',
-      'change .preset select': 'onPresetChanged'
+      'change .preset select': 'onPresetChanged',
+      'click a.edit': 'showPresetEdit'
     },
 
     initialize: function() {
@@ -26,6 +29,9 @@ define(function(require){
       this.listenTo(this, 'dataReady', this.render);
       this.listenTo(Origin, 'editorThemingSidebar:views:save', this.saveData);
       this.listenTo(Origin, 'editorThemingSidebar:views:savePreset', this.onSavePresetClicked);
+
+      this.listenTo(Origin, 'managePresets:edit', this.onEditPreset);
+      this.listenTo(Origin, 'managePresets:delete', this.onDeletePreset);
 
       this.loadCollections();
 
@@ -41,6 +47,7 @@ define(function(require){
     },
 
     renderForm: function() {
+      console.log('renderForm');
       // out with the old
       this.$('.form-container').empty();
 
@@ -51,6 +58,7 @@ define(function(require){
           model: selectedTheme,
           schemaType: selectedTheme.get('theme')
         });
+
         this.$('.form-container').html(this.form.el);
         this.$('.theme-customiser').show();
       } else {
@@ -67,10 +75,12 @@ define(function(require){
     loadCollections: function() {
       this.themes = new ThemeCollection();
       this.listenTo(this.themes, 'sync', this.onCollectionReady);
+      this.listenTo(this.themes, 'error', this.onError);
       this.themes.fetch();
 
       this.presets = new PresetCollection();
       this.listenTo(this.presets, 'sync', this.onCollectionReady);
+      this.listenTo(this.presets, 'error', this.onError);
       this.presets.fetch();
     },
 
@@ -88,18 +98,25 @@ define(function(require){
     updatePresetSelect: function() {
       var selectedThemeId = $('.theme select').val();
       var presets = this.presets.where({ parentTheme: selectedThemeId });
-      if(presets.length > 0) {
-        var presetSelect = this.$('.preset select');
-        this.updateSelect(presetSelect, presets);
-      }
+      var presetSelect = this.$('.preset select');
+
+      this.updateSelect(presetSelect, presets);
+      // TODO check selected preset exists (show error message), and select it
     },
 
     // adds all installed optionsCollection items as options to select
+    // can also be used to disable the select (if no options passed)
     updateSelect: function(select, options) {
+      // remove previous options
+      $('option', select).remove();
+      // add generic instruction
+      select.append($('<option>', { disabled: 'disabled', selected: 'selected' }).text(window.polyglot.t('app.selectinstr')));
+      // add options
       _.each(options, function(item, index) {
-        select.append($('<option>', { value : item.get('_id') }).text(item.get('displayName')));
+        select.append($('<option>', { value: item.get('_id') }).text(item.get('displayName')));
       }, this);
-      select.attr('disabled', false);
+      // disable if no options
+      select.attr('disabled', options.length === 0);
     },
 
     saveData: function(event) {
@@ -145,29 +162,13 @@ define(function(require){
       // first, save the form data
       this.form.commit();
 
-      $.ajax('api/themepreset', {
-        method: 'POST',
-        data: {
-          displayName: presetName,
-          parentTheme: this.getSelectedTheme().get('_id'),
-          properties: _.pick(this.form.model.attributes, Object.keys(this.form.model.get('properties')))
-        },
-        error: function(jqXHR, textStatus, errorThrown) {
-          Origin.Notify.alert({
-            type: 'error',
-            text: errorThrown
-          });
-        },
-        success: function(message, textStatus, jqXHR) {
-          console.log(message);
-          Origin.Notify.alert({
-            type: 'success',
-            text: message
-          });
-        }
+      var presetModel = new PresetModel({
+        displayName: presetName,
+        parentTheme: this.getSelectedTheme().get('_id'),
+        properties: _.pick(this.form.model.attributes, Object.keys(this.form.model.get('properties')))
       });
-
-      return false;
+      presetModel.save();
+      this.presets.add(presetModel);
     },
 
     navigateBack: function(event) {
@@ -192,11 +193,36 @@ define(function(require){
     * Event handling
     */
 
+    showPresetEdit: function(event) {
+      event && event.preventDefault();
+      var pev = new PresetEditView({
+        model: new Backbone.Model({ presets: this.presets })
+      });
+      $('body').append(pev.el);
+    },
+
+    onEditPreset: function(data) {
+      var model = this.presets.findWhere({ displayName: data.oldValue });
+      console.log(model.set('displayName', data.newValue));
+      model.save();
+    },
+
+    onDeletePreset: function(preset) {
+      this.presets.findWhere({ displayName: preset }).destroy();
+    },
+
     onCollectionReady: function(collection) {
       if(collection === this.themes) this.themes.ready = true;
       else if(collection === this.presets) this.presets.ready = true;
 
       if(this.isDataLoaded()) this.trigger('dataReady');
+    },
+
+    onError: function(collection, response, options) {
+      Origin.Notify.alert({
+        type: 'error',
+        text: response
+      });
     },
 
     onThemeChanged: function(event) {

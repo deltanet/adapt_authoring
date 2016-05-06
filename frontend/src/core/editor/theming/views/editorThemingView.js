@@ -58,11 +58,14 @@ define(function(require){
           model: selectedTheme,
           schemaType: selectedTheme.get('theme')
         });
-
         this.$('.form-container').html(this.form.el);
         this.$('.theme-customiser').show();
+        this.$('a.edit').show();
+        Origin.trigger('theming:showPresetButton', true);
       } else {
         this.$('.theme-customiser').hide();
+        this.$('a.edit').hide();
+        Origin.trigger('theming:showPresetButton', false);
       }
     },
 

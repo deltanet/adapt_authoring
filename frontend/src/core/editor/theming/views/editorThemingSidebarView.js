@@ -5,12 +5,21 @@ define(function(require) {
   var SidebarItemView = require('coreJS/sidebar/views/sidebarItemView');
 
   var EditorThemingSidebarView = SidebarItemView.extend({
-    dialogView: null,
-
     events: {
       'click .editor-theming-sidebar-save': 'saveEditing',
       'click .editor-theming-sidebar-savePreset': 'savePreset',
       'click .editor-theming-sidebar-cancel': 'cancelEditing'
+    },
+
+    initialize: function() {
+      SidebarItemView.prototype.initialize.apply(this, arguments);
+      this.listenTo(Origin, 'theming:showPresetButton', this.showPresetButton);
+    },
+
+    showPresetButton: function(show) {
+      var btn = this.$('.editor-theming-sidebar-savePreset');
+      if(show) btn.show();
+      else btn.hide();
     },
 
     saveEditing: function(event) {

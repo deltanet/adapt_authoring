@@ -159,7 +159,7 @@
   "app.themingtitle": "Set the style for your course",
   "app.themingdesc": "You can see a live-preview of your chosen theme and preset below.",
   "app.choosethemetitle": "Choose a theme",
-  "app.choosethemedesc": "You can select your base theme, and apply a preset to your chosen theme using the dropdowns below.",
+  "app.choosethemedesc": "You can select your base theme, and apply a preset to your chosen theme using the dropdowns below.<br/><br/><b>IMPORTANT:</b> Changing the options here will replace any unsaved selections you've made in the form below; make sure there's nothing you want to keep!",
   "app.themeselectlabel": "Base Theme:",
   "app.themeselectinstr": "Select a theme",
   "app.themeselecterror": "You need to select a theme!",

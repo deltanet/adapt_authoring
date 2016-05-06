@@ -47,7 +47,6 @@ define(function(require){
     },
 
     renderForm: function() {
-      console.log('renderForm');
       // out with the old
       this.$('.form-container').empty();
 
@@ -198,8 +197,9 @@ define(function(require){
 
     showPresetEdit: function(event) {
       event && event.preventDefault();
+      var parentTheme = this.getSelectedTheme()._id;
       var pev = new PresetEditView({
-        model: new Backbone.Model({ presets: this.presets })
+        model: new Backbone.Model({ presets: this.presets.where({ parentTheme: parentTheme }) })
       });
       $('body').append(pev.el);
     },

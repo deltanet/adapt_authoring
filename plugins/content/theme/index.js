@@ -159,8 +159,8 @@ function initialize () {
                   return res.json({ success: false, message: 'theme not found' });
                 }
 
-                // Update the course config object
-                app.contentmanager.update('config', { _courseId: courseId }, { _courseId: courseId, _theme: results[0].name }, function (err) {
+                // Update the course config object: add theme, remove old preset
+                app.contentmanager.update('config', { _courseId: courseId }, { _theme: results[0].name, _themepreset: null }, function (err) {
                   if (err) {
                     return next(err);
                   }

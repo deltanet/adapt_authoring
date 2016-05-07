@@ -164,6 +164,7 @@
   "app.themeselectinstr": "Select a theme",
   "app.themeselecterror": "You need to select a theme!",
   "app.selectinstr": "Select an option",
+  "app.nopresets": "No preset",
   "app.presetselectlabel": "Preset:",
   "app.presetselectinstr": "Select a preset",
   "app.customisethemetitle": "Customise your theme",

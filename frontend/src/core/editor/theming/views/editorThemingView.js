@@ -61,7 +61,8 @@ define(function(require){
         this.$('.theme-customiser').show();
         this.$('a.edit').show();
         Origin.trigger('theming:showPresetButton', true);
-      } else {
+      }
+      else {
         this.$('.theme-customiser').hide();
         this.$('a.edit').hide();
         Origin.trigger('theming:showPresetButton', false);
@@ -96,76 +97,111 @@ define(function(require){
     },
 
     updateThemeSelect: function() {
-      var themeSelect = this.$('.theme select');
-      this.updateSelect(themeSelect, this.themes.models);
+      var select = this.$('.theme select');
+      // remove options first
+      $('option', select).remove();
+      // add 'no presets'
+      select.append($('<option>', { value: "", disabled: 'disabled', selected: 'selected' }).text(window.polyglot.t('app.selectinstr')));
+      // add options
+      _.each(this.themes.models, function(item, index) {
+        select.append($('<option>', { value: item.get('_id') }).text(item.get('displayName')));
+      }, this);
+
+      // disable if no options
+      select.attr('disabled', this.themes.models.length === 0);
 
       // select current theme
       var selectedTheme = this.getSelectedTheme();
       if(selectedTheme) {
-        themeSelect.val(selectedTheme.get('_id'));
+        select.val(selectedTheme.get('_id'));
       }
     },
 
     updatePresetSelect: function() {
-      var selectedThemeId = $('.theme select').val();
-      var presets = this.presets.where({ parentTheme: selectedThemeId });
-      var presetSelect = this.$('.preset select');
+      var presets = this.presets.where({ parentTheme: $('.theme select').val() });
+      var select = this.$('.preset select');
+      // remove options first
+      $('option', select).remove();
+      // add 'no presets'
+      select.append($('<option>', { value: "", disabled: 'disabled', selected: 'selected' }).text(window.polyglot.t('app.nopresets')));
+      // add options
+      _.each(presets, function(item, index) {
+        select.append($('<option>', { value: item.get('_id') }).text(item.get('displayName')));
+      }, this);
+      // disable delect, hide manage preset buttons if empty
+      if(presets.length > 0) {
+        select.attr('disabled', false);
+        this.$('a.edit').show();
+      } else {
+        select.attr('disabled', true);
+        this.$('a.edit').hide();
+      }
 
-      this.updateSelect(presetSelect, presets);
       // TODO check selected preset exists (show error message), and select it
     },
 
-    // adds all installed optionsCollection items as options to select
-    // can also be used to disable the select (if no options passed)
-    updateSelect: function(select, options) {
-      // remove previous options
-      $('option', select).remove();
-      // add generic instruction
-      select.append($('<option>', { disabled: 'disabled', selected: 'selected' }).text(window.polyglot.t('app.selectinstr')));
-      // add options
-      _.each(options, function(item, index) {
-        select.append($('<option>', { value: item.get('_id') }).text(item.get('displayName')));
-      }, this);
-      // disable if no options
-      select.attr('disabled', options.length === 0);
-    },
-
-    saveData: function(event) {
-      event && event.preventDefault();
-
-      // TODO validation
-      // TODO store variable data
-
+    // checks form for errors, returns true if valid, false otherwise
+    validateForm: function() {
       var selectedTheme = this.getSelectedTheme();
       var selectedPreset = this.getSelectedPreset();
-
-      // TODO remove
-      console.log('Apply', selectedTheme && selectedTheme.get('displayName') || 'NO THEME?!', selectedPreset && selectedPreset.get('displayName') || 'no preset');
 
       if (selectedTheme === undefined) {
         Origin.Notify.alert({
           type: 'error',
           text: window.polyglot.t('app.errornothemeselected')
         });
-        Origin.trigger('sidebar:resetButtons');
-        return;
+        return false;
+      }
+      return true;
+    },
+
+    saveData: function(event) {
+      event && event.preventDefault();
+
+      if(!this.validateForm()) {
+        return Origin.trigger('sidebar:resetButtons');
       }
 
-      // inform the backend
+      this.postThemeData(function(){
+        this.postPresetData(function() {
+          this.postSettingsData(this.onSaveSuccess);
+        });
+      });
+    },
 
+    postThemeData: function(callback) {
+      var selectedTheme = this.getSelectedTheme();
       var selectedThemeId = selectedTheme.get('_id');
       $.post('/api/theme/' + selectedThemeId + '/makeitso/' + this.model.get('_courseId'))
         .error(_.bind(this.onSaveError, this))
-        .done(_.bind(this.onSaveSuccess, this));
+        .done(_.bind(callback, this));
+    },
 
+    postPresetData: function(callback) {
+      var selectedPreset = this.getSelectedPreset();
       if(selectedPreset) {
-        // TODO apply preset
-        /*
-        var selectedPresetId = selectedTheme.get('_id');
-        $.post('/api/preset/' + selectedThemeId + '/makeitso/' + this.model.get('_courseId'))
+        var selectedPresetId = selectedPreset.get('_id');
+        $.post('/api/themepreset/' + selectedPresetId + '/makeitso/' + this.model.get('_courseId'))
         .error(_.bind(this.onSaveError, this))
-        .done(_.bind(this.onSaveSuccess, this));
-        */
+        .done(_.bind(callback, this));
+      } else {
+        callback.apply(this);
+      }
+    },
+
+    postSettingsData: function(callback) {
+      var selectedTheme = this.getSelectedTheme();
+      if(this.form) {
+        this.form.commit();
+        console.log(this.getSelectedTheme(), this.getSelectedPreset());
+        var settings = _.pick(selectedTheme.attributes, Object.keys(selectedTheme.get('properties')));
+        Origin.editor.data.course.set('themeSettings', settings);
+        Origin.editor.data.course.save(null, {
+          error: _.bind(this.onSaveError, this),
+          success: _.bind(callback, this)
+        });
+      } else {
+        callback.apply(this);
       }
     },
 
@@ -251,7 +287,14 @@ define(function(require){
     onPresetChanged: function(event) {
       // set _isSelected
       var presetId = $(event.currentTarget).val();
-      this.presets.findWhere({ _id: presetId }).set("_isSelected", true);
+      var preset = this.presets.findWhere({ _id: presetId }).set("_isSelected", true);
+      // set the form input values
+      var presetProps = preset.get('properties');
+      for(var key in presetProps) {
+        var el = $('[name=' + key + ']', this.form.el);
+        el.val(presetProps[key]);
+        if(el.hasClass('scaffold-color-picker')) el.css('background-color', presetProps[key]);
+      }
     },
 
     onSavePresetClicked: function() {

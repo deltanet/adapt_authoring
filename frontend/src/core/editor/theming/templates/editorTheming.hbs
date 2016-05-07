@@ -1,8 +1,9 @@
 <div class="theming-inner">
+  <div class="error display-none">
+    {{! content dynamically replaced with error messages }}
+  </div>
   <div class="description">{{{t 'app.themingdesc'}}}</div>
   <div class="live-view">
-    <div class="thumb tile"></div>
-    <div class="styles tile"></div>
   </div>
   <div class="title">{{t 'app.choosethemetitle'}}</div>
   <div class="description">{{{t 'app.choosethemedesc'}}}</div>
@@ -19,8 +20,8 @@
         <option value="" disabled selected>{{t 'app.presetselectinstr'}}</option>
       </select>
     </div>
-    <span class="error display-none">{{t 'app.themeselecterror'}}</span>
-    <a href="" class="edit"><i class="fa fa-pencil-square-o"></i> {{t 'app.presetedit'}}</a>
+    <button href="" class="edit btn btn-info"><i class="fa fa-pencil-square-o"></i> {{t 'app.presetedit'}}</button>
+    <button href="" class="reset btn btn-alert"><i class="fa fa-undo"></i> {{t 'app.restoredefaults'}}</button>
   </div>
   <div class="theme-customiser">
     <div class="title">{{t 'app.customisethemetitle'}}</div>

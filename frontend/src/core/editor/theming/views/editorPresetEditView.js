@@ -23,7 +23,6 @@ define(function(require){
     },
 
     render: function() {
-      console.log('PresetEditView.render');
       var template = Handlebars.templates[this.constructor.template];
       this.$el.html(template(this.model.toJSON()));
       return this;

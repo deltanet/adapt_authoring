@@ -219,7 +219,6 @@ define(function(require){
       var selectedTheme = this.getSelectedTheme();
       if(this.form) {
         this.form.commit();
-        console.log(this.getSelectedTheme(), this.getSelectedPreset());
         var settings = _.pick(selectedTheme.attributes, Object.keys(selectedTheme.get('properties')));
         Origin.editor.data.course.set('themeSettings', settings);
         Origin.editor.data.course.save(null, {

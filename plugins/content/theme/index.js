@@ -158,9 +158,9 @@ function initialize () {
                   res.statusCode = 404;
                   return res.json({ success: false, message: 'theme not found' });
                 }
-
+                console.log('Updating theme', results[0].name);
                 // Update the course config object: add theme, remove old preset
-                app.contentmanager.update('config', { _courseId: courseId }, { _theme: results[0].name, _themepreset: null }, function (err) {
+                app.contentmanager.update('config', { _courseId: courseId }, { _theme: results[0].name, _themepreset: "" }, function (err) {
                   if (err) {
                     return next(err);
                   }
@@ -187,10 +187,10 @@ function initialize () {
 
                     res.statusCode = 200;
                     return res.json({success: true});
-                  });  
+                  });
                 });
               });
-            }, configuration.getConfig('dbName'));            
+            }, configuration.getConfig('dbName'));
           }
         });
       });

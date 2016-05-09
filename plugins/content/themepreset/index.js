@@ -35,8 +35,9 @@ function initialize () {
           if (!results || 1 !== results.length) {
             return res.status(404).json({ success: false, message: 'preset not found' });
           }
+          console.log('Updating preset', presetId);
           // save to config
-          app.contentmanager.update('config', { _courseId: courseId }, { _courseId: courseId, _themepreset: presetId }, function (err) {
+          app.contentmanager.update('config', { _courseId: courseId }, { _themepreset: presetId }, function (err) {
             if (err) return next(err);
             // lose any previously set theme settings, preset overrides
             app.contentmanager.update('course', { _id: courseId }, { themeSettings: null }, function (err) {

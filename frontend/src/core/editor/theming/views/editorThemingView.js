@@ -163,7 +163,7 @@ define(function(require){
 
       for(var key in toRestore) {
         var el = $('[name=' + key + ']', this.form.el);
-        el.val(toRestore[key]);
+        el.val(toRestore[key].toString());
         if(el.hasClass('scaffold-color-picker')) {
           el.css('background-color', toRestore[key]);
         }

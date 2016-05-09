@@ -159,7 +159,7 @@ define(function(require){
     },
 
     restoreFormSettings: function(toRestore) {
-      if(!this.form || !this.form.el) return console.log('No form to restore...');
+      if(!this.form || !this.form.el) return;
 
       for(var key in toRestore) {
         var el = $('[name=' + key + ']', this.form.el);

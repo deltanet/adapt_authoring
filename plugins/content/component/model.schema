@@ -78,6 +78,32 @@
       "inputType":"TextArea",
       "validators": []
     },
+    "_appearance": {
+      "type":"object",
+      "properties": {
+        "_quoteText": {
+          "type":"object",
+          "properties": {
+            "_color": {
+              "type": "string",
+              "title": "Text colour",
+              "default": "",
+              "inputType": "ColorPicker",
+              "validators": [],
+              "default": ""
+            },
+            "_isEnabled": {
+              "type": "bool",
+              "title": "Enable quote-styling?",
+              "default": "",
+              "inputType": {"type": "Boolean", "options": [true, false]},
+              "validators": [],
+              "default": false
+            }
+          }
+        }
+      }
+    },
     "_extensions": {
       "type":"object"
     },

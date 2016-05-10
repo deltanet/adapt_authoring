@@ -130,7 +130,7 @@ define(function(require){
     },
 
     updatePresetSelect: function() {
-      var theme = $('.theme select').val();
+      var theme = this.$('.theme select').val();
       var presets = this.presets.where({ parentTheme: theme });
       var select = this.$('.preset select');
       // remove options first
@@ -170,6 +170,36 @@ define(function(require){
       }
     },
 
+    showPresetEdit: function(event) {
+      event && event.preventDefault();
+      var parentTheme = this.getSelectedTheme().get('_id');
+      var pev = new PresetEditView({
+        model: new Backbone.Model({ presets: new Backbone.Collection(this.presets.where({ parentTheme: parentTheme })) })
+      });
+      $('body').append(pev.el);
+    },
+
+    restoreDefaultSettings: function(event) {
+      event && event.preventDefault();
+      var self = this;
+      Origin.Notify.confirm({
+        type: 'warning',
+        text: window.polyglot.t('app.restoredefaultstext'),
+        callback: function(confirmed) {
+          if(confirmed) {
+            var preset = self.getSelectedPreset();
+            console.log(preset);
+            var settings = (preset) ? preset.get('properties') : self.getDefaultThemeSettings();
+            self.restoreFormSettings(settings);
+          }
+        }
+      });
+    },
+
+    /**
+    * Data persistence
+    */
+
     // checks form for errors, returns true if valid, false otherwise
     validateForm: function() {
       var selectedTheme = this.getSelectedTheme();
@@ -183,6 +213,29 @@ define(function(require){
         return false;
       }
       return true;
+    },
+
+    savePreset: function(presetName) {
+      // first, save the form data
+      this.form.commit();
+
+      var presetModel = new PresetModel({
+        displayName: presetName,
+        parentTheme: this.getSelectedTheme().get('_id'),
+        properties: _.pick(this.form.model.attributes, Object.keys(this.form.model.get('properties')))
+      });
+
+      var self = this;
+      presetModel.save(null, {
+        error: function(model, response, options) {
+          Origin.Notify.alert({ type: 'error', text: response });
+        },
+        success: function() {
+          self.presets.add(presetModel);
+          // HACK reorder things so this works without setTimeout later
+          window.setTimeout(function() { self.$('.preset select').val(presetModel.get('_id')); }, 1);
+        }
+      });
     },
 
     saveData: function(event) {
@@ -234,19 +287,6 @@ define(function(require){
       }
     },
 
-    savePreset: function(presetName) {
-      // first, save the form data
-      this.form.commit();
-
-      var presetModel = new PresetModel({
-        displayName: presetName,
-        parentTheme: this.getSelectedTheme().get('_id'),
-        properties: _.pick(this.form.model.attributes, Object.keys(this.form.model.get('properties')))
-      });
-      presetModel.save();
-      this.presets.add(presetModel);
-    },
-
     navigateBack: function(event) {
       event && event.preventDefault();
       Backbone.history.history.back();
@@ -291,32 +331,6 @@ define(function(require){
     /**
     * Event handling
     */
-
-    showPresetEdit: function(event) {
-      event && event.preventDefault();
-      var parentTheme = this.getSelectedTheme().get('_id');
-      var pev = new PresetEditView({
-        model: new Backbone.Model({ presets: new Backbone.Collection(this.presets.where({ parentTheme: parentTheme })) })
-      });
-      $('body').append(pev.el);
-    },
-
-    restoreDefaultSettings: function(event) {
-      event && event.preventDefault();
-      var self = this;
-      Origin.Notify.confirm({
-        type: 'warning',
-        text: window.polyglot.t('app.restoredefaultstext'),
-        callback: function(confirmed) {
-          if(confirmed) {
-            var preset = self.getSelectedPreset();
-            console.log(preset);
-            var settings = (preset) ? preset.get('properties') : self.getDefaultThemeSettings();
-            self.restoreFormSettings(settings);
-          }
-        }
-      });
-    },
 
     onEditPreset: function(data) {
       this.presets.findWhere({ displayName: data.oldValue }).save();

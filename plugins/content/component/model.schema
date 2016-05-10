@@ -83,15 +83,8 @@
       "properties": {
         "_quoteText": {
           "type":"object",
+          "legend": "Quote text",
           "properties": {
-            "_color": {
-              "type": "string",
-              "title": "Text colour",
-              "default": "",
-              "inputType": "ColorPicker",
-              "validators": [],
-              "default": ""
-            },
             "_isEnabled": {
               "type": "bool",
               "title": "Enable quote-styling?",
@@ -99,6 +92,14 @@
               "inputType": {"type": "Boolean", "options": [true, false]},
               "validators": [],
               "default": false
+            },
+            "_color": {
+              "type": "string",
+              "title": "Text colour",
+              "default": "",
+              "inputType": "ColorPicker",
+              "validators": [],
+              "default": ""
             }
           }
         }

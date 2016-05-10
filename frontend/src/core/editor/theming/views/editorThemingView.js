@@ -118,6 +118,7 @@ define(function(require){
       select.append($('<option>', { value: "", disabled: 'disabled', selected: 'selected' }).text(window.polyglot.t('app.selectinstr')));
       // add options
       _.each(this.themes.models, function(item, index) {
+        if(item.get('_isAvailableInEditor') === false) return;
         select.append($('<option>', { value: item.get('_id') }).text(item.get('displayName')));
       }, this);
 

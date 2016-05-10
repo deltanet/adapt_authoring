@@ -188,7 +188,6 @@ define(function(require){
         callback: function(confirmed) {
           if(confirmed) {
             var preset = self.getSelectedPreset();
-            console.log(preset);
             var settings = (preset) ? preset.get('properties') : self.getDefaultThemeSettings();
             self.restoreFormSettings(settings);
           }

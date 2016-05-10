@@ -67,9 +67,7 @@ define(function(require){
         callback: function(confirmed) {
           if(confirmed === true) {
             Origin.trigger('managePresets:delete', presetName);
-            self.model.get('presets').fetch({
-              success: _.bind(self.render, self)
-            });
+            self.render();
           }
         }
       });

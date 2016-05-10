@@ -126,13 +126,15 @@ define(function(require) {
 
         setToLocked: function() {
             this.isLocked = true;
-            this.$('.scaffold-display-title-lock i').removeClass('fa-unlink');
+            this.$('.scaffold-display-title-lock i').removeClass('fa-unlock');
+            this.$('.scaffold-display-title-lock i').addClass('fa-lock');
             this.$('input').attr('disabled', true).val(this.titleField.val());
         },
 
         setToUnlocked: function() {
             this.isLocked = false;
-            this.$('.scaffold-display-title-lock i').addClass('fa-unlink');
+            this.$('.scaffold-display-title-lock i').addClass('fa-unlock');
+            this.$('.scaffold-display-title-lock i').removeClass('fa-lock');
             this.$('input').attr('disabled', false);
         },
 

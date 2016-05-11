@@ -333,7 +333,9 @@ define(function(require){
     */
 
     onEditPreset: function(data) {
-      this.presets.findWhere({ displayName: data.oldValue }).save();
+      var model = this.presets.findWhere({ displayName: data.oldValue });
+      model.set('displayName', data.newValue);
+      model.save();
     },
 
     onDeletePreset: function(preset) {

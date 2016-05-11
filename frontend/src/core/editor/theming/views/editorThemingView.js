@@ -3,6 +3,7 @@ define(function(require){
   var Backbone = require('backbone');
   var EditorOriginView = require('editorGlobal/views/editorOriginView');
   var Handlebars = require('handlebars');
+  var Helpers = require('coreJS/app/helpers');
   var Origin = require('coreJS/app/origin');
   var PresetCollection = require('../collections/editorPresetCollection');
   var PresetEditView = require('./editorPresetEditView');
@@ -383,7 +384,8 @@ define(function(require){
           if(preset) {
             swal.showInputError(window.polyglot.t('app.duplicatepreseterror'));
           } else {
-            self.savePreset(arguments[0]);
+            // watch out for injection attacks
+            self.savePreset(Helpers.escapeText(arguments[0]));
             swal.close();
           }
         }

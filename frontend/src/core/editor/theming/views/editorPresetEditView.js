@@ -4,6 +4,7 @@ define(function(require){
   var Backbone = require('backbone');
   var Handlebars = require('handlebars');
   var Origin = require('coreJS/app/origin');
+  var Helpers = require('coreJS/app/helpers');
 
   var PresetEditView = Backbone.View.extend({
     tagName: 'div',
@@ -43,7 +44,8 @@ define(function(require){
     onSaveClicked: function(event) {
       event && event.preventDefault();
       var $preset = $(event.currentTarget).closest('.preset');
-      var newValue = $('input', $preset).val();
+      // look out for injection attacks
+      var newValue = Helpers.escapeText($('input', $preset).val());
 
       Origin.trigger('managePresets:edit', {
         oldValue: $preset.attr('data-name'),

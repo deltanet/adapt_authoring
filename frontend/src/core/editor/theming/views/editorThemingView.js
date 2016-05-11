@@ -376,9 +376,16 @@ define(function(require){
       Origin.Notify.alert({
         type: 'input',
         text: window.polyglot.t('app.presetinputtext'),
+        closeOnConfirm: false,
         showCancelButton: true,
         callback: function() {
-          self.savePreset(arguments[0]);
+          var preset = self.presets.findWhere({ displayName: arguments[0] })
+          if(preset) {
+            swal.showInputError(window.polyglot.t('app.duplicatepreseterror'));
+          } else {
+            self.savePreset(arguments[0]);
+            swal.close();
+          }
         }
       });
     },

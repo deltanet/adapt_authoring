@@ -152,12 +152,12 @@ define(function(require){
         }
         select.attr('disabled', false);
         this.$('button.edit').show();
-        this.$('button.reset').show();
       } else {
         select.attr('disabled', true);
         this.$('button.edit').hide();
-        this.$('button.reset').hide();
       }
+
+      // TODO need to hide reset button if defaults selected
     },
 
     restoreFormSettings: function(toRestore) {

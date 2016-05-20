@@ -53,7 +53,7 @@ define(function(require){
       this.removeForm();
 
       var selectedTheme = this.getSelectedTheme();
-      var themeHasProperties = selectedTheme.get('properties') && Object.keys(selectedTheme.get('properties')).length > 0;
+      var themeHasProperties = selectedTheme && selectedTheme.get('properties') && Object.keys(selectedTheme.get('properties')).length > 0;
       if(selectedTheme && themeHasProperties) {
         this.form = Origin.scaffold.buildForm({
           model: selectedTheme,
@@ -201,7 +201,7 @@ define(function(require){
     * Data persistence
     */
 
-    // checks form for errors, returns true if valid, false otherwise
+    // checks form for errors, returns boolean
     validateForm: function() {
       var selectedTheme = this.getSelectedTheme();
       var selectedPreset = this.getSelectedPreset();
@@ -313,7 +313,9 @@ define(function(require){
       if(presetId) {
         return this.presets.findWhere({ '_id': presetId });
       } else if(includeCached !== false){
-        var parent = this.getSelectedTheme().get('_id');
+        var selectedTheme = this.getSelectedTheme();
+        if(!selectedTheme) return;
+        var parent = selectedTheme.get('_id');
         return this.presets.findWhere({ '_id': this.model.get('_themepreset'), parentTheme: parent });
       }
     },

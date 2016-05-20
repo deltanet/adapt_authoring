@@ -113,6 +113,7 @@ define(function(require){
 
     updateThemeSelect: function() {
       var select = this.$('.theme select');
+      var oldVal = select.val();
       // remove options first
       $('option', select).remove();
       // add 'no presets'
@@ -125,6 +126,9 @@ define(function(require){
 
       // disable if no options
       select.attr('disabled', this.themes.models.length === 0);
+
+      // restore the previous value
+      if(oldVal) return select.val(oldVal);
 
       // select current theme
       var selectedTheme = this.getSelectedTheme();

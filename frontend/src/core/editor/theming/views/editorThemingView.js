@@ -60,12 +60,12 @@ define(function(require){
           schemaType: selectedTheme.get('theme')
         });
 
-        var toRestore = Origin.editor.data.course.get('themeSettings') || this.getDefaultThemeSettings();
-        this.restoreFormSettings(toRestore);
-
         this.$('.form-container').html(this.form.el);
         this.$('.theme-customiser').show();
         Origin.trigger('theming:showPresetButton', true);
+
+        var toRestore = Origin.editor.data.course.get('themeSettings') || this.getDefaultThemeSettings();
+        this.restoreFormSettings(toRestore);
       }
     },
 
@@ -168,10 +168,12 @@ define(function(require){
       if(!this.form || !this.form.el) return;
 
       for(var key in toRestore) {
-        var el = $('[name=' + key + ']', this.form.el);
-        el.val(toRestore[key].toString());
-        if(el.hasClass('scaffold-color-picker')) {
-          el.css('background-color', toRestore[key]);
+        var view = this.form.fields[key];
+        if(view.schema.fieldType === 'ColorPicker') {
+          view.setValue(toRestore[key]);
+        }
+        else {
+          view.editor.$el.val(toRestore[key].toString());
         }
       }
     },

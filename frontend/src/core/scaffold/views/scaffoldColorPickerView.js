@@ -88,6 +88,7 @@ define(function(require) {
 
             this.value = newValue;
             this.$el.css('backgroundColor', this.value);
+            this.$el.ColorPickerSetColor(this.value);
 
             if(this.value) this.$el.siblings('.reset').show();
             else this.$el.siblings('.reset').hide();

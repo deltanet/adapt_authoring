@@ -34,9 +34,6 @@ define(function(require) {
         },
 
         render: function() {
-            // Listen to remove:views and remove color picker
-            this.listenTo(Origin, 'remove:views', this.removeColorPicker);
-
             if (this.value === null) {
                 this.value = '';
             }
@@ -73,6 +70,11 @@ define(function(require) {
 
             }, this));
             return this;
+        },
+
+        remove: function() {
+            this.removeColorPicker();
+            Backbone.Form.editors.Text.prototype.remove.apply(this, arguments);
         },
 
         removeColorPicker: function() {

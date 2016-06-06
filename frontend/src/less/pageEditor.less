@@ -58,3 +58,36 @@
         border-right:1px solid darken(#e0e8f7, 10%);
     }
 }
+
+.add-control {
+    .add-article, .add-block, .add-component {
+        font-size: 18px;
+        width: 100%;
+        padding: 0;
+        line-height: 50px;
+        text-align: center;
+        color: @primary-color;
+        border: 1px dashed @primary-color;
+
+        &.add-block {
+            background-color: #EAF8FB;
+            width: 98%;
+            margin-left: 1%;
+        }
+
+        &.add-component {
+            background-color: #D6F3F9;
+            width: 96%;
+            margin-left: 2%;
+            margin-bottom: 20px;
+        }
+
+        &:hover, &:focus {
+            padding: 0;
+            line-height: 50px;
+            text-align: center;
+            color: @primary-color;
+            border: 1px solid @primary-color;
+        }
+    }
+}

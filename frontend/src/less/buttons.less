@@ -4,7 +4,6 @@ button {
     border:none;
     background:none;
     padding:10px 12px;
-    font-size:13px;
     &:hover, &:focus {
         outline:none;
     }
@@ -53,8 +52,6 @@ button {
     background:none;
     border:@button-border;
     border-radius:@button-radius;
-    background-color:@button-color;
-    font-size:13px;
     font-weight:300;
     text-decoration: none;
     transition:all 0.3s;
@@ -63,22 +60,6 @@ button {
         outline:none;
         color:@button-hover-text-color;
         border:@button-hover-border;
-    }
-
-    &-block {
-        display:inline-block;
-        width:100%;
-        max-width:300px;
-        margin:0 auto;
-        text-align:center;
-    }
-    
-    &-fixed-width {
-      width: 150px;
-    }
-    
-    &-icon {
-      padding-right: 16px;
     }
 }
 

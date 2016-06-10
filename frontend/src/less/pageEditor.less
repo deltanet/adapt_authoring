@@ -50,15 +50,6 @@
     }
 }
 
-.block {
-    border-left:1px solid transparent;
-    border-right:1px solid transparent;
-    &.hovering {
-        border-left:1px solid darken(#e0e8f7, 10%);
-        border-right:1px solid darken(#e0e8f7, 10%);
-    }
-}
-
 .add-control {
     .add-article, .add-block, .add-component {
         font-size: 18px;
@@ -68,6 +59,7 @@
         text-align: center;
         color: @primary-color;
         border: 1px dashed @primary-color;
+        transition: all 0s;
 
         &.add-block {
             background-color: #EAF8FB;
@@ -77,9 +69,23 @@
 
         &.add-component {
             background-color: #D6F3F9;
-            width: 96%;
-            margin-left: 2%;
-            margin-bottom: 20px;
+            &.full {
+                width: 96%;
+                margin-left: 2%;
+                margin-bottom: 20px;
+            }
+            &.left {
+                width: 46%;
+                position: absolute;
+                top: 90px;
+                left: 2%;
+            }
+            &.right {
+                width: 46%;
+                position: absolute;
+                top: 90px;
+                left: 52%;
+            }
         }
 
         &:hover, &:focus {

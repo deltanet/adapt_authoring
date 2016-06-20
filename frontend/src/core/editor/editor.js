@@ -333,13 +333,27 @@ define(function(require) {
       case 'selecttheme':
         var configModel = new EditorConfigModel({_courseId: route1});
 
+        var backButtonRoute = "/#/editor/" + route1 + "/menu";
+        var backButtonText = "Back to menu";
+
+        if (Origin.previousLocation.route2 === "page") {
+            backButtonRoute = "/#/editor/" + route1 + "/page/" + Origin.previousLocation.route3;
+            backButtonText = "Back to page";
+        }
+
+            var optionsObject = {
+            "backButtonText": backButtonText,
+            "backButtonRoute": backButtonRoute
+        };
+
         configModel.fetch({
           success: function() {
             Origin.trigger('location:title:update', {title: 'Select theme'});
-            Origin.sidebar.addView(new EditorThemeCollectionSidebarView().$el);
+            Origin.sidebar.addView(new EditorThemeCollectionSidebarView().$el, optionsObject);
             Origin.editingOverlay.addView(new EditorThemeCollectionView({model: configModel}).$el);
           }
         });
+
         break;
 
       case 'extensions':
@@ -371,10 +385,23 @@ define(function(require) {
       case 'menusettings':
         var configModel = new EditorConfigModel({_courseId: route1});
 
+        var backButtonRoute = "/#/editor/" + route1 + "/menu";
+        var backButtonText = "Back to menu";
+
+        if (Origin.previousLocation.route2 === "page") {
+            backButtonRoute = "/#/editor/" + route1 + "/page/" + Origin.previousLocation.route3;
+            backButtonText = "Back to page";
+        }
+
+            var optionsObject = {
+            "backButtonText": backButtonText,
+            "backButtonRoute": backButtonRoute
+        };
+
         configModel.fetch({
           success: function() {
             Origin.trigger('location:title:update', {title: 'Select menu'});
-            Origin.sidebar.addView(new EditorMenuSettingsEditSidebarView().$el);
+            Origin.sidebar.addView(new EditorMenuSettingsEditSidebarView().$el, optionsObject);
             Origin.editingOverlay.addView(new EditorMenuSettingsEditView({model: configModel}).$el);
           }
         });

@@ -7,15 +7,6 @@
     border-bottom:1px solid rgba(0,0,0,0.15);
     font-size: 15px;
     font-family: @font-title;
-    a {
-        // transition:all 0.3s;
-        &:hover {
-        text-decoration: underline;
-            &.navigation-user-logout {
-                text-decoration: none;
-            }
-        }
-    }
 }
 
 .navigation-item {
@@ -34,5 +25,14 @@
 .navigation-right {
     .navigation-user-logout {
         padding: 0px 25px;
+    }
+    a {
+        // transition:all 0.3s;
+        &:hover {
+        text-decoration: underline;
+            &.navigation-user-logout {
+                text-decoration: none;
+            }
+        }
     }
 }

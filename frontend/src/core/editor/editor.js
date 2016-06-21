@@ -215,7 +215,6 @@ define(function(require) {
   }
 
   function routeAfterDataIsLoaded(route1, route2, route3, route4) {
-    
     if (route2 === 'article' && route4 === 'edit') {
       var articleModel = new EditorArticleModel({_id: route3});
       articleModel.fetch({
@@ -303,9 +302,28 @@ define(function(require) {
             var form = Origin.scaffold.buildForm({
               model: project
             });
+
+            var backButtonRoute = Origin.dashboardRoute;
+            var backButtonText = "Back to Dashboard";
+
+            if (Origin.previousLocation.route2 === "page") {
+                backButtonRoute = "/#/editor/" + route1 + "/page/" + Origin.previousLocation.route3;
+                backButtonText = "Back to page";
+            }
+
+            if (Origin.previousLocation.route2 === "menu") {
+            var backButtonRoute = "/#/editor/" + route1 + "/menu";
+            var backButtonText = "Back to menu";
+            }
+
+            var optionsObject = {
+                "backButtonText": backButtonText,
+                "backButtonRoute": backButtonRoute
+            };
+
             Origin.trigger('location:title:update', {title: 'Edit course'});
             Origin.editingOverlay.addView(new ProjectDetailView({model: project, form: form}).$el);
-            Origin.sidebar.addView(new ProjectDetailEditSidebarView({form: form}).$el);
+            Origin.sidebar.addView(new ProjectDetailEditSidebarView({form: form}).$el, optionsObject);
           }
         });
         break;
@@ -313,8 +331,7 @@ define(function(require) {
       case 'config':
         // route2 is the courseid
         // var collection = new EditorConfigCollection();
-        // collection.findWhere({_courseId: location});
-
+        // collection.findWhere({_courseId: location})
         var configModel = new EditorConfigModel({_courseId: route1});
 
         configModel.fetch({
@@ -323,11 +340,25 @@ define(function(require) {
               model: configModel
             });
 
+            var backButtonRoute = "/#/editor/" + route1 + "/menu";
+            var backButtonText = "Back to menu";
+
+            if (Origin.previousLocation.route2 === "page") {
+                backButtonRoute = "/#/editor/" + route1 + "/page/" + Origin.previousLocation.route3;
+                backButtonText = "Back to page";
+            }
+
+            var optionsObject = {
+                "backButtonText": backButtonText,
+                "backButtonRoute": backButtonRoute
+            };
+
             Origin.trigger('location:title:update', {title: 'Edit configuration'});
-            Origin.sidebar.addView(new EditorConfigEditSidebarView({form: form}).$el);
+            Origin.sidebar.addView(new EditorConfigEditSidebarView({form: form}).$el, optionsObject);
             Origin.editingOverlay.addView(new EditorConfigEditView({model: configModel, form: form}).$el);
           }
         });
+
         break;
 
       case 'selecttheme':
@@ -341,7 +372,7 @@ define(function(require) {
             backButtonText = "Back to page";
         }
 
-            var optionsObject = {
+        var optionsObject = {
             "backButtonText": backButtonText,
             "backButtonRoute": backButtonRoute
         };
@@ -385,21 +416,22 @@ define(function(require) {
       case 'menusettings':
         var configModel = new EditorConfigModel({_courseId: route1});
 
-        var backButtonRoute = "/#/editor/" + route1 + "/menu";
-        var backButtonText = "Back to menu";
-
-        if (Origin.previousLocation.route2 === "page") {
-            backButtonRoute = "/#/editor/" + route1 + "/page/" + Origin.previousLocation.route3;
-            backButtonText = "Back to page";
-        }
-
-            var optionsObject = {
-            "backButtonText": backButtonText,
-            "backButtonRoute": backButtonRoute
-        };
-
         configModel.fetch({
           success: function() {
+
+            var backButtonRoute = "/#/editor/" + route1 + "/menu";
+            var backButtonText = "Back to menu";
+
+            if (Origin.previousLocation.route2 === "page") {
+                backButtonRoute = "/#/editor/" + route1 + "/page/" + Origin.previousLocation.route3;
+                backButtonText = "Back to page";
+            }
+
+            var optionsObject = {
+                "backButtonText": backButtonText,
+                "backButtonRoute": backButtonRoute
+            };
+
             Origin.trigger('location:title:update', {title: 'Select menu'});
             Origin.sidebar.addView(new EditorMenuSettingsEditSidebarView().$el, optionsObject);
             Origin.editingOverlay.addView(new EditorMenuSettingsEditView({model: configModel}).$el);
@@ -412,6 +444,7 @@ define(function(require) {
         // Edit the menu item
         if (route4 === "edit") {
           var contentObjectModel = new EditorContentObjectModel({_id: route3});
+
           contentObjectModel.fetch({
             success: function() {
               

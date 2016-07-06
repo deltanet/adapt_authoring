@@ -17,10 +17,9 @@ span.error {
 .loading {
   width: 100vw;
   height: 100vh;
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
-  padding-top: 28%;
   z-index: 5;
   text-align: center;
   opacity:1;
@@ -35,6 +34,10 @@ span.error {
     .loading-inner {
       margin-top:41px;
     }
+  }
+
+  .loading-inner {
+    margin-top: 25%;
   }
   
   @loading-icon-size: 8px;
@@ -69,12 +72,12 @@ span.error {
       animation: sk-bouncedelay 1.8s infinite ease-in-out both;
     }
     .circle1 {
-      -webkit-animation-delay: -0.64s;
-      animation-delay: -0.64s;
-    }
-    .circle2 {
       -webkit-animation-delay: -0.32s;
       animation-delay: -0.32s;
+    }
+    .circle2 {
+      -webkit-animation-delay: -0.16s;
+      animation-delay: -0.16s;
     }
   }
 

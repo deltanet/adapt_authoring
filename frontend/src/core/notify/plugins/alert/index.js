@@ -81,27 +81,6 @@ define(function(require) {
 			cancelButtonText: window.polyglot.t('app.no')
 		};
 
-		if(data.destructive === true) {
-			_.defer(function() {
-				var count = 5;
-				var oldLabel = $('.sweet-alert button.confirm').text();
-
-				$('.sweet-alert button.confirm').attr('disabled', true);
-				$('.sweet-alert button.confirm').text('Wait ' + count);
-
-				clearInterval(interval);
-				interval = setInterval(function() {
-					if(--count > 0) {
-						$('.sweet-alert button.confirm').text(window.polyglot.t('app.confirmwait') + ' ' + count);
-					} else {
-						clearInterval(interval);
-						$('.sweet-alert button.confirm').text(oldLabel);
-						$('.sweet-alert button.confirm').attr('disabled', false);
-					}
-				}, 1000);
-			});
-		}
-
 		openPopup(_.extend(defaults, data));
 
 		// forces the user to wait before the confirm button can be clicked

@@ -2,9 +2,10 @@
 define(function(require) {
   var Backbone = require('backbone');
   var OriginView = require('coreJS/app/views/originView');
+  var Origin = require('coreJS/app/origin');
 
   var ForgotPasswordView = OriginView.extend({
-    
+
     tagName: "div",
 
     className: "forgot-password",
@@ -21,8 +22,7 @@ define(function(require) {
 
     goToLogin: function(e) {
       e.preventDefault();
-
-      Origin.router.navigate('#user/login', {trigger: true});
+      Origin.router.navigate('#/user/login', {trigger: true});
     },
 
     handleKeydown: function(e) {
@@ -52,7 +52,7 @@ define(function(require) {
 
     requestResetToken: function(e) {
       e && e.preventDefault();
-      
+
       var self = this;
 
       if (self.isValid()) {

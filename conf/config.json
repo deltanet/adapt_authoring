@@ -11,5 +11,6 @@
   "auth": "local",
   "useffmpeg": false,
   "outputPlugin": "adapt",
-  "isProduction": false
+  "isProduction": false,
+  "masterTenantID": "57163fba1d5a4203003147e0"
 }

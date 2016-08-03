@@ -12,6 +12,15 @@
                 {{t 'app.addnewproject'}}
 			</span>
 		</button>
+    {{!TODO make these permissions a bit more specific?}}
+    {{#ifHasPermissions "*/*:create,*/*:read,*/*:update,*/*:delete"}}
+		<button class="dashboard-sidebar-import-course">
+			<span class="dashboard-sidebar-import-course-inner">
+				<i class="fa-upload fa"></i>{{t "app.importdashboardbutton"}}
+			</span>
+		</button>
+    {{/ifHasPermissions}}
+	</div>
 
 		<div class="separator"></div>
 

@@ -14,9 +14,9 @@
 		</button>
     {{!TODO make these permissions a bit more specific?}}
     {{#ifHasPermissions "*/*:create,*/*:read,*/*:update,*/*:delete"}}
-		<button class="dashboard-sidebar-import-course">
+		<button class="dashboard-sidebar-import-course action-secondary">
 			<span class="dashboard-sidebar-import-course-inner">
-				<i class="fa-upload fa"></i>{{t "app.importdashboardbutton"}}
+				{{t "app.importdashboardbutton"}}
 			</span>
 		</button>
     {{/ifHasPermissions}}

@@ -11,11 +11,11 @@ define(function(require) {
 
         events: {
             'click .dashboard-sidebar-add-course'   : 'addCourse',
+            'click .dashboard-sidebar-import-course'   : 'goToCourseImport',
             'click .dashboard-sidebar-my-courses'   : 'gotoMyCourses',
             'click .dashboard-sidebar-shared-courses' : 'gotoSharedCourses',
             'keyup .dashboard-sidebar-filter-search-input':'filterProjectsByTitle',
-            'keydown .dashboard-sidebar-filter-search-input':'onInputKeyDown',
-            'click .dashboard-sidebar-filter-clear': 'clearFilterInput',
+            'click .sidebar-filter-clear': 'clearFilterInput',
             'click .dashboard-sidebar-tag': 'onFilterButtonClicked',
             'click .dashboard-sidebar-add-tag': 'onAddTagClicked',
             'click .dashboard-sidebar-row-filter': 'onFilterRemovedClicked'
@@ -35,7 +35,7 @@ define(function(require) {
                 this.$('.dashboard-sidebar-filter-search-input').addClass('search-highlight')
             }
         },
-        
+
         updateUI: function(userPreferences) {
             if (userPreferences.search) {
                 this.$('.dashboard-sidebar-filter-search-input').val(userPreferences.search);
@@ -60,6 +60,10 @@ define(function(require) {
             Origin.router.navigate('#/project/new', {trigger:true});
         },
 
+        goToCourseImport: function() {
+            Origin.router.navigate('#/courseImport', {trigger:true});
+        },
+
         gotoMyCourses: function() {
             Origin.router.navigate('#/dashboard', {trigger: true});
         },
@@ -68,20 +72,13 @@ define(function(require) {
             Origin.router.navigate('#/dashboard/shared', {trigger: true});
         },
 
-        onInputKeyDown: function(event) {
-            if (13 == event.keyCode) {
-                event.preventDefault();
-            }
-        },
-
         filterProjectsByTitle: function(event, filter) {
             if (event) {
                 event.preventDefault();
             }
-            if (13 == event.keyCode || filter) {
-                var filterText = $(event.currentTarget).val().trim();
-                Origin.trigger('dashboard:dashboardSidebarView:filterBySearch', filterText);
-            }
+            var filterText = $(event.currentTarget).val().trim();
+            Origin.trigger('dashboard:dashboardSidebarView:filterBySearch', filterText);
+
             this.highlightSearchBox();
         },
 
@@ -135,7 +132,7 @@ define(function(require) {
         },
 
         filterProjectsByTags: function(tag) {
-            
+
             // Check if the tag is already being filtered and remove it
             if (_.findWhere(this.tags, { id: tag.id } )) {
                 this.tags = _.reject(this.tags, function(tagItem) {
@@ -148,7 +145,7 @@ define(function(require) {
 
             Origin.trigger('dashboard:dashboardSidebarView:filterByTags', this.tags);
         },
-        
+
         addTagToSidebar: function(tag) {
             this.usedTags.push(tag);
 

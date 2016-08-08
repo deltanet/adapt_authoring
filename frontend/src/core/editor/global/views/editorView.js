@@ -13,9 +13,7 @@ define(function(require){
   var EditorOriginView = require('editorGlobal/views/editorOriginView');
   var EditorMenuView = require('editorMenu/views/editorMenuView');
   var EditorPageView = require('editorPage/views/editorPageView');
-  /*var EditorCollection = require('editorGlobal/collections/editorCollection');*/
   var EditorModel = require('editorGlobal/models/editorModel');
-  /*var EditorCourseModel = require('editorCourse/models/editorCourseModel');*/
   var EditorContentObjectModel = require('editorMenu/models/editorContentObjectModel');
   var EditorArticleModel = require('editorPage/models/editorArticleModel');
   var EditorBlockModel = require('editorPage/models/editorBlockModel');
@@ -60,7 +58,6 @@ define(function(require){
       this.listenTo(Origin, 'editorCommon:preview', this.previewProject);
       this.listenTo(Origin, 'editorCommon:export', this.exportProject);
 
-
       this.render();
       this.setupEditor();
     },
@@ -84,64 +81,89 @@ define(function(require){
 
     downloadProject: function(event) {
       event && event.preventDefault();
-      var canPublish = helpers.validateCourseContent(this.currentCourse);
+      var self = this;
 
-      if (canPublish && !Origin.editor.isPublishPending) {
-        $('.editor-common-sidebar-downloading-progress').animate({ width: '100%' }, 30000);
+      if (helpers.validateCourseContent(this.currentCourse) && !Origin.editor.isDownloadPending) {
         $('.editor-common-sidebar-download-inner').addClass('display-none');
         $('.editor-common-sidebar-downloading').removeClass('display-none');
-        //return;
+
+        if (Origin.constants.outputPlugin == 'adapt') {
+          // Report progress for 45 seconds
+          $('.editor-common-sidebar-downloading').animate({ width: '100%' }, 45000);
+        }
+
         var courseId = Origin.editor.data.course.get('_id');
         var tenantId = Origin.sessionModel.get('tenantId');
 
-        $.get('/download/' + tenantId + '/' + courseId, function(data) {
+        $.ajax({
+          method: 'get',
+          url: '/api/output/' + Origin.constants.outputPlugin + '/publish/' + this.currentCourseId,
+          success: function (jqXHR, textStatus, errorThrown) {
+            if (jqXHR.success) {
+              if (jqXHR.payload && typeof(jqXHR.payload.pollUrl) != 'undefined' && jqXHR.payload.pollUrl != '') {
+                // Ping the remote URL to check if the job has been completed
+                self.updateDownloadProgress(jqXHR.payload.pollUrl);
+              } else {
+                self.resetDownloadProgress();
 
-          $('.editor-common-sidebar-downloading-progress').css('width', 0).stop();;
-          Origin.editor.isPublishPending = false;
-          $('.editor-common-sidebar-download-inner').removeClass('display-none');
-          $('.editor-common-sidebar-downloading').addClass('display-none');
+                var $downloadForm = $('#downloadForm');
 
-          var $downloadForm = $('#downloadForm');
+                $downloadForm.attr('action', '/download/' + tenantId + '/' + courseId + '/' + jqXHR.payload.zipName + '/download.zip');
+                $downloadForm.submit();
+              }
+            } else {
+              self.resetDownloadProgress();
 
-          $downloadForm.attr('action', '/download/' + tenantId + '/' + courseId + '/' + data.zipName + '/download.zip');
-          $downloadForm.submit();
+              Origin.Notify.alert({
+                type: 'error',
+                text: window.polyglot.t('app.errorgeneric')
+              });
+            }
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+            self.resetDownloadProgress();
 
+            Origin.Notify.alert({
+              type: 'error',
+              text: window.polyglot.t('app.errorgeneric')
+            });
+          }
         });
-
       } else {
         return false;
       }
     },
 
-    exportProject: function(event) {
-      event && event.preventDefault();
-
+    exportProject: function(devMode) {
       // aleady processing, don't try again
       if(this.exporting) return;
 
       var courseId = Origin.editor.data.course.get('_id');
       var tenantId = Origin.sessionModel.get('tenantId');
 
-      this.showExportAnimation();
+      var $btn = devMode == true ? $('button.editor-common-sidebar-export-dev') : $('button.editor-common-sidebar-export');
+
+      this.showExportAnimation(true, $btn);
       this.exporting = true;
 
       var self = this;
       $.ajax({
-         url: '/export/' + tenantId + '/' + courseId,
+         url: '/export/' + tenantId + '/' + courseId + '/' + devMode,
          success: function(data, textStatus, jqXHR) {
-           self.showExportAnimation(false);
+           self.showExportAnimation(false, $btn);
            self.exporting = false;
 
            // get the zip
-           var form = document.createElement("form");
-           form.setAttribute('action', '/export/' + tenantId + '/' + courseId + '/' + data.zipName + '/download.zip');
+           var form = document.createElement('form');
+           self.$el.append(form);
+           form.setAttribute('action', '/export/' + tenantId + '/' + courseId + '/download.zip');
            form.submit();
          },
          error: function(jqXHR, textStatus, errorThrown) {
            var messageText = errorThrown;
            if(jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) messageText += ':<br/>' + jqXHR.responseJSON.message;
 
-           self.showExportAnimation(false);
+           self.showExportAnimation(false, $btn);
            self.exporting = false;
 
            Origin.Notify.alert({
@@ -153,13 +175,13 @@ define(function(require){
       });
     },
 
-    showExportAnimation: function(show) {
+    showExportAnimation: function(show, $btn) {
       if(show !== false) {
-        $('.editor-common-sidebar-export-inner').addClass('display-none');
-        $('.editor-common-sidebar-exporting').removeClass('display-none');
+        $('.editor-common-sidebar-export-inner', $btn).addClass('display-none');
+        $('.editor-common-sidebar-exporting', $btn).removeClass('display-none');
       } else {
-        $('.editor-common-sidebar-export-inner').removeClass('display-none');
-        $('.editor-common-sidebar-exporting').addClass('display-none');
+        $('.editor-common-sidebar-export-inner', $btn).removeClass('display-none');
+        $('.editor-common-sidebar-exporting', $btn).addClass('display-none');
       }
     },
 
@@ -174,17 +196,12 @@ define(function(require){
       event && event.preventDefault();
 
       var self = this;
-      var canPreview = helpers.validateCourseContent(this.currentCourse);
 
-      if (canPreview && !Origin.editor.isPreviewPending) {
+      if (helpers.validateCourseContent(this.currentCourse) && !Origin.editor.isPreviewPending) {
         Origin.editor.isPreviewPending = true;
+        $('.navigation-loading-indicator').removeClass('display-none');
         $('.editor-common-sidebar-preview-inner').addClass('display-none');
         $('.editor-common-sidebar-previewing').removeClass('display-none');
-
-        if (Origin.constants.outputPlugin == 'adapt') {
-          // Report progress for 45 seconds
-          $('.editor-common-sidebar-preview-progress').animate({ width: '100%' }, 45000);
-        }
 
         $.ajax({
           method: 'get',
@@ -230,10 +247,46 @@ define(function(require){
               self.launchCoursePreview();
               self.resetPreviewProgress();
             } else {
-               $('.editor-common-sidebar-preview-progress').animate({ width: jqXHR.progress + '%' }, 1000);
+               $('.navigation-loading-progress').animate({ width: jqXHR.progress + '%' }, 1000);
             }
           },
           error: function(jqXHR, textStatus, errorThrown) {
+            clearInterval(pollId);
+            self.resetPreviewProgress();
+
+            Origin.Notify.alert({
+              type: 'error',
+              text: errorThrown
+            });
+          }
+        });
+      }
+
+      // Check for updated progress every 3 seconds
+      var pollId = setInterval(pollUrl, 3000);
+    },
+
+    updateDownloadProgress: function(url) {
+      var self = this;
+
+      var pollUrl = function() {
+        $.ajax({
+          method: 'get',
+          url: url,
+          success: function(jqXHR, textStatus, errorThrown) {
+            if (jqXHR.progress == "100") {
+              clearInterval(pollId);
+
+              self.resetDownloadProgress();
+            } else {
+               $('.editor-common-sidebar-downloading-progress').animate({ width: jqXHR.progress + '%' }, 1000);
+            }
+          },
+          error: function(jqXHR, textStatus, errorThrown) {
+            clearInterval(pollId);
+
+            self.resetDownloadProgress();
+
             Origin.Notify.alert({
               type: 'error',
               text: errorThrown
@@ -247,10 +300,18 @@ define(function(require){
     },
 
     resetPreviewProgress: function() {
-      $('.editor-common-sidebar-preview-progress').css('width', 0).stop();
+      $('.navigation-loading-progress').css('width', 0).stop();
       $('.editor-common-sidebar-preview-inner').removeClass('display-none');
       $('.editor-common-sidebar-previewing').addClass('display-none');
+      $('.navigation-loading-indicator').addClass('display-none');
       Origin.editor.isPreviewPending = false;
+    },
+
+    resetDownloadProgress: function() {
+      $('.editor-common-sidebar-downloading-progress').css('width', 0).stop();
+      $('.editor-common-sidebar-download-inner').removeClass('display-none');
+      $('.editor-common-sidebar-downloading').addClass('display-none');
+      Origin.editor.isDownloadPending = false;
     },
 
     /*

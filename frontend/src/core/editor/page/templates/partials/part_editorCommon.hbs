@@ -25,7 +25,7 @@
 
     <div class="separator" />
     <div class="sidebar-row">
-        <button class="editor-common-sidebar-export">
+        <button class="editor-common-sidebar-export-dev">
             <span class="editor-common-sidebar-export-inner">
                 <i class="fa fa-code primary-color"/>Export source code
             </span>
@@ -34,6 +34,18 @@
             </span>
         </button>
     </div>
+    {{#ifHasPermissions "*/*:create,*/*:read,*/*:update,*/*:delete"}}
+    <div class="sidebar-row">
+        <button class="editor-common-sidebar-export">
+            <span class="editor-common-sidebar-export-inner">
+                <i class="fa fa-share primary-color"></i>{{ t 'app.export'}}
+            </span>
+            <span class="editor-common-sidebar-exporting display-none">
+                <i class="fa fa-circle-o-notch fa-spin primary-color"></i>{{ t 'app.exporting'}}
+            </span>
+        </button>
+    </div>
+    {{/ifHasPermissions}}
     <div class="separator" />
 
     <div class="sidebar-row">

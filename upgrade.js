@@ -52,7 +52,7 @@ var steps = [
       headers: {
         'User-Agent' : DEFAULT_USER_AGENT
       },
-      uri: 'https://api.github.com/repos/adaptlearning/adapt_authoring/tags',
+      uri: 'https://api.github.com/repos/deltanet/adapt_authoring/tags',
       method: 'GET'
     }, function (error, response, body) {
 
@@ -77,7 +77,7 @@ var steps = [
       headers: {
         'User-Agent' : DEFAULT_USER_AGENT
       },
-      uri: 'https://api.github.com/repos/adaptlearning/adapt_framework/tags',
+      uri: 'https://api.github.com/repos/deltanet/adapt_framework/tags',
       method: 'GET'
     }, function (error, response, body) {
       if (!error && response.statusCode == 200) {

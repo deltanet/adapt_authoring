@@ -1,6 +1,6 @@
 {
-  "app.productname": "Adapt authoring tool",
-  "app.welcomeblurb": "Welcome to the Adapt authoring tool",
+  "app.productname": "Adapt Builder",
+  "app.welcomeblurb": "Welcome to the Adapt Builder",
   "app.loading": "Loading",
   "app.rememberme": "Remember me",
   "app.ok": "OK",
@@ -105,7 +105,7 @@
   "app.newpassword": "New password",
   "app.confirmpassword": "Confirm password",
   "app.passwordtip": "Enter a new password below. The most secure passwords have a mix of numbers, letters (including capitals) and other characters.",
-  "app.forgotpasswordblurb": "Enter the e-mail address associated with your Adapt account, then click Continue.",
+  "app.forgotpasswordblurb": "Enter the e-mail address associated with your account, then click Continue.",
   "app.forgotpasswordfooter": "Contact Support for help with restoring access to your account.",
   "app.hasyouremailchanged": "Has your e-mail address changed?",
   "app.forgotpasswordsuccesstitle": "Request successful",
@@ -262,10 +262,10 @@
   "app.databaseuser": "Database User",
   "app.databasepass": "Database Password",
   "app.databaseport": "Database Port",
-  "app.emailadminpasswordresetsubject": "Your Adapt password has been reset",
+  "app.emailadminpasswordresetsubject": "Your password has been reset",
   "app.emailadminpasswordresetbody": "Your password has been reset.  Your new password is: %{data}",
-  "app.emailforgottenpasswordsubject": "Reset Your Adapt Password",
-  "app.emailforgottenpasswordbody": "<p>We've received a request to reset the password for your <a href='%{rootUrl}' target='_blank'>Adapt authoring tool</a> account.</p><p>If you weren't expecting this email, don't worry! You can safely ignore it. Otherwise, please click the button below.</p>",
+  "app.emailforgottenpasswordsubject": "Reset Your Adapt Builder Password",
+  "app.emailforgottenpasswordbody": "<p>We've received a request to reset the password for your <a href='%{rootUrl}' target='_blank'>Adapt Builder</a> account.</p><p>If you weren't expecting this email, don't worry! You can safely ignore it. Otherwise, please click the button below.</p>",
   "app.edittenant": "Edit Tenant",
   "app.addtenant": "Add Tenant",
   "app.tenant": "Tenant",
@@ -347,6 +347,6 @@
   "app.descending": "Z to A",
   "app.visitpluginhomepage": "Visit plugin homepage",
   "app.greeting": "Hi",
-  "app.emaillogotext": "ADAPT",
-  "app.emailfooter": "Sent by Adapt Learning."
+  "app.emaillogotext": "Adapt Builder",
+  "app.emailfooter": "Sent by Adapt Builder."
 }

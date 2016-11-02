@@ -33,11 +33,10 @@ define(function(require) {
 				this.model.set('_isSelected', true);
 				this.$('i').addClass('fa-toggle-on');
 			}
-			
-			Origin.trigger('sidebarFieldsetFilter:filterForm', this.model.get('legend'));
-			
-		}
 
+			Origin.trigger('sidebarFieldsetFilter:filterForm', this.model.get('id'));
+
+		}
 	}, {
 		template: 'sidebarFieldsetFilter'
 	});

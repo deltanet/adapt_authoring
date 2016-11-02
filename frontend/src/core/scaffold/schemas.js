@@ -27,6 +27,17 @@ define(function(require) {
                 });
             }
 
+            // only include settings for used menus
+            var appliedMenus = [ configModel.get('_menu') ]; // TODO we only support one menu right now...
+            _.each(schema.menuSettings.properties, function(value, key) {
+                if (!_.contains(appliedMenus, value.name)) {
+                    delete schema.menuSettings.properties[key];
+                }
+            });
+            if(_.isEmpty(schema.menuSettings.properties)) {
+                delete schema.menuSettings;
+            }
+
             if (schemaName == 'course') {
                 // Remove unrequired globals from the course
                 if (schema._globals && schema._globals.properties._extensions) {

@@ -107,6 +107,11 @@
       "required": true,
       "default": 1,
       "editorOnly": true
+    },
+    "menuSettings": {
+      "type": "object",
+      "isSetting": true,
+      "title": "Menu"
     }
   }
 }

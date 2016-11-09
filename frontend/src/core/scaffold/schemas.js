@@ -27,6 +27,19 @@ define(function(require) {
                 });
             }
 
+            // Compare the enabledMenu against the current schemas
+            if (schema.menuSettings) {
+                var appliedMenus = [ configModel.get('_menu')];
+                _.each(schema.menuSettings.properties, function(value, key) {
+                    if (!_.contains(appliedMenus, value.name)) {
+                        delete schema.menuSettings.properties[key];
+                    }
+                });
+                if (_.isEmpty(schema.menuSettings.properties)) {
+                  delete schema.menuSettings;
+                }
+            }
+
             if (schemaName == 'course') {
                 // Remove unrequired globals from the course
                 if (schema._globals && schema._globals.properties._extensions) {
@@ -74,6 +87,7 @@ define(function(require) {
             delete schema._extensions;
             // Remove globals as these are appended to the course model
             delete schema.globals;
+            if(!schema.menuSettings.properties) delete schema.menuSettings;
             return schema;
         }
     };

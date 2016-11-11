@@ -110,7 +110,6 @@ function getEnabledMenu(courseId, cb) {
       // get the menu based on the _menu attribute
       // TODO - this does not need to be an array
       var enabledMenu = results[0]._menu;
-      logger.log('info', 'menu - ' + enabledMenu);
       db.retrieve('menutype', { name: enabledMenu }, cb);
     });
   });
@@ -140,7 +139,6 @@ function get_type(thing){
  * @param {callback} cb
  */
 function contentCreationHook(contentType, data, cb) {
-  logger.log('info', 'contentCreationHook - ' + contentType);
   // in creation, data[0] is the content
   var contentData = data[0];
   if (!contentData._courseId) {
@@ -148,15 +146,9 @@ function contentCreationHook(contentType, data, cb) {
     return cb(null, data);
   }
 
-  // TODO - we should check that the menu has properties otherwise return
-
-  // Start the async bit
   async.series([
     function(callback) {
       getEnabledMenu(contentData._courseId, function (error, menu) {
-        logger.log('info', menu[0]);
-        var menuTypeThing = get_type(menu[0]);
-        logger.log('info', menuTypeThing);
         if (error) {
           // permit content creation to continue, but log error
           logger.log('error', 'could not load menu: ' + error.message);
@@ -186,32 +178,160 @@ function contentCreationHook(contentType, data, cb) {
 
     return cb(null, data);
   });
-
-
-
-
-
-
 }
-
 
 /**
  *  add/remove menu JSON from content
  *  only supports one menu
  *
  * @params courseId {string}
- * @params menu {object} [menu ID]
+ * @params new menu {string} [menu name]
+ * @params oldmenu  {string} [menu name]
  * @param {callback} cb
 */
-function toggleMenu (courseId, menu, cb) {
-logger.log('info', 'toggleMenu - ' + menu);
+function toggleMenu (courseId, menuId, cb) {
+  if (!menuId) {
+    return cb(error);
+  }
 
+  var user = usermanager.getCurrentUser();
 
+  if (user && user.tenant && user.tenant._id) {
+    // Changes to extensions warrants a full course rebuild
+    app.emit('rebuildCourse', user.tenant._id, courseId);
+  }
+
+  database.getDatabase(function (err, db) {
+    if (err) {
+      return cb(err);
+    }
+    // TODO rename componentType variable it's confusing
+    // componentType is the DB collection not a framework component
+    var updateComponentItems = function (tenantDb, componentType, schema, menuItem, nextComponent) {
+      var criteria = 'course' == componentType ? { _id : courseId } : { _courseId : courseId };
+
+      tenantDb.retrieve(componentType, criteria, { fields: '_id menuSettings' }, function (err, results) {
+        if (err) {
+          return cb(err);
+        }
+
+        var generatedObject = helpers.schemaToObject(schema, menuItem.name, menuItem.version, componentType);
+        var targetAttribute = menuItem.targetAttribute;
+        // iterate components and update menuSettings attribute
+        async.each(results, function (component, next) {
+          var isConfig = ('config' == componentType);
+          var updatedMenu = component.menuSettings || {};
+
+          // remove the exsiting menuSettings
+          for (var oldProps in updatedMenu) {
+            if (updatedMenu.hasOwnProperty(oldProps)) {
+              delete updatedMenu[oldProps];
+            }
+          }
+
+          // populate new schema
+          updatedMenu = _.extend(updatedMenu, generatedObject);
+          // update using delta
+          var delta = { menuSettings : updatedMenu };
+
+          tenantDb.update(componentType, { _id: component._id }, delta, next);
+        }, nextComponent);
+      });
+    };
+
+    db.retrieve('menutype', { _id: menuId }, function (err, results) {
+      if (err) {
+        return cb(err);
+      }
+
+      // Switch to the tenant database
+      database.getDatabase(function(err, tenantDb) {
+        if (err) {
+          logger.log('error', err);
+          return cb(err);
+        }
+
+        // Iterate over the menu, probably only be one
+        async.eachSeries(results, function (menuItem, nextItem) {
+          var locations = menuItem.properties.pluginLocations.properties;
+
+          // Ensure that the 'config' key always exists, as this is required
+          // to presist the list of enabled extensions.
+          if (!_.has(locations, 'config')) {
+            locations.config = {};
+          }
+
+          if (menuItem.globals) {
+            tenantDb.retrieve('course', {_id: courseId}, function (err, results) {
+              if (err) {
+                return cb(err);
+              }
+
+              var courseDoc = results[0]._doc;
+              var key = '_' + menuItem.menu;
+              // Extract the global defaults
+              var courseGlobals = courseDoc._globals
+                ? courseDoc._globals
+                : {};
+
+              // Add default value and
+              if (!courseGlobals._menu) {
+                courseGlobals._menu = {};
+              } else {
+                // remove the exsiting menu globals
+                for (var menuProps in courseGlobals._menu) {
+                  if (courseGlobals._menu.hasOwnProperty(menuProps)) {
+                    delete courseGlobals._menu[menuProps];
+                  }
+                }
+              }
+
+              if (!courseGlobals._menu[key]) {
+                // The global JSON does not exist for this menu so set the defaults
+                var menuGlobals = {};
+
+                for (var prop in menuItem.globals) {
+                  if (menuItem.globals.hasOwnProperty(prop)) {
+                    menuGlobals[prop] = menuItem.globals[prop].default;
+                  }
+                }
+                courseGlobals._menu[key] = menuGlobals;
+              }
+
+              tenantDb.update('course', {_id: courseId}, {_globals: courseGlobals}, function(err, doc) {
+                if (!err) {
+                  async.eachSeries(Object.keys(locations), function (key, nextLocation) {
+                    updateComponentItems(tenantDb, key, locations[key].properties, menuItem, nextLocation);
+                  }, nextItem);
+                }
+              });
+            });
+          } else {
+            async.eachSeries(Object.keys(locations), function (key, nextLocation) {
+              updateComponentItems(tenantDb, key, locations[key].properties, menuItem, nextLocation);
+            }, nextItem);
+          }
+        }, function(err) {
+          if (err) {
+            cb(err);
+          } else {
+            // The results array should only ever contain one item now, but using a FOR loop just in case.
+            for (var i = 0; i < results.length; i++) {
+              // Trigger an event to indicate that the menu has been enabled/disabled.
+            //  app.emit(`menu:${action}`, results[0].name, user.tenant._id, courseId, user._id);
+            }
+
+            cb();
+          }
+        });
+      });
+    });
+  }, configuration.getConfig('dbName'));
 }
+
 
 // TODO - add other content types, currently only supports contentObject
 // add content creation hooks for each viable content type, can add more
-
 ['contentobject'].forEach(function (contentType) {
   app.contentmanager.addContentHook('create', contentType, contentCreationHook.bind(null, contentType));
 });
@@ -261,8 +381,7 @@ BowerPlugin.prototype.initialize.call(new Menu(), bowerConfig);
                 return next(err);
               }
 
-              // toggleMenu - add/remove menu JSON from content
-              toggleMenu(courseId, results[0].name, function(error, result) {
+              toggleMenu(courseId, menuId, function(error, result) {
                 if (error) {
                   res.statusCode = error instanceof ContentTypeError ? 400 : 500;
                   return res.json({ success: false, message: error.message });
@@ -278,8 +397,6 @@ BowerPlugin.prototype.initialize.call(new Menu(), bowerConfig);
                 res.statusCode = 200;
                 return res.json({ success: true });
               }
-
-
               app.emit('rebuildCourse', tenantId, courseId);
 
               res.statusCode = 200;

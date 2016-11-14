@@ -25,13 +25,15 @@ define(function(require) {
                         delete schema._extensions.properties[key];
                     }
                 });
+                if(_.isEmpty(schema._extensions.properties)) {
+                    delete schema._extensions;
+                }
             }
 
-            // Compare the enabledMenu against the current schemas
             if (schema.menuSettings) {
                 var appliedMenus = [ configModel.get('_menu')];
                 _.each(schema.menuSettings.properties, function(value, key) {
-                    if (!_.contains(appliedMenus, value.name)) {
+                    if(!_.contains(appliedMenus, value.name)) {
                         delete schema.menuSettings.properties[key];
                     }
                 });

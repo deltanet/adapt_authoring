@@ -222,7 +222,7 @@ function toggleMenu (courseId, menuId, cb) {
           var isConfig = ('config' == componentType);
           var updatedMenu = component.menuSettings || {};
 
-          // remove the exsiting menuSettings
+          // remove the existing menuSettings
           for (var oldProps in updatedMenu) {
             if (updatedMenu.hasOwnProperty(oldProps)) {
               delete updatedMenu[oldProps];
@@ -278,7 +278,7 @@ function toggleMenu (courseId, menuId, cb) {
               if (!courseGlobals._menu) {
                 courseGlobals._menu = {};
               } else {
-                // remove the exsiting menu globals
+                // remove the existing menu globals
                 for (var menuProps in courseGlobals._menu) {
                   if (courseGlobals._menu.hasOwnProperty(menuProps)) {
                     delete courseGlobals._menu[menuProps];
@@ -329,10 +329,9 @@ function toggleMenu (courseId, menuId, cb) {
   }, configuration.getConfig('dbName'));
 }
 
-
-// TODO - add other content types, currently only supports contentObject
+// TODO - add other content types, currently only supports course and contentObject
 // add content creation hooks for each viable content type, can add more
-['contentobject'].forEach(function (contentType) {
+['course', 'contentobject'].forEach(function (contentType) {
   app.contentmanager.addContentHook('create', contentType, contentCreationHook.bind(null, contentType));
 });
 
@@ -388,17 +387,6 @@ BowerPlugin.prototype.initialize.call(new Menu(), bowerConfig);
                 }
               });
 
-              // if we successfully changed the menu, we need to force a rebuild of the course
-              var user = usermanager.getCurrentUser();
-              var tenantId = user.tenant._id;
-              if (!tenantId) {
-                // log an error, but don't fail
-                logger.log('error', 'failed to determine current tenant', user);
-                res.statusCode = 200;
-                return res.json({ success: true });
-              }
-              app.emit('rebuildCourse', tenantId, courseId);
-
               res.statusCode = 200;
               return res.json({success: true});
             });
@@ -409,7 +397,6 @@ BowerPlugin.prototype.initialize.call(new Menu(), bowerConfig);
   });
 };
 
-// setup menu
 initialize();
 
 /**

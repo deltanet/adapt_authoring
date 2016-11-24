@@ -55,6 +55,13 @@ define(function(require) {
       Origin.trigger('editorSidebarView:removeEditView', this.model);
     },
 
+    refreshData: function() {
+      var self = this;
+      Origin.trigger('scaffold:updateSchemas', function() {
+        console.log('Menu schema refreshed');
+      }, this);
+    },
+
     saveData: function(event) {
       if (event) {
         event.preventDefault();
@@ -72,7 +79,8 @@ define(function(require) {
 
       $.post('/api/menu/' + selectedMenuId + '/makeitso/' + this.model.get('_courseId'))
         .error(_.bind(this.onSaveError, this))
-        .done(_.bind(this.onSaveSuccess, this));
+        .done(_.bind(this.onSaveSuccess, this))
+        .always(_.bind(this.refreshData, this));
     }
 
   },

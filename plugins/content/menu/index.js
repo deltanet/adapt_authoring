@@ -379,7 +379,8 @@ BowerPlugin.prototype.initialize.call(new Menu(), bowerConfig);
               if (err) {
                 return next(err);
               }
-
+              // TODO - should check if they are just re-saving the same menu, in which case we do not want to toggle menu just rebuild.
+              // otherwise this will overwrite their data.
               toggleMenu(courseId, menuId, function(error, result) {
                 if (error) {
                   res.statusCode = error instanceof ContentTypeError ? 400 : 500;

@@ -115,6 +115,30 @@ function getEnabledMenu(courseId, cb) {
   });
 }
 
+/**
+ * retrieves the menu name on a particular course
+ *
+ * @param {string} courseId
+ * @param {callback} cb
+ */
+function getEnabledMenuName(courseId, cb) {
+  database.getDatabase(function (error, db) {
+    if (error) {
+      return cb(error);
+    }
+    db.retrieve('config', { _courseId: courseId }, function (error, results) {
+      if (error) {
+        return cb(error);
+      }
+      if (!results || 0 === results.length) {
+        return cb(null, []);
+      }
+      var enabledMenuName = results[0]._menu;
+      cb(error, enabledMenuName);
+    });
+  });
+}
+
 function contentDeletionHook(contentType, data, cb) {
   var contentData = data[0];
 
@@ -197,7 +221,7 @@ function toggleMenu (courseId, menuId, cb) {
   var user = usermanager.getCurrentUser();
 
   if (user && user.tenant && user.tenant._id) {
-    // Changes to extensions warrants a full course rebuild
+    // Changes to menus warrants a full course rebuild
     app.emit('rebuildCourse', user.tenant._id, courseId);
   }
 
@@ -374,22 +398,37 @@ BowerPlugin.prototype.initialize.call(new Menu(), bowerConfig);
               return res.json({ success: false, message: 'menu not found' });
             }
 
-            // update the course config object
-            db.update('config', { _courseId: courseId }, { _menu: results[0].name }, function (err) {
-              if (err) {
-                return next(err);
+            // check if we are saving the same menu, if so just rebuild
+            getEnabledMenuName(courseId, function(error, oldMenuName) {
+              if (error) {
+                logger.log('error', 'could not find current menu: ' + error.message);
+                res.statusCode = error instanceof ContentTypeError ? 400 : 500;
+                return res.json({ success: false, message: error.message });
               }
-              // TODO - should check if they are just re-saving the same menu, in which case we do not want to toggle menu just rebuild.
-              // otherwise this will overwrite their data.
-              toggleMenu(courseId, menuId, function(error, result) {
-                if (error) {
-                  res.statusCode = error instanceof ContentTypeError ? 400 : 500;
-                  return res.json({ success: false, message: error.message });
-                }
-              });
+              if (oldMenuName == results[0].name) {
+                var user = usermanager.getCurrentUser();
 
-              res.statusCode = 200;
-              return res.json({success: true});
+                if (user && user.tenant && user.tenant._id) {
+                  app.emit('rebuildCourse', user.tenant._id, courseId);
+                  res.statusCode = 200;
+                  return res.json({success: true});
+                }
+              } else {
+                db.update('config', { _courseId: courseId }, { _menu: results[0].name }, function (err) {
+                  if (err) {
+                     return next(err);
+                   }
+                   toggleMenu(courseId, menuId, function(error, result) {
+                     if (error) {
+                       res.statusCode = error instanceof ContentTypeError ? 400 : 500;
+                       return res.json({ success: false, message: error.message });
+                     }
+                   });
+
+                   res.statusCode = 200;
+                   return res.json({success: true});
+                });
+              }
             });
           });
         }, configuration.getConfig('dbName'));

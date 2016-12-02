@@ -7,6 +7,8 @@ define(function(require) {
   var AssetManagementSidebarView = require('coreJS/assetManagement/views/assetManagementSidebarView');
   var AssetManagementNewAssetView = require('coreJS/assetManagement/views/assetManagementNewAssetView');
   var AssetManagementNewAssetSidebarView = require('coreJS/assetManagement/views/assetManagementNewAssetSidebarView');
+  var AssetManagementUploadAssetsView = require('coreJS/assetManagement/views/assetManagementUploadAssetsView');
+  var AssetManagementUploadAssetsSidebarView = require('coreJS/assetManagement/views/assetManagementUploadAssetsSidebarView');
   var TagsCollection = require('coreJS/tags/collections/tagsCollection');
 
   Origin.on('router:assetManagement', function(location, subLocation, action) {
@@ -35,6 +37,10 @@ define(function(require) {
         Origin.trigger('location:title:update', {title: 'New Asset'});
         Origin.sidebar.addView(new AssetManagementNewAssetSidebarView().$el);
         Origin.router.createView(AssetManagementNewAssetView, { model: new AssetModel });
+    } else if (location=== 'upload') {
+        Origin.trigger('location:title:update', {title: 'Upload Assets'});
+        Origin.sidebar.addView(new AssetManagementUploadAssetsSidebarView().$el);
+        Origin.router.createView(AssetManagementUploadAssetsView, { model: new AssetModel });
     } else if (subLocation === 'edit') {
       var Asset = new AssetModel({ _id: location });
       // Fetch existing asset model

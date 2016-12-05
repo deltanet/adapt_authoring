@@ -77,27 +77,13 @@ define(function(require){
 
       var title = this.$('.asset-title').val();
       var description = this.$('.asset-description').val();
+        // TODO - we don't need a model for this so this check is irrelevant
         // If model is new then uploadFile
         if (this.model.isNew()) {
           this.uploadFile();
           // Return false to prevent the page submitting
           return false;
-        } else {
-          // Else just update the title, description and tags
-          this.model.set({title: title, description: description});
-          this.model.save(null, {
-            error: function(model, response, options) {
-              Origin.Notify.alert({
-                type: 'error',
-                text: window.polyglot.t('app.errorassetupdate')
-              });
-            },
-            success: function(model, response, options) {
-              Origin.router.navigate('#/assetManagement', {trigger:true});
-            }
-          })
         }
-
     },
 
     uploadFile: function() {

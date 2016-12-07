@@ -3,7 +3,8 @@
     <form class="asset-form forms asset-form" action="/api/asset/upload" method="post">
         <div class="form-group">
             <label for="file">
-                {{t 'app.assetfile'}} <span class="req">*</span>
+                {{t 'app.assetfile'}} <span class="req">*</span><br>
+                {{t 'app.uploadnewassetshelp'}}
                 <span class="error"></span>
             </label>
             {{#if path}}

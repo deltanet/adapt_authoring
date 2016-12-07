@@ -192,6 +192,7 @@
   "app.assetfile": "File",
   "app.noassetsfound": "No assets found",
   "app.uploadnewasset": "Upload new asset",
+  "app.uploadnewassetshelp": "File should be a zip with assets in the root of the zip. Mac compressed files are not accepted.",
   "app.upload": "Upload",
   "app.assetfilters": "Filters",
   "app.selectexternalasset": "Select an External Asset",

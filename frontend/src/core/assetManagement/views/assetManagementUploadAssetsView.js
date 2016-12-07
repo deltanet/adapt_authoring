@@ -104,12 +104,23 @@ define(function(require){
           $('.progress-percent').html(percentVal);
         },
 
-        error: function(xhr, status, error) {
+        error: function(data, status, error) {
+          $('.loading').hide();
           Origin.trigger('sidebar:resetButtons');
+          var message = '';
+          if (data) {
+            if (data.responseText) {
+              message = data.responseText;
+            } else if(data.responseJSON && data.responseJSON.error) {
+              message = data.responseJSON.error;
+            }
+          }
+
           Origin.Notify.alert({
             type: 'error',
-            text: xhr.responseJSON.message
+            text: Helpers.decodeHTML(message)
           });
+          Origin.router.navigate('#/assetManagement/upload', { trigger: true });
         },
 
         success: function(data, status, xhr) {

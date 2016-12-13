@@ -280,7 +280,7 @@ function toggleMenu (courseId, menuId, cb) {
           var locations = menuItem.properties.pluginLocations.properties;
 
           // Ensure that the 'config' key always exists, as this is required
-          // to presist the list of enabled extensions.
+          // to presist the list of enabled menus.
           if (!_.has(locations, 'config')) {
             locations.config = {};
           }

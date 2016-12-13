@@ -352,13 +352,14 @@ function toggleMenu (courseId, menuId, cb) {
     });
   }, configuration.getConfig('dbName'));
 }
-
+/*
 // TODO - add other content types, currently only supports course and contentObject
+// TODO - this is causing problems when you copy and paste, loosing menu attributes.
 // add content creation hooks for each viable content type, can add more
 ['course', 'contentobject'].forEach(function (contentType) {
   app.contentmanager.addContentHook('create', contentType, contentCreationHook.bind(null, contentType));
 });
-
+*/
 /**
  * essential setup
  *

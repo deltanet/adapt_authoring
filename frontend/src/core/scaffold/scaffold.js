@@ -180,7 +180,7 @@ define(function(require) {
 
     	try {
             // These types of schemas change frequently and cannot be cached.
-    	    var volatileTypes = ['course', 'config', 'article', 'block', 'component'];
+    	    var volatileTypes = ['course', 'config', 'contentobject', 'article', 'block', 'component'];
 
     	    if (_.indexOf(volatileTypes, type) == -1 && builtSchemas[type]) {
     	       return builtSchemas[type];

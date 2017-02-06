@@ -599,7 +599,11 @@ function importCourseassets(metadata, courseassetsImported) {
     async.each(metadata.courseassets, function(courseasset, createdCourseasset) {
       courseasset._courseId = metadata.idMap[courseasset._courseId];
       courseasset._assetId = metadata.idMap[courseasset._assetId];
-      plugin.create(courseasset, createdCourseasset);
+      if (courseasset._assetId !== undefined) {
+        plugin.create(courseasset, createdCourseasset);
+      } else {
+        createdCourseasset();
+      }
     }, courseassetsImported);
   });
 };
@@ -987,10 +991,11 @@ function copyFrameworkFiles(filesCopied) {
 function copyCustomPlugins(filesCopied) {
   var src = path.join(FRAMEWORK_ROOT_DIR, Constants.Folders.Source);
   var dest = path.join(EXPORT_DIR, Constants.Folders.Plugins);
-  async.each(metadata.pluginIncludes, function iterator(plugin, cb) {
+  _.each(metadata.pluginIncludes, function iterator(plugin, cb) {
     var pluginDir = path.join(src, plugin.folder, plugin.name);
     fse.copy(pluginDir, path.join(dest, plugin.name), cb);
-  }, filesCopied);
+  });
+  filesCopied();
 };
 
 // copies everything in the course folder
@@ -1041,7 +1046,9 @@ function zipExport(error) {
   archive.on('error', cleanUpExport);
   output.on('close', cleanUpExport);
   archive.pipe(output);
-  archive.bulk([{ expand: true, cwd: EXPORT_DIR, src: ['**/*'] }]).finalize();
+  //archive.bulk([{ expand: true, cwd: EXPORT_DIR, src: ['**/*'] }]).finalize();
+  archive.glob('**/*', { cwd: EXPORT_DIR });
+  archive.finalize();
 };
 
 // remove the EXPORT_DIR, if there is one

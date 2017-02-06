@@ -102,7 +102,7 @@ function initialize () {
       if (data[1].hasOwnProperty('_generateSourcemap')) {
         var tenant = usermanager.getCurrentUser().tenant._id;
         var course = data[1]._courseId;
-        
+
         app.emit('rebuildCourse', tenant, course);
       }
 
@@ -126,7 +126,7 @@ ConfigContent.prototype.retrieve = function (search, options, next) {
   }
 
   var modelName = this.getModelName();
-  
+
   // must have a model name
   if (!modelName) {
     return next(new ContentTypeError('this.getModelName() must be set!'));
@@ -144,12 +144,12 @@ ConfigContent.prototype.retrieve = function (search, options, next) {
     if (err) {
       return next(err);
     }
-    
+
     if (!records || records.length == 0) {
       return next(new Error(`Unable to retrieve ${modelName} for ${JSON.stringify(search)}`));
     }
-    
-    // When passing down the config model we should 
+
+    // When passing down the config model we should
     // find out how many and what components are being used
     // Why you might ask - to sort out _globals and when compiling
     // this should act as a filter
@@ -163,36 +163,37 @@ ConfigContent.prototype.retrieve = function (search, options, next) {
             logger.log('error', err);
             return next(err);
           }
-          
+
           db.retrieve('componenttype', {}, function(err, componentTypes) {
             if (err) {
               return next(err);
             }
-            
+
             var uniqueComponents = _.uniq(components, false, function(component) {
               return component._component;
             });
-    
+
             async.map(uniqueComponents, function(component, callback) {
               var componentType = _.findWhere(componentTypes, {component: component._component});
-              
+
               // Adding an _ here is necessary because of the way the attributes are set
               // onto the _globals object on the schemas
+              logger.log('info', JSON.stringify(componentType));
               var definition = {
-                name: componentType.name, 
-                _componentType: component._componentType, 
+                name: componentType.name,
+                _componentType: component._componentType,
                 _component: "_" + component._component
               };
-              
+
               return callback(null, definition);
-    
+
             }, function(err, uniqueComponentList) {
-    
+
               var configModel = records[0].toObject();
               configModel._enabledComponents = uniqueComponentList;
-    
+
               return next(null, [configModel]);
-            });    
+            });
           });
         }, configuration.getConfig('dbName'));
       })

@@ -933,7 +933,8 @@ function getPluginMetadata(courseId, gotPluginMetadata) {
           }
           async.each(results, function iterator(result, doneIterator2) {
             if(_.indexOf(includes, result.name) !== -1) {
-              var data = _.extend(pluginType, { name: result.name });
+              var thisPluginType = _.clone(pluginType);
+              var data = _.extend(thisPluginType, { name: result.name });
               metadata.pluginIncludes.push(data);
             }
             doneIterator2();

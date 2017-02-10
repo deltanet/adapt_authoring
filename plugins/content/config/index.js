@@ -178,7 +178,6 @@ ConfigContent.prototype.retrieve = function (search, options, next) {
 
               // Adding an _ here is necessary because of the way the attributes are set
               // onto the _globals object on the schemas
-              logger.log('info', JSON.stringify(componentType));
               var definition = {
                 name: componentType.name,
                 _componentType: component._componentType,

@@ -427,7 +427,10 @@ function restoreData(metadata, callback) {
     importPlugins: function(cb) {
       importPlugins(metadata, cb);
     },
-    importCourseJson: ['importPlugins', function(cb) {
+    importTagsJson: ['importPlugins', function(cb) {
+      importTagsJson(metadata, cb);
+    }],
+    importCourseJson: ['importTagsJson', function(cb) {
       importCourseJson(metadata, cb);
     }],
     importAssets: ['importCourseJson', function(cb) {
@@ -446,6 +449,40 @@ function restoreData(metadata, callback) {
   });
 };
 
+/**
+* Adds tags to the DB
+* Checks for a similar tag first (tag title). if similar found, map that
+* to the imported course.
+*/
+function importTagsJson(metadata, importedTags) {
+  var userId = usermanager.getCurrentUser()._id;
+  // init the id map
+  metadata.idMap = {};
+
+  origin.contentmanager.getContentPlugin('tag', function gotTagsPlugin(error, plugin) {
+    if(error) {
+      logger.log('error', error)
+      return importedTags(error);
+    }
+    async.eachSeries(metadata.tags, function itemIterator(tagJson, doneItemIterator) {
+      if (tagJson !== undefined) {
+        var memo = _.omit(tagJson, 'oldId');
+        plugin.create(memo, function tagIterator(error, newDoc) {
+          if(error) {
+            return doneItemIterator(error);
+          }
+          var newObj = newDoc.toObject();
+          metadata.idMap[tagJson.oldId] = newObj._id;
+          doneItemIterator();
+        });
+      } else {
+        doneItemIterator();
+      }
+    }, importedTags);
+  });
+};
+
+
 // TODO broken for sections?
 function importCourseJson(metadata, importedJson) {
   var userId = usermanager.getCurrentUser()._id;
@@ -461,9 +498,6 @@ function importCourseJson(metadata, importedJson) {
     'component',
   ];
 
-  // init the id map
-  metadata.idMap = {};
-
   async.eachSeries(order, function typeIterator(courseKey, doneTypeIterator) {
     origin.contentmanager.getContentPlugin(courseKey, function gotContentPlugin(error, plugin) {
       if(error) {
@@ -476,6 +510,16 @@ function importCourseJson(metadata, importedJson) {
           // we're doing everything in hierarchy order, so should have a _parentId
           memo._parentId = metadata.idMap[json._parentId];
           memo._courseId = newCourseId;
+        }
+        // replace tags with mapped id's, if no match remove tag.
+        if (memo.tags) {
+          _.each(memo.tags, function iterator(tag, index) {
+            if (metadata.idMap[tag]) {
+              memo.tags[index] = metadata.idMap[tag];
+            } else {
+              memo.tags.splice(index, 1);
+            }
+          });
         }
         memo.createdBy = userId;
 
@@ -576,6 +620,16 @@ function importAsset(fileMetadata, metadata, assetImported) {
           if (storedFile.thumbnailPath) storedFile.thumbnailPath = storedFile.thumbnailPath;
           var asset = _.extend(fileMetadata, storedFile);
 
+          if (asset.tags) {
+            // loop through tags and replace id's
+            _.each(asset.tags, function iterator(tag, index) {
+              if (metadata.idMap[tag]) {
+                asset.tags[index] = metadata.idMap[tag];
+              } else {
+                asset.tags.splice(index, 1);
+              }
+            });
+          }
           // Create the asset record
           origin.assetmanager.createAsset(asset, function onAssetCreated(createError, assetRec) {
             if (createError) {

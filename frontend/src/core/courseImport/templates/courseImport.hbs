@@ -1,11 +1,13 @@
-<div class="courseImport-inner">
-  <div class="form-container form-container-style">
-    <div class="inner">
-      <form action="/import" method="post">
-          <div class="form-group">
+<div class="inner">
+    <!-- Begin upload form -->
+    <form class="courseImport-form forms courseImport-form" action="/import" method="post">
+        <div class="form-group">
+            <label for="file">
+                {{t 'app.importinstruction'}} <span class="req">*</span>
+                <span class="field-error display-none" data-error="">Required</span>
+            </label>
             <input type="file" name="file" id="file">
-          </div>
-      </form>
-    </div>
-  </div>
+        </div>
+    </form>
+    <!-- end upload form -->
 </div>

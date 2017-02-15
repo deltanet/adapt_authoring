@@ -29,44 +29,47 @@ define(function(require){
     },
 
     submit: function() {
-      // HACK in case the browser file filter doesn't work
-      // (FF, I'm looking at you - https://bugzilla.mozilla.org/show_bug.cgi?id=826176)
+
+      if(this.validate()) {
+        this.$('form').ajaxSubmit({
+          error: function(data, status, error) {
+            Origin.Notify.alert({
+              type: 'error',
+              title: window.polyglot.t('app.importerrortitle'),
+              text: data.responseJSON && data.responseJSON.message || data.statusText
+            });
+            Origin.router.navigate('#/dashboard', { trigger: true });
+          },
+          success: function(data, status, xhr) {
+            Origin.Notify.alert({
+              type: 'success',
+              title: 'Import successful',
+              text: data.message
+            });
+            Origin.router.navigate('#/dashboard', { trigger: true });
+          }
+        });
+
+        return false;
+      }
+    },
+
+    validate: function() {
+      console.log('validate !!!');
+      var file = this.$('form input').val();
       var isZip = this.$('form input[type="file"]').val().search(/.(?:\.zip$)/) > -1;
-      if(!isZip) {
-        return this.showError();
-      } else {
-        this.hideError();
+
+      if(_.isEmpty(file)) {
+        console.log('empty file !!!');
+        this.$('.field-error').removeClass('display-none');
+        Origin.trigger('sidebar:resetButtons');
+
+        return false;
       }
 
-      // TODO localise notify strings
-      this.$('form').ajaxSubmit({
-        error: function(data, status, error) {
-          Origin.Notify.alert({
-            type: 'error',
-            title: 'Import error',
-            text: data.responseJSON && data.responseJSON.message || data.statusText
-          });
-          Origin.router.navigate('#/dashboard', { trigger: true });
-        },
-        success: function(data, status, xhr) {
-          Origin.Notify.alert({
-            type: 'success',
-            title: 'Import successful',
-            text: data.message
-          });
-          Origin.router.navigate('#/dashboard', { trigger: true });
-        }
-      });
+      this.$('.field-error').addClass('display-none');
 
-      return false;
-    },
-
-    showError: function(errorText) {
-      this.$('label[for=file]').addClass('validation-error');
-    },
-
-    hideError: function(errorText) {
-      this.$('label[for=file]').removeClass('validation-error');
+      return true;
     },
 
     /*

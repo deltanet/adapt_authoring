@@ -1118,11 +1118,10 @@ function copyFrameworkFiles(filesCopied) {
 function copyCustomPlugins(filesCopied) {
   var src = path.join(FRAMEWORK_ROOT_DIR, Constants.Folders.Source);
   var dest = path.join(EXPORT_DIR, Constants.Folders.Plugins);
-  _.each(metadata.pluginIncludes, function iterator(plugin, cb) {
+  async.each(metadata.pluginIncludes, function iterator(plugin, cb) {
     var pluginDir = path.join(src, plugin.folder, plugin.name);
     fse.copy(pluginDir, path.join(dest, plugin.name), cb);
-  });
-  filesCopied();
+  }, filesCopied);
 };
 
 // copies everything in the course folder

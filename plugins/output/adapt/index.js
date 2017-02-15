@@ -512,15 +512,13 @@ function importCourseJson(metadata, importedJson) {
           memo._courseId = newCourseId;
         }
         // replace tags with mapped id's, if no match remove tag.
-        if (memo.tags) {
-          _.each(memo.tags, function iterator(tag, index) {
-            if (metadata.idMap[tag]) {
-              memo.tags[index] = metadata.idMap[tag];
-            } else {
-              memo.tags.splice(index, 1);
-            }
-          });
-        }
+        _.each(memo.tags, function iterator(tag, index) {
+          if (metadata.idMap[tag]) {
+            memo.tags[index] = metadata.idMap[tag];
+          } else {
+            memo.tags.splice(index, 1);
+          }
+        });
         memo.createdBy = userId;
 
         plugin.create(memo, function onCreated(error, newDoc) {
@@ -620,16 +618,13 @@ function importAsset(fileMetadata, metadata, assetImported) {
           if (storedFile.thumbnailPath) storedFile.thumbnailPath = storedFile.thumbnailPath;
           var asset = _.extend(fileMetadata, storedFile);
 
-          if (asset.tags) {
-            // loop through tags and replace id's
-            _.each(asset.tags, function iterator(tag, index) {
-              if (metadata.idMap[tag]) {
-                asset.tags[index] = metadata.idMap[tag];
-              } else {
-                asset.tags.splice(index, 1);
-              }
-            });
-          }
+          _.each(asset.tags, function iterator(tag, index) {
+            if (metadata.idMap[tag]) {
+              asset.tags[index] = metadata.idMap[tag];
+            } else {
+              asset.tags.splice(index, 1);
+            }
+          });
           // Create the asset record
           origin.assetmanager.createAsset(asset, function onAssetCreated(createError, assetRec) {
             if (createError) {

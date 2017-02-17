@@ -603,7 +603,7 @@ function importAsset(fileMetadata, metadata, assetImported) {
       var fileOptions = {
         createMetadata: true,
         // TODO thumbnail
-        createThumbnail: false
+        createThumbnail: true
       };
       filestorage.getStorage(fileMetadata.repository, function gotStorage(error, storage) {
         if (error) {

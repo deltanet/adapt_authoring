@@ -602,8 +602,7 @@ function importAsset(fileMetadata, metadata, assetImported) {
       var filepath = path.join(directory, filehash) + path.extname(fileMetadata.filename);
       var fileOptions = {
         createMetadata: true,
-        // TODO thumbnail
-        createThumbnail: false
+        createThumbnail: true
       };
       filestorage.getStorage(fileMetadata.repository, function gotStorage(error, storage) {
         if (error) {

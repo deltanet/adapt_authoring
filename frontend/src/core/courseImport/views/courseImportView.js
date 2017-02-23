@@ -55,12 +55,10 @@ define(function(require){
     },
 
     validate: function() {
-      console.log('validate !!!');
       var file = this.$('form input').val();
       var isZip = this.$('form input[type="file"]').val().search(/.(?:\.zip$)/) > -1;
 
       if(_.isEmpty(file)) {
-        console.log('empty file !!!');
         this.$('.field-error').removeClass('display-none');
         Origin.trigger('sidebar:resetButtons');
 

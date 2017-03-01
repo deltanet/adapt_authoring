@@ -743,11 +743,12 @@ function removeImport(metadata, doneRemove) {
         origin.assetmanager.destroyAsset(metadata.idMap[asset.oldId], assetDeleted);
       }, cb);
     },
-    function deletePlugins(cb) {
+    // TODO - Should not just delete included plugins as they may already be installed and used.
+    /* function deletePlugins(cb) {
       async.each(metadata.pluginIncludes, function(pluginData, donePluginIterator) {
         origin.bowermanager.destroyPlugin(pluginData.type, pluginData.name, donePluginIterator);
       }, cb);
-    }
+    } */
   ], doneRemove);
 };
 
@@ -814,7 +815,7 @@ AdaptOutput.prototype.export = function(pCourseId, devMode, request, response, p
       // standard export
       generateMetadata: generateMetadata,
       copyCustomPlugins: ['generateMetadata', copyCustomPlugins],
-      copyAssets: ['generateMetadata', copyAssets]
+      copyAssets: ['copyCustomPlugins', copyAssets]
     }, zipExport);
   });
 
@@ -1116,9 +1117,9 @@ function copyFrameworkFiles(filesCopied) {
 function copyCustomPlugins(filesCopied) {
   var src = path.join(FRAMEWORK_ROOT_DIR, Constants.Folders.Source);
   var dest = path.join(EXPORT_DIR, Constants.Folders.Plugins);
-  _.each(metadata.pluginIncludes, function iterator(plugin, cb) {
+  _.each(metadata.pluginIncludes, function iterator(plugin) {
     var pluginDir = path.join(src, plugin.folder, plugin.name);
-    fse.copy(pluginDir, path.join(dest, plugin.name), cb);
+    fse.copy(pluginDir, path.join(dest, plugin.name), function (err) {      if (err) logger.log('error', err)    });
   });
   filesCopied();
 };
@@ -1140,7 +1141,7 @@ function copyAssets(assetsCopied) {
   var dest = path.join(EXPORT_DIR, Constants.Folders.Assets);
   fse.ensureDir(dest, function(error) {
     if (error) {
-      return filesCopied(error);
+      return assetsCopied(error);
     }
     async.each(Object.keys(metadata.assets), function iterator(assetKey, doneIterator) {
       var oldId = metadata.assets[assetKey].oldId;

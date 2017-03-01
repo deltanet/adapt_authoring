@@ -1119,7 +1119,11 @@ function copyCustomPlugins(filesCopied) {
   var dest = path.join(EXPORT_DIR, Constants.Folders.Plugins);
   _.each(metadata.pluginIncludes, function iterator(plugin) {
     var pluginDir = path.join(src, plugin.folder, plugin.name);
-    fse.copy(pluginDir, path.join(dest, plugin.name), function (err) {      if (err) logger.log('error', err)    });
+    fse.copy(pluginDir, path.join(dest, plugin.name), function (err) {
+      if (err) {
+        logger.log('error', err);
+      }
+    });
   });
   filesCopied();
 };

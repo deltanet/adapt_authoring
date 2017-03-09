@@ -651,6 +651,10 @@ function importCourseassets(metadata, courseassetsImported) {
     async.each(metadata.courseassets, function(courseasset, createdCourseasset) {
       courseasset._courseId = metadata.idMap[courseasset._courseId];
       courseasset._assetId = metadata.idMap[courseasset._assetId];
+      if (metadata.idMap[courseasset._contentTypeParentId]) {
+        courseasset._contentTypeParentId = metadata.idMap[courseasset._contentTypeParentId];
+      }
+      courseasset.createdBy = app.usermanager.getCurrentUser();
       if (courseasset._assetId !== undefined) {
         plugin.create(courseasset, createdCourseasset);
       } else {

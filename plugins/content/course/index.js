@@ -31,7 +31,7 @@ util.inherits(CourseContent, ContentPlugin);
 
 var DASHBOARD_COURSE_FIELDS = [
     '_id', '_tenantId', '_type', '_isShared', 'title', 'heroImage',
-    'updatedAt', 'updatedBy', 'createdAt', 'createdBy', 'tags', '_projectInformation'
+    'updatedAt', 'updatedBy', 'createdAt', 'createdBy', 'tags', 'projectInformation'
 ];
 /**
  * essential setup
@@ -327,8 +327,7 @@ CourseContent.prototype.create = function (data, next) {
   var self = this;
   var user = usermanager.getCurrentUser();
   var tenantId = user.tenant && user.tenant._id;
-console.log('###################');
-console.log(data);
+
   ContentPlugin.prototype.create.call(self, data, function (err, doc) {
     if (err) {
       logger.log('error', err);

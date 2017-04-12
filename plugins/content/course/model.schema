@@ -623,7 +623,7 @@
     "externalReferences": {
       "type" : "object"
     },
-    "_projectInformation": {
+    "projectInformation": {
       "type": "object",
       "properties": {
         "_reference": {
@@ -634,13 +634,21 @@
           "inputType": "Text",
           "validators": []
         },
-        "_notes": {
+        "releaseStatus": {
+          "type": "string",
+          "required": false,
+          "default": "",
+          "title": "Release status",
+          "inputType": "Text",
+          "validators": []
+        },
+        "notes": {
           "type": "array",
           "title": "Notes",
           "items": {
             "type": "object",
             "properties": {
-              "_comment": {
+              "comment": {
                 "type": "string",
                 "default": "",
                 "title": "Comment",

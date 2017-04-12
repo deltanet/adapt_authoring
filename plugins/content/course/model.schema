@@ -622,6 +622,47 @@
     },
     "externalReferences": {
       "type" : "object"
+    },
+    "_projectInformation": {
+      "type": "object",
+      "properties": {
+        "_reference": {
+          "type": "string",
+          "required": false,
+          "default": "",
+          "title": "Reference",
+          "inputType": "Text",
+          "validators": []
+        },
+        "_notes": {
+          "type": "array",
+          "title": "Notes",
+          "items": {
+            "type": "object",
+            "properties": {
+              "_comment": {
+                "type": "string",
+                "default": "",
+                "title": "Comment",
+                "inputType": "TextArea",
+                "validators": []
+              },
+              "_reviewer": {
+                "type": "string",
+                "inputType": "Text",
+                "required": true,
+                "title": "Reviewer"
+              },
+              "_date": {
+                "type": "string",
+                "inputType": "Text",
+                "required": true,
+                "title": "Date"
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

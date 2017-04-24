@@ -210,24 +210,24 @@ define(function(require) {
 		var fieldsets = {
 			general: {
 				id: 'general',
-				legend: 'General',
+				legend: window.polyglot.t('app.general'),
 				fields: []
 			},
 			// ::TODO
 			// I want to remove this please
 			properties: {
 				id: 'properties',
-				legend: 'Properties',
+				legend: window.polyglot.t('app.properties'),
 				fields: []
 			},
 			settings :{
 				id: 'settings',
-				legend: 'Settings',
+				legend: window.polyglot.t('app.settings'),
 				fields: []
 			},
 			extensions: {
 				id: 'extensions',
-				legend: 'Extensions',
+				legend: window.polyglot.t('app.extensions'),
 				fields: ['_extensions']
 			}
 		};

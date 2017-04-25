@@ -9,7 +9,7 @@ define(function(require) {
 
     routes: {
       ""                                      : "handleIndex",
-      "_=_"                                   : "handleIndex",  
+      "_=_"                                   : "handleIndex",
       ":module(/*route1)(/*route2)(/*route3)(/*route4)" : "handleRoute"
     },
 
@@ -56,7 +56,7 @@ define(function(require) {
       this.showLoading();
       // console.log('in handleIndex');
       if (this.isUserAuthenticated()) {
-        this.navigate('#/dashboard', {trigger: true});
+        this.navigate('#/dashboard/shared', {trigger: true});
       } else {
         return this.redirectToLogin();
       }

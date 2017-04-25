@@ -47,14 +47,14 @@ define(function(require) {
           if (jqXHR.success) {
             self.set('id', jqXHR.id);
             self.set('tenantId', jqXHR.tenantId);
-            self.set('email', jqXHR.email);  
+            self.set('email', jqXHR.email);
             self.set('isAuthenticated', jqXHR.success);
             self.set('permissions', jqXHR.permissions);
 
             Origin.trigger('login:changed');
 
             Origin.trigger('schemas:loadData', function() {
-              Origin.router.navigate('#/dashboard', {trigger: true});
+              Origin.router.navigate('#/dashboard/shared', {trigger: true});
             });
           }
         },

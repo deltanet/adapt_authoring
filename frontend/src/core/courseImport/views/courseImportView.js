@@ -38,7 +38,7 @@ define(function(require){
               title: window.polyglot.t('app.importerrortitle'),
               text: data.responseJSON && data.responseJSON.message || data.statusText
             });
-            Origin.router.navigate('#/dashboard', { trigger: true });
+            Origin.router.navigate('#/dashboard/shared', { trigger: true });
           },
           success: function(data, status, xhr) {
             Origin.Notify.alert({
@@ -46,7 +46,7 @@ define(function(require){
               title: 'Import successful',
               text: data.message
             });
-            Origin.router.navigate('#/dashboard', { trigger: true });
+            Origin.router.navigate('#/dashboard/shared', { trigger: true });
           }
         });
 

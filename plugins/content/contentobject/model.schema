@@ -77,6 +77,23 @@
       "help": "Indicate how long this page or section should take to complete",
       "translatable": true
     },
+    "_lockType": {
+      "type": "string",
+      "default": "",
+      "inputType": {
+        "type": "Select",
+        "options": [
+          "",
+          "custom",
+          "lockLast",
+          "sequential",
+          "unlockFirst"
+        ]
+      },
+      "title": "Menu lock type",
+      "help": "Defines which (if any) locking mechanism will be used for menu items. This should only be used on menus to lock sub menu pages.",
+      "validators": []
+    },
     "_lockedBy": {
       "type": "array",
       "required": false,

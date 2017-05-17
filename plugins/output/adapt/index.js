@@ -863,8 +863,6 @@ function generateMetadata(generatedMetadata) {
 };
 
 
-
-
 // pulls out relevant attributes from package.json
 function getPackageData(frameworkDir, gotPackageJson) {
   fse.readJson(path.join(frameworkDir, Constants.Filenames.Package), function onJsonRead(error, packageJson) {
@@ -1091,7 +1089,7 @@ function copyFrameworkFiles(filesCopied) {
       includes[i] = '\/' + includes[i] + '(\/|$)';
 
     var includesRE = new RegExp(includes.join('|'));
-    var excludesRE = new RegExp(/\.git\b|\.DS_Store|\/node_modules|\/courses\b|\/course\b|\/exports\b/);
+    var excludesRE = new RegExp(/\.git\b|\.DS_Store|\/node_modules(?!\.)|\/courses\b(?!\.)|\/course\b(?!\.)|\/exports\b/);
     var pluginsRE = new RegExp('\/components\/|\/extensions\/|\/menu\/|\/theme\/');
 
     fse.copy(FRAMEWORK_ROOT_DIR, EXPORT_DIR, {

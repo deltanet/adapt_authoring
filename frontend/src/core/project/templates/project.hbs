@@ -32,6 +32,11 @@
           <div class="projects-details-label">{{t 'app.lastupdated'}}</div>
           <div class="projects-details-value">{{momentFormat updatedAt "Do MMMM YYYY"}}</div>
         </div>
+        {{#if projectInformation.releaseStatus}}
+        <div class="project-details-release-status project-details-row">
+          <div class="projects-details-label">{{projectInformation.releaseStatus}}</div>
+        </div>
+        {{/if}}
         {{#if tags.length}}
         <div class="project-details-tags project-details-row tags">
           <div class="projects-details-tags-button">

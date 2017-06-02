@@ -36,9 +36,9 @@ define(function(require) {
       });
       this.model.set('tags', tags);
 
-      var changedAttributes = this.model.changedAttributes(this.originalAttributes);
+      var changedAttributes = this.model.changedAttributes(this.model);
       if(changedAttributes) {
-        return _.pick(this.model.attributes, _.keys(changedAttributes));
+        return _.pick(this.model.attributes, _.keys(changedAttributes.attributes));
       }
 
       return null;

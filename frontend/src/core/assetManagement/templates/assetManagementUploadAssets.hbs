@@ -4,12 +4,11 @@
         <div class="form-group">
             <label for="file">
                 {{t 'app.assetfile'}} <span class="req">*</span><br>
-                {{t 'app.uploadnewassetshelp'}}
                 <span class="error"></span>
             </label>
             {{#if path}}
             <div class="asset-management-new-asset-file">
-                File has been uploaded
+                {{t 'app.fileuploaded'}}
             </div>
             {{else}}
             <input type="file" class="asset-file" name="file">

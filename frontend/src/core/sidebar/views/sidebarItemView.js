@@ -12,7 +12,6 @@ define(function(require) {
     className: 'sidebar-item',
 
     events: {
-      'click button'                                    : 'onButtonClick',
       'click button.editor-common-sidebar-project'      : 'editProject',
       'click button.editor-common-sidebar-config'       : 'editConfiguration',
       'click button.editor-common-sidebar-extensions'   : 'manageExtensions',
@@ -20,8 +19,8 @@ define(function(require) {
       'click button.editor-common-sidebar-select-theme' : 'selectTheme',
       'click button.editor-common-sidebar-download'     : 'downloadProject',
       'click button.editor-common-sidebar-preview'      : 'previewProject',
-      'click button.editor-common-sidebar-export'       : 'exportProject',
       'click button.editor-common-sidebar-export-dev'   : 'exportProjectDev',
+      'click button.editor-common-sidebar-backup'       : 'downloadBackup',
       'click button.editor-common-sidebar-close'        : 'closeProject'
     },
 
@@ -99,18 +98,6 @@ define(function(require) {
         this.$el.velocity({'left': '0%', 'opacity': 1}, "easeOutQuad");
     },
 
-    /*
-    * TODO need to allow for custom buttons.
-    * Maybe transition to using the following function to listen to all clicks.
-    */
-
-    onButtonClick: function(e) {
-      e && e.preventDefault();
-      var event = $(e.currentTarget).attr('data-event');
-      // TODO should be editorSidebar?
-      Origin.trigger('editorCommon:' + event);
-    },
-
     editProject: function() {
       Origin.router.navigate('#/editor/' + Origin.editor.data.course.get('_id') + '/settings', {trigger: true});
     },
@@ -139,12 +126,12 @@ define(function(require) {
       Origin.trigger('editorCommon:preview');
     },
 
-    exportProject: function() {
-      Origin.trigger('editorCommon:export', false);
-    },
-
     exportProjectDev: function() {
       Origin.trigger('editorCommon:export', true);
+    },
+
+    downloadBackup: function() {
+      Origin.trigger('editorCommon:backup', true);
     },
 
     closeProject: function() {

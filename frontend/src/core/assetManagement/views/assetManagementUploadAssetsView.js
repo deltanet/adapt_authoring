@@ -1,5 +1,5 @@
 // LICENCE https://github.com/adaptlearning/adapt_authoring/blob/master/LICENSE
-define(function(require){
+define(function(require) {
 
   var Backbone = require('backbone');
   var OriginView = require('coreJS/app/views/originView');
@@ -9,15 +9,14 @@ define(function(require){
 
   var AssetManagementNewAssetView = OriginView.extend({
 
-
     className: 'asset-management-upload-asset',
 
     events: {
-      'change .asset-file'          : 'onChangeFile',
+      'change .asset-file': 'onChangeFile'
     },
 
     preRender: function() {
-        this.listenTo(Origin, 'assetManagement:uploadAssets', this.uploadAssets);
+      this.listenTo(Origin, 'assetManagement:uploadAssets', this.uploadAssets);
     },
 
     postRender: function() {
@@ -26,10 +25,9 @@ define(function(require){
         autocomplete_url: '/api/autocomplete/tag',
         onAddTag: _.bind(this.onAddTag, this),
         onRemoveTag: _.bind(this.onRemoveTag, this),
-        'minChars' : 3,
-        'maxChars' : 30
+        minChars: 3,
+        maxChars: 30
       });
-      // Set view to ready
       this.setViewToReady();
     },
 
@@ -37,15 +35,15 @@ define(function(require){
       var $title = this.$('.asset-title');
 
       // Default 'title' -- remove C:\fakepath if it is added
-      $title.val(this.$('.asset-file')[0].value.replace("C:\\fakepath\\", ""));
+      $title.val(this.$('.asset-file')[0].value.replace('C:\\fakepath\\', ''));
     },
 
-    validateInput: function () {
+    validateInput: function() {
       var reqs = this.$('.required');
       var uploadFile = this.$('.asset-file');
       var validated = true;
       var uploadFileErrormsg = $(uploadFile).prev('label').find('span.error');
-      $.each(reqs, function (index, el) {
+      $.each(reqs, function(index, el) {
         var errormsg = $(el).prev('label').find('span.error');
         if (!$.trim($(el).val())) {
           validated = false;
@@ -77,19 +75,19 @@ define(function(require){
 
       var title = this.$('.asset-title').val();
       var description = this.$('.asset-description').val();
-        // TODO - we don't need a model for this so this check is irrelevant
-        // If model is new then uploadFile
-        if (this.model.isNew()) {
-          this.uploadFile();
-          // Return false to prevent the page submitting
-          return false;
-        }
+      // TODO - we don't need a model for this so this check is irrelevant
+      // If model is new then uploadFile
+      if (this.model.isNew()) {
+        this.uploadFile();
+        // Return false to prevent the page submitting
+        return false;
+      }
     },
 
     uploadFile: function() {
       // fix tags
       var tags = [];
-      _.each(this.model.get('tags'), function (item) {
+      _.each(this.model.get('tags'), function(item) {
         item._id && tags.push(item._id);
       });
       this.$('#tags').val(tags);
@@ -98,40 +96,29 @@ define(function(require){
       this.$('.asset-form').ajaxSubmit({
 
         uploadProgress: function(event, position, total, percentComplete) {
-          $(".progress-container").css("visibility", "visible");
+          $('.progress-container').css('visibility', 'visible');
           var percentVal = percentComplete + '%';
-          $(".progress-bar").css("width", percentVal);
+          $('.progress-bar').css('width', percentVal);
           $('.progress-percent').html(percentVal);
         },
 
         error: function(data, status, error) {
-          $('.loading').hide();
           Origin.trigger('sidebar:resetButtons');
-          var message = '';
-          if (data) {
-            if (data.responseText) {
-              message = data.responseText;
-            } else if(data.responseJSON && data.responseJSON.error) {
-              message = data.responseJSON.error;
-            }
-          }
-
           Origin.Notify.alert({
             type: 'error',
-            text: Helpers.decodeHTML(message)
+            text: data.responseJSON.message
           });
-          Origin.router.navigate('#/assetManagement/upload', { trigger: true });
         },
 
         success: function(data, status, xhr) {
           Origin.trigger('assets:update');
 
           self.model.set({_id: data._id});
-          self.model.fetch().done(function (data) {
+          self.model.fetch().done(function(data) {
             Origin.trigger('assetItemView:preview', self.model);
           });
 
-          Origin.router.navigate('#/assetManagement', {trigger:true});
+          Origin.router.navigate('#/assetManagement', {trigger: true});
         }
       });
 
@@ -139,13 +126,13 @@ define(function(require){
       return false;
     },
 
-    onAddTag: function (tag) {
+    onAddTag: function(tag) {
       var model = this.model;
       $.ajax({
         url: '/api/content/tag',
         method: 'POST',
         data: { title: tag }
-      }).done(function (data) {
+      }).done(function(data) {
         if (data && data._id) {
           var tags = model.get('tags') || [];
           tags.push({ _id: data._id, title: data.title });
@@ -154,9 +141,9 @@ define(function(require){
       });
     },
 
-    onRemoveTag: function (tag) {
+    onRemoveTag: function(tag) {
       var tags = [];
-      _.each(this.model.get('tags'), function (item) {
+      _.each(this.model.get('tags'), function(item) {
         if (item.title !== tag) {
           tags.push(item);
         }

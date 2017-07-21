@@ -287,5 +287,9 @@
   "app.visitpluginhomepage": "Visit plugin homepage",
   "app.greeting": "Hi",
   "app.emaillogotext": "Adapt Builder",
-  "app.emailfooter": "Sent by Adapt Builder."
+  "app.emailfooter": "Sent by Adapt Builder.",
+  "app.cleanassets": "Clean Assets",
+  "app.cleanassetsmessage": "You have removed the orphaned assets from this course.",
+  "app.cleanassetssuccess": "Course cleaned successfully!",
+  "app.cleanassetsfailed": "Course asset clean failed"
 }

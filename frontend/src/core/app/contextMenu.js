@@ -60,6 +60,11 @@ define(function(require) {
         className: 'context-menu-item',
         callbackEvent: 'export'
       });
+      courseItems.push({
+        title: window.polyglot.t('app.cleanassets'),
+        className: 'context-menu-item',
+        callbackEvent: 'cleanassets'
+      });
     }
     ContextMenu.addItem('course', courseItems);
   };

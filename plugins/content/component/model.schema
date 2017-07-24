@@ -31,22 +31,22 @@
       "title": "Classes"
     },
     "_isOptional": {
-      "type": "bool",
-      "default": "false",
+      "type": "boolean",
+      "default": false,
       "isSetting": true,
-      "inputType": {"type": "Boolean", "options": [true, false]},
+      "inputType": "Checkbox",
       "validators": [],
       "title": "Is this optional?",
-      "help": "If set to 'true' this component does not have to be completed"
+      "help": "An optional component does not have to be completed"
     },
-     "_isAvailable": {
-      "type": "bool",
-      "default": "true",
+    "_isAvailable": {
+      "type": "boolean",
+      "default": true,
       "isSetting": true,
-      "inputType": {"type": "Boolean", "options": [true, false]},
+      "inputType": "Checkbox",
       "validators": [],
       "title": "Is this available?",
-      "help": "If set to 'false' this will not be displayed"
+      "help": "Controls whether this component is available in the course or not."
     },
     "_parentId": {
       "type":"objectid",

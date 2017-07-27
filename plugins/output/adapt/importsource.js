@@ -431,7 +431,7 @@ function ImportSource(req, done) {
         },
         function updateAssetData(cb) {
           // TODO -- Strip lang folder. This global replace is intended as a temporary solution
-          var replaceRegex = new RegExp(/(course\/)((\w){2}\/)/, 'gi');
+          var replaceRegex = new RegExp(/(course\/)((\w){2}\/)/gi);
           var newAssetPath = Constants.Folders.Course + path.sep;
 
           var traverse = require('traverse');

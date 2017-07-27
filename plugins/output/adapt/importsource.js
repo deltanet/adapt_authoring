@@ -58,7 +58,7 @@ function ImportSource(req, done) {
   var configId;
   var cleanupDirs = [];
   var assetFields = [];
-  var PATH_REXEX = new RegExp(/(course\/)((\w)*\/)*(\w)*.[a-zA-Z0-9]+/, 'gi');
+  var PATH_REXEX = new RegExp(/(course\/)((\w)*\/)*(\w)*.[a-zA-Z0-9]+/gi);
 
   form.parse(req, function (error, fields, files) {
 

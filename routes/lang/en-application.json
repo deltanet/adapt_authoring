@@ -289,13 +289,13 @@
   "app.emailfooter": "Sent by Adapt Builder.",
   "app.courseimportmenu": "Authoring Import",
   "app.courseimporttitle": "Authoring Tool Import",
-  "app.importsidebarbutton": "Import",
   "app.importing": "Importing...",
-  "app.importinstruction": "Import from another authoring tool instance. Select a zip file for import.",
-  "app.importvalidationerror": "This isn't a zip file!",
-  "app.importerrortitle": "Course import failed",
-  "app.importcoursesuccess": "Course imported successfully!",
   "app.frameworkimportmenu": "Framework Import",
   "app.frameworkimporttitle": "Import Framework Course",
-  "app.importframeworkinstruction": "Select a framework zip for import. Tags will be added to the course and all new assets."
+  "app.importframeworkinstruction": "Select a framework zip for import. Tags will be added to the course and all new assets.",
+  "app.cleanassets": "Clean Assets",
+  "app.cleanassetsmessage": "You have removed the orphaned assets from this course.",
+  "app.cleanassetssuccess": "Course cleaned successfully!",
+  "app.cleanassetsfailed": "Course asset clean failed"
+
 }

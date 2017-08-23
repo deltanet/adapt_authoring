@@ -53,6 +53,14 @@ define(function(require) {
       }
     ]);
     var courseItems = getDefaultItems(['copyID']);
+    var superPerms = ["*/*:create","*/*:read","*/*:update","*/*:delete"];
+    if (Origin.permissions.hasPermissions(superPerms)) {
+      courseItems.push({
+        title: window.polyglot.t('app.cleanassets'),
+        className: 'context-menu-item',
+        callbackEvent: 'cleanassets'
+      });
+    }
     ContextMenu.addItem('course', courseItems);
   };
 

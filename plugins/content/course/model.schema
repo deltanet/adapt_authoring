@@ -627,13 +627,7 @@
       "type": "boolean",
       "default": true,
       "editorOnly": true,
-      "inputType": {
-        "type": "Boolean",
-        "options": [
-          true,
-          false
-        ]
-      },
+      "inputType": "Checkbox",
       "validators": [],
       "title": "Share with other users",
       "help": "When this is set to 'true', your colleagues will be able to see this course from the 'Shared courses' option"

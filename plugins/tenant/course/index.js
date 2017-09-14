@@ -26,10 +26,6 @@ function ReplicateCourse () {
 
 util.inherits(ReplicateCourse, ContentPlugin);
 
-var DASHBOARD_COURSE_FIELDS = [
-    '_id', '_tenantId', '_type', '_isShared', 'title', 'heroImage',
-    'updatedAt', 'updatedBy', 'createdAt', 'createdBy', 'tags'
-];
 /**
  * essential setup
  *
@@ -310,7 +306,7 @@ function replicate (data, cb) {
 
   async.waterfall([
     function getUserData(cb) {
-      // TODO - find a better way of getting this
+
       usermanager.retrieveUser({ _id: data.userId }, function(error, result) {
         if (error) {
           cb(error);
@@ -321,7 +317,58 @@ function replicate (data, cb) {
         }
       });
     },
-    function copyCourse(user, cb) {
+    function copyCourseHeroImage(user, cb) {
+      if (!user || 'object' !== typeof user) {
+        return cb("there was an error copying assets");
+      }
+      var parentIdMap = [];
+
+      ReplicateCourse.prototype.retrieve({_id: data._id}, {}, function (error, courses) {
+        if (error) {
+          return cb(error);
+        }
+        if (courses && courses.length) {
+          var course = courses[0].toObject();
+          database.getDatabase(function (error, db) {
+            if (error) {
+              logger.log('error', error);
+              return cb(error);
+            }
+            // Assuming there are no errors the assets must set the course assets
+            // TODO use ContentPlugin courseassets to get assets
+            assetmanager.retrieveAsset({ _id: course.heroImage }, function(error, items) {
+              if (error) {
+                logger.log('error', error);
+                return cb(error);
+              } else {
+                async.eachSeries(items, function(item, next) {
+                  ReplicateCourse.prototype.copyAssetToTenant(item, user, function(error, newAssetId) {
+                    if (error || !newAssetId || 'object' != typeof newAssetId) {
+                      var copyError = error || "Error - cannot copy asset to tenant";
+                      return cb(copyError);
+                    }
+
+                    parentIdMap[item._id] = newAssetId._id;
+                    next();
+                  });
+                }, function(error) {
+                  if (error) {
+                    logger.log('error', error);
+                    return cb(error);
+                  } else {
+                    cb(null, user, parentIdMap);
+                  }
+                });
+              }
+            });
+          });
+        } else {
+          // do nothing if no hero image
+          cb(null, user, parentIdMap);
+        }
+      });
+    },
+    function copyCourse(user, parentIdMap, cb) {
       // Get the original item
       ReplicateCourse.prototype.retrieve({_id: data._id}, {}, function (error, docs) {
         if (error) {
@@ -343,6 +390,7 @@ function replicate (data, cb) {
           doc.createdBy = user._id;
           doc._isShared = true;
           doc.user = user;
+          doc.heroImage = parentIdMap[doc.heroImage];
 
           ReplicateCourse.prototype.create(doc, { _tenantId: user._tenantId }, function (error, newCourse) {
             if (error) {
@@ -350,7 +398,6 @@ function replicate (data, cb) {
               return cb(error);
             }
             var newCourseId = newCourse._id;
-            var parentIdMap = [];
 
             database.getDatabase(function (error, db) {
               if (error) {
@@ -506,11 +553,8 @@ function replicate (data, cb) {
         });
       });
     },
-    function createCourseAssets(user, newCourse, parentIdMap, cb) {
 
-      // TODO check for correct initial vars
-      // TODO check for existing asset?
-      // TODO need to get list of unique assets then copy and create asset records before creating courseassets
+    function createCourseAssets(user, newCourse, parentIdMap, cb) {
       database.getDatabase(function (error, db) {
         if (error) {
           logger.log('error', error);

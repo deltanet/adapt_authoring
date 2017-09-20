@@ -52,7 +52,7 @@ var steps = [
       headers: {
         'User-Agent' : DEFAULT_USER_AGENT
       },
-      uri: 'https://api.github.com/repos/adaptlearning/adapt_authoring/tags',
+      uri: 'https://api.github.com/repos/deltanet/adapt_authoring/tags',
       method: 'GET'
     }, function (error, response, body) {
 
@@ -297,7 +297,7 @@ function upgradeBuilder(tagName, callback) {
 
         console.log("Building front-end.\n");
 
-        var fourthChild = exec('grunt build:prod', {
+        var fourthChild = exec('grunt build:dev', {
           stdio: [0, 'pipe', 'pipe']
         });
 

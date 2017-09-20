@@ -27,7 +27,7 @@
     </div>
 
     {{#ifValueEquals assetType "image"}}
-        {{#if metadata}} 
+        {{#if metadata}}
         <div class="asset-management-list-item-image" data-style="background-image:url(api/asset/thumb/{{_id}})">
         {{else}}
         <div class="asset-management-list-item-image">
@@ -38,8 +38,8 @@
     {{/ifValueEquals}}
 
     {{#ifValueEquals assetType "video"}}
-        {{#if metadata}} 
-        <div class="asset-management-list-item-image" data-style="background-image:url(api/asset/thumb/{{_id}})"}>
+        {{#if metadata}}
+        <div class="asset-management-list-item-image" data-style=""}>
         {{else}}
         <div class="asset-management-list-item-image">
             <i class="fa fa-file-video-o"></i>
@@ -70,7 +70,7 @@
 
         </div>
 
-        
+
 
     </div>
 

@@ -9,7 +9,8 @@
       "required":true,
       "default": "New Menu/Page Title",
       "inputType":"Text",
-      "validators": ["required"]
+      "validators": ["required"],
+      "translatable": true
     },
     "displayTitle": {
       "type":"string",
@@ -17,13 +18,22 @@
       "default": "New Menu/Page Title",
       "inputType":"DisplayTitle",
       "validators": [],
-      "help": "When viewing a menu/page - this is the title that will be displayed on the menu/page"
+      "help": "When viewing a menu/page - this is the title that will be displayed on the menu/page",
+      "translatable": true
+    },
+    "pageBody":{
+      "type":"string",
+      "default" : "",
+      "inputType":"TextArea",
+      "validators": [],
+      "translatable": true
     },
     "body":{
       "type":"string",
       "default" : "",
       "inputType":"TextArea",
-      "validators": []
+      "validators": [],
+      "translatable": true
     },
     "_graphic": {
       "type": "object",
@@ -35,7 +45,8 @@
           "default": "",
           "inputType": "Text",
           "validators": [],
-          "help": "This is the alternative text that is displayed when the image is not visible. This is also used by screen readers."
+          "help": "This is the alternative text that is displayed when the image is not visible. This is also used by screen readers.",
+          "translatable": true
         },
         "src": {
           "type": "string",
@@ -53,7 +64,8 @@
       "title": "Button link text",
       "default": "View",
       "inputType": "Text",
-      "validators" : ["required"]
+      "validators" : ["required"],
+      "translatable": true
     },
     "duration": {
       "type": "string",
@@ -62,7 +74,25 @@
       "default": "",
       "inputType": "Text",
       "validators" : [""],
-      "help": "Indicate how long this page or section should take to complete"
+      "help": "Indicate how long this page or section should take to complete",
+      "translatable": true
+    },
+    "_lockType": {
+      "type": "string",
+      "default": "",
+      "inputType": {
+        "type": "Select",
+        "options": [
+          "",
+          "custom",
+          "lockLast",
+          "sequential",
+          "unlockFirst"
+        ]
+      },
+      "title": "Menu lock type",
+      "help": "Defines which (if any) locking mechanism will be used for menu items. This should only be used on menus to lock sub menu pages.",
+      "validators": []
     },
     "_lockedBy": {
       "type": "array",
@@ -82,22 +112,22 @@
       "title": "Classes"
     },
     "_isOptional": {
-      "type": "bool",
-      "default": "false",
+      "type": "boolean",
+      "default": false,
       "isSetting": true,
-      "inputType": {"type": "Boolean", "options": [true, false]},
+      "inputType": "Checkbox",
       "validators": [],
       "title": "Is this optional?",
-      "help": "If set to 'true' this does not have to be completed"
+      "help": "An optional page does not have to be completed, nor do any of the articles, blocks and components contained within it."
     },
     "_isAvailable": {
-      "type": "bool",
-      "default": "true",
+      "type": "boolean",
+      "default": true,
       "isSetting": true,
-      "inputType": {"type": "Boolean", "options": [true, false]},
+      "inputType": "Checkbox",
       "validators": [],
       "title": "Is this available?",
-      "help": "If set to 'false' this will not be displayed"
+      "help": "Controls whether this page and its contents are available in the course or not."
     },
     "_onScreen": {
       "type": "object",
@@ -142,6 +172,9 @@
       "required": true,
       "default": 1,
       "editorOnly": true
+    },
+    "menuSettings": {
+      "type": "object"
     }
   }
 }

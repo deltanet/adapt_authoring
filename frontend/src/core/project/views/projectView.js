@@ -7,10 +7,9 @@ define(function(require){
   var Origin = require('coreJS/app/origin');
 
   var ProjectView = OriginView.extend({
-
     tagName: 'li',
-
     className: 'project-list-item',
+    exporting: false,
 
     events: {
       'dblclick'                        : 'editProject',
@@ -36,7 +35,9 @@ define(function(require){
       this.on('contextMenu:course:editSettings', this.editProjectSettings);
       this.on('contextMenu:course:edit', this.editProject);
       this.on('contextMenu:course:delete', this.deleteProjectPrompt);
-      this.on('contextMenu:course:duplicate', this.duplicateProject);
+      this.on('contextMenu:course:copy', this.duplicateProject);
+      this.on('contextMenu:course:export', this.exportProject);
+      this.on('contextMenu:course:cleanassets', this.cleanAssets);
 
       this.model.set('heroImageURI', this.model.getHeroImageURI());
     },
@@ -141,6 +142,81 @@ define(function(require){
             text: window.polyglot.t('app.errorduplication')
           });
         }
+      });
+    },
+
+    exportProject: function() {
+      // aleady processing, don't try again
+      if(this.exporting) return;
+
+      this.$el.css('cursor', 'progress');
+
+      var courseId = this.model.get('_id');
+      var tenantId = Origin.sessionModel.get('tenantId');
+
+      this.exporting = true;
+
+      var self = this;
+      $.ajax({
+         url: '/export/' + tenantId + '/' + courseId + '/false',
+         success: function(data, textStatus, jqXHR) {
+           self.exporting = false;
+           self.$el.css('cursor', 'default');
+           // get the zip
+           var form = document.createElement('form');
+           self.$el.append(form);
+           form.setAttribute('action', '/export/' + tenantId + '/' + courseId + '/download.zip');
+           form.submit();
+         },
+         error: function(jqXHR, textStatus, errorThrown) {
+           var messageText = errorThrown;
+           if(jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) messageText += ':<br/>' + jqXHR.responseJSON.message;
+           self.exporting = false;
+           self.$el.css('cursor', 'default');
+           Origin.Notify.alert({
+             type: 'error',
+             title: window.polyglot.t('app.exporterrortitle'),
+             text: messageText
+           });
+         }
+      });
+    },
+
+    cleanAssets: function() {
+      // aleady processing, don't try again
+      if(this.exporting) return;
+
+      this.$el.css('cursor', 'progress');
+
+      var courseId = this.model.get('_id');
+      var tenantId = Origin.sessionModel.get('tenantId');
+
+      this.exporting = true;
+
+      var self = this;
+      $.ajax({
+         url: '/api/cleanassets/course/' + courseId,
+         success: function(data, textStatus, jqXHR) {
+           var messageText = window.polyglot.t('app.cleanassetsmessage');
+           self.exporting = false;
+           self.$el.css('cursor', 'default');
+           Origin.Notify.alert({
+             type: 'success',
+             title: window.polyglot.t('app.cleanassetssuccess'),
+             text: messageText
+           });
+         },
+         error: function(jqXHR, textStatus, errorThrown) {
+           var messageText = errorThrown;
+           if(jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) messageText += ':<br/>' + jqXHR.responseJSON.message;
+           self.exporting = false;
+           self.$el.css('cursor', 'default');
+           Origin.Notify.alert({
+             type: 'error',
+             title: window.polyglot.t('app.cleanassetsfailed'),
+             text: messageText
+           });
+         }
       });
     },
 

@@ -76,7 +76,7 @@ define(function(require) {
 						subSchema: field.items.properties,
             confirmDelete: window.polyglot.t('app.confirmdelete'),
 						fieldType: 'List'
-					}
+					};
 				}
 
 			} else {
@@ -98,7 +98,7 @@ define(function(require) {
 						itemType:field.items.inputType,
 						subSchema: field.items,
 						fieldType: field.items.inputType
-					}
+					};
 				}
 			}
 
@@ -108,7 +108,7 @@ define(function(require) {
 			_.each(objectSchema, function(field, key) {
 				setupSchemaFields(field, key, objectSchema, scaffoldObjectSchema);
 			});
-			
+
 		} else if (field.type != 'object' || field.inputType) {
 
 			var validators = [];
@@ -130,7 +130,7 @@ define(function(require) {
                 console.log('No validator of that sort - please register: "' + validator + '" by using Origin.scaffold.addCustomValidator(name, validatorMethod)');
               }
               // If match is found - add the method
-              validators.push(customValidator.validatorMethod);  
+              validators.push(customValidator.validatorMethod);
             }
 					}
 				}
@@ -157,7 +157,7 @@ define(function(require) {
 			scaffoldSchema[key] = {
 				type: 'Object',
 				subSchema: field.properties
-			}
+			};
 
 			var objectSchema = (schema[key].properties || schema[key].subSchema);
 			var scaffoldObjectSchema = scaffoldSchema[key].subSchema;
@@ -170,7 +170,7 @@ define(function(require) {
 
 		if (field.title) {
 			scaffoldSchema[key].title = field.title;
-			
+
 		} else if (field.type === 'object' || field.type === 'array') {
 			scaffoldSchema[key].title = '';
 			scaffoldSchema[key].legend = field.legend;
@@ -181,7 +181,7 @@ define(function(require) {
 
     	try {
             // These types of schemas change frequently and cannot be cached.
-    	    var volatileTypes = ['course', 'config', 'article', 'block', 'component'];
+    	    var volatileTypes = ['course', 'config', 'contentobject', 'article', 'block', 'component'];
 
     	    if (_.indexOf(volatileTypes, type) == -1 && builtSchemas[type]) {
     	       return builtSchemas[type];
@@ -210,20 +210,24 @@ define(function(require) {
 		// Setup default fieldsets
 		var fieldsets = {
 			general: {
+				id: 'general',
 				legend: window.polyglot.t('app.general'),
 				fields: []
 			},
 			// ::TODO
 			// I want to remove this please
 			properties: {
+				id: 'properties',
 				legend: window.polyglot.t('app.properties'),
 				fields: []
-			}, 
+			},
 			settings :{
+				id: 'settings',
 				legend: window.polyglot.t('app.settings'),
 				fields: []
 			},
 			extensions: {
+				id: 'extensions',
 				legend: window.polyglot.t('app.extensions'),
 				fields: ['_extensions']
 			}
@@ -250,6 +254,7 @@ define(function(require) {
 				} else {
 
 					fieldsets[key] = {
+						id: key,
 						legend: Helpers.keyToTitleString(key),
 						fields: [key]
 					};
@@ -268,7 +273,7 @@ define(function(require) {
 		if (!schema._extensions) {
 			delete fieldsets.extensions;
 		}
-		
+
 		// Delete empty field sets
 		if (fieldsets.settings.fields.length === 0) {
 			delete fieldsets.settings;
@@ -318,16 +323,16 @@ define(function(require) {
           schema = _.pick(schema, 'customStyle');
           break;
       }
-      
+
       options.model.schema = buildSchema(schema, options, type);
       options.fieldsets = buildFieldsets(schema, options);
       alternativeModel = options.alternativeModelToSave;
       alternativeAttribute = options.alternativeAttributeToSave;
       currentModel = options.model;
-              
+
       var form = new Backbone.Form(options).render();
       currentForm = form;
-      
+
       return form;
     } catch (e) {
       alert(e.message);

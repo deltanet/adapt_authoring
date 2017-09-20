@@ -30,8 +30,8 @@ function CourseContent () {
 util.inherits(CourseContent, ContentPlugin);
 
 var DASHBOARD_COURSE_FIELDS = [
-    '_id', '_tenantId', '_type', '_isShared', 'title', 'heroImage', 
-    'updatedAt', 'updatedBy', 'createdAt', 'createdBy', 'tags'
+    '_id', '_tenantId', '_type', '_isShared', 'title', 'heroImage',
+    'updatedAt', 'updatedBy', 'createdAt', 'createdBy', 'tags', 'projectInformation'
 ];
 /**
  * essential setup
@@ -71,7 +71,7 @@ function initialize () {
         if (orList.length) {
           query.$or = orList;
         }
-        
+
         query.$and = andList;
 
         // force search to use only courses created by current user
@@ -80,7 +80,7 @@ function initialize () {
 
         options.jsonOnly = true;
         options.fields = DASHBOARD_COURSE_FIELDS.join(' ');
-        
+
         new CourseContent().retrieve(query, options, function (err, results) {
           if (err) {
             res.statusCode = 500;
@@ -120,12 +120,12 @@ function initialize () {
         if (orList.length) {
           query.$or = orList;
         }
-        
+
         query.$and = andList;
 
         // Only return courses which have been shared
         query.$and.push({ _isShared: true });
-        
+
         options.jsonOnly = true;
         options.fields = DASHBOARD_COURSE_FIELDS.join(' ');
 
@@ -226,59 +226,59 @@ function initialize () {
   ['component'].forEach(function (contentType) {
     app.contentmanager.addContentHook('create', contentType, {when: 'pre'}, function(contentType, data, next) {
       var user = usermanager.getCurrentUser();
-      
+
       database.getDatabase(function (err, db) {
         if (err) {
             logger.log('error', err);
             return next(err)
         }
-        
+
         var delta = data[0];
-        
+
         db.retrieve('component', {_courseId: delta._courseId, _component: delta._component}, function(err, results) {
           if (results.length == 0) {
             // This is the first time this component has been added, so trigger a rebuild.
             if (user && user.tenant && user.tenant._id) {
               app.emit('rebuildCourse', user.tenant._id, delta._courseId);
-            } 
+            }
           }
-          
-          return next(null, data); 
+
+          return next(null, data);
         });
-        
+
       });
     }.bind(null, contentType));
   });
-  
+
   ['component'].forEach(function (contentType) {
     app.contentmanager.addContentHook('destroy', contentType, {when: 'pre'}, function(contentType, data, next) {
       var user = usermanager.getCurrentUser();
-      
+
       database.getDatabase(function (err, db) {
         if (err) {
             logger.log('error', err);
             return next(err)
         }
-        
+
         db.retrieve('component', {_id: data[0]._id}, function(err, results) {
           if (err) {
             logger.log('error', err);
             return next(err);
           }
-          
+
           if (results && results.length == 1) {
             var delta = results[0];
-            
+
             db.retrieve('component', {_courseId: delta._courseId, _component: delta._component}, function(err, results) {
               if (results.length <= 1) {
                 // This component is no longer used in this course, so trigger a rebuild.
                 if (user && user.tenant && user.tenant._id) {
                   app.emit('rebuildCourse', user.tenant._id, delta._courseId.toString());
-                } 
+                }
               }
-              
-              return next(null, data); 
-            });    
+
+              return next(null, data);
+            });
           } else {
             // In theory the next line should never run.
             return next(null, data);
@@ -287,7 +287,7 @@ function initialize () {
       });
     }.bind(null, contentType));
   });
-  
+
   // Content Hook for updatedAt and updatedBy:
   ['contentobject', 'article', 'block', 'component'].forEach(function (contentType) {
     app.contentmanager.addContentHook('update', contentType, {when:'post'}, function (contentType, data, next) {
@@ -302,7 +302,7 @@ function initialize () {
 
         // Defensive programming -- just in case
         if (data && data._courseId) {
-          // If the _courseId is present, update the last updated date                   
+          // If the _courseId is present, update the last updated date
           db.update('course', { _id: data._courseId }, { updatedAt: new Date(), updatedBy: userId }, function (err) {
             if (err) {
               logger.log('error', err);
@@ -313,7 +313,7 @@ function initialize () {
         } else {
           next(null, data);
         }
-        
+
       });
 
     }.bind(null, contentType));
@@ -432,7 +432,7 @@ CourseContent.prototype.destroy = function (search, force, next) {
         if (docs[0]._isShared && docs[0].createdBy != user._id) {
           return next(new ContentPermissionError());
         }
-        
+
         // Courses use cascading delete
         async.eachSeries(
           docs,
@@ -481,7 +481,7 @@ function duplicate (data, cb) {
 
       // Set the current user's ID as the creator
       doc.createdBy = user._id;
-      
+
       CourseContent.prototype.create(doc, function (error, newCourse) {
         if (error) {
           logger.log('error', error);
@@ -572,7 +572,7 @@ function duplicate (data, cb) {
                     } else {
                       next();
                     }
-                    
+
                   }, function(error) {
                     if (error) {
                       logger.log('error', error);

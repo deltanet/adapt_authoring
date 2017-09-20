@@ -1,5 +1,5 @@
 {
-  "app.productname": "Adapt authoring tool",
+  "app.productname": "Adapt Builder",
   "app.rememberme": "Recuérdame",
   "app.ok": "OK",
   "app.yes": "Sí",
@@ -75,7 +75,7 @@
   "app.resetpassword": "Reiniciar contraseña",
   "app.submit": "Enviar",
   "app.newpassword": "Nueva contraseña",
-  "app.forgotpasswordblurb": "Introduzca la dirección de correo electrónico asociada a su cuenta de Learning Pool Adapt, luego haga click en Continuar. Le enviaremos un correo electrónico con un enlace a una página donde podrá crear una nueva contraseña de manera sencilla.",
+  "app.forgotpasswordblurb": "Introduzca la dirección de correo electrónico asociada a su cuenta de Adapt Builder, luego haga click en Continuar. Le enviaremos un correo electrónico con un enlace a una página donde podrá crear una nueva contraseña de manera sencilla.",
   "app.forgotpasswordfooter": "Si ya no utiliza la dirección de correo electrónico asociada a su cuenta de Adapt, por favor póngase en contacto con Soporte para recibir ayuda para poder restaurar el acceso a su cuenta.",
   "app.hasyouremailchanged": "¿Ha sido cambiada su dirección de correo electrónico?",
   "app.forgotpasswordsuccess": "Su solicitud está siendo procesada. Si los datos que ha enviado coinciden con nuestros registros, recibirá  más instrucciones a través de correo electrónico.",

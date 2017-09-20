@@ -412,11 +412,11 @@ var steps = [
   // run grunt build
   function gruntBuild (next) {
     console.log('Compiling the ' + app.polyglot.t('app.productname') + ' web application, please wait a moment ... ');
-    var proc = exec('grunt build:prod', { stdio: [0, 'pipe', 'pipe'] }, function (err) {
+    var proc = exec('grunt build:dev', { stdio: [0, 'pipe', 'pipe'] }, function (err) {
       if (err) {
         console.log('ERROR: ', err);
-        console.log('grunt build:prod command failed. Is the grunt-cli module installed? You can install using ' + 'npm install -g grunt grunt-cli');
-        console.log('Install will continue. Try running ' + 'grunt build:prod' + ' after installation completes.');
+        console.log('grunt build:dev command failed. Is the grunt-cli module installed? You can install using ' + 'npm install -g grunt grunt-cli');
+        console.log('Install will continue. Try running ' + 'grunt build:dev' + ' after installation completes.');
         return next();
       }
 

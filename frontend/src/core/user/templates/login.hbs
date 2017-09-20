@@ -1,8 +1,13 @@
+<div class="login-strapline">
+  <div class="login-logo">
+      <a href="http://www.delta-net.co.uk/" target="_blank"><img src="adaptbuilder/css/assets/deltanet-logo.png"/ alt="DeltaNet"></a>
+  </div>
+  <div class="login-strapline-head"><img src="adaptbuilder/css/assets/strapline-head.png"/ alt="Author multi-device eLearning anywhere"></div>
+  <div class="login-strapline-body">Adapt Builder lets you create responsive, HTML5 eLearning content with the
+    Adapt Framework and deploy to mobiles, tablets and PCs from right here in your browser.
+  </div>
+</div>
 <div class="login-inner">
-    <div class="login-logo">
-        <img src="adaptbuilder/css/assets/adapt-learning-logo-white.png"/>
-    </div>
-
     <form class="login-form" autocomplete="off">
         <div class="login-title">{{t 'app.signin'}}</div>
         {{#if isAuthenticated}}
@@ -15,7 +20,7 @@
                 </div>
                 <input type="email" autocomplete="off" class="login-input-username" value="" id="login-input-username" placeholder="{{t 'app.usernameoremail'}}" tabindex="1" />
                 <input type="password" autocomplete="off" class="login-input-password" value="" id="login-input-password" placeholder="{{t 'app.password'}}" tabindex="2" />
-                <button type="submit" class="btn secondary login-form-submit" tabindex="3">{{t 'app.login'}}</button>
+                <button type="submit" class="btn loginButton login-form-submit" tabindex="3">{{t 'app.login'}}</button>
             </div>
 
             <div class="login-remember-me">
@@ -28,4 +33,7 @@
             </div>
         {{/if}}
     </form>
+    <div class="login-attribution">
+        Powered by <a href="https://www.adaptlearning.org/" target="_blank"><img src="adaptbuilder/css/assets/adapt-logo-small.png"/ alt="Adapt"></a>
+    </div>
 </div>

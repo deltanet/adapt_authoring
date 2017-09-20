@@ -31,22 +31,22 @@
       "title": "Classes"
     },
     "_isOptional": {
-      "type": "bool",
-      "default": "false",
+      "type": "boolean",
+      "default": false,
       "isSetting": true,
-      "inputType": {"type": "Boolean", "options": [true, false]},
+      "inputType": "Checkbox",
       "validators": [],
       "title": "Is this optional?",
-      "help": "If set to 'true' this component does not have to be completed"
+      "help": "An optional component does not have to be completed"
     },
-     "_isAvailable": {
-      "type": "bool",
-      "default": "true",
+    "_isAvailable": {
+      "type": "boolean",
+      "default": true,
       "isSetting": true,
-      "inputType": {"type": "Boolean", "options": [true, false]},
+      "inputType": "Checkbox",
       "validators": [],
       "title": "Is this available?",
-      "help": "If set to 'false' this will not be displayed"
+      "help": "Controls whether this component is available in the course or not."
     },
     "_parentId": {
       "type":"objectid",
@@ -62,7 +62,8 @@
       "required":true,
       "default": "New Component Title",
       "inputType":"Text",
-      "validators": ["required"]
+      "validators": ["required"],
+      "translatable": true
     },
     "displayTitle": {
       "type":"string",
@@ -70,13 +71,15 @@
       "default": "New Component Title",
       "inputType":"DisplayTitle",
       "validators": [],
-      "help": "When viewing a component - this is the title that will be displayed"
+      "help": "When viewing a component - this is the title that will be displayed",
+      "translatable": true
     },
     "body":{
       "type":"string",
       "default" : "",
       "inputType":"TextArea",
-      "validators": []
+      "validators": [],
+      "translatable": true
     },
     "_onScreen": {
       "type": "object",

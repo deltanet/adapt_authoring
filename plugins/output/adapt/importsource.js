@@ -4,7 +4,7 @@ var async = require('async');
 var fs = require("fs-extra");
 var path = require("path");
 var IncomingForm = require('formidable').IncomingForm;
-
+var configuration = require('../../../lib/configuration');
 var database = require("../../../lib/database");
 var logger = require("../../../lib/logger");
 var Constants = require('../../../lib/outputmanager').Constants;

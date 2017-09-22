@@ -1,5 +1,6 @@
 // LICENCE https://github.com/adaptlearning/adapt_authoring/blob/master/LICENSE
 var _ = require('underscore');
+var async = require('async');
 var origin = require('../../../')();
 var yauzl = require("yauzl");
 var fs = require("fs-extra");

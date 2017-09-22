@@ -303,17 +303,16 @@ function replicate (data, cb) {
   }
 
   var self = this;
-
+  logger.log('info', 'Copying course to tenant');
   async.waterfall([
     function getUserData(cb) {
-
       usermanager.retrieveUser({ _id: data.userId }, function(error, result) {
         if (error) {
           cb(error);
         } else if (result) {
           cb(null, result);
         } else {
-          cb(new Error('No matching user record found 1'));
+          cb(new Error('No matching user record found'));
         }
       });
     },
@@ -329,39 +328,44 @@ function replicate (data, cb) {
         }
         if (courses && courses.length) {
           var course = courses[0].toObject();
-          database.getDatabase(function (error, db) {
-            if (error) {
-              logger.log('error', error);
-              return cb(error);
-            }
-            // Assuming there are no errors the assets must set the course assets
-            // TODO use ContentPlugin courseassets to get assets
-            assetmanager.retrieveAsset({ _id: course.heroImage }, function(error, items) {
+          if (course && course.heroImage &&'string' == typeof course.heroImage) {
+            database.getDatabase(function (error, db) {
               if (error) {
                 logger.log('error', error);
                 return cb(error);
-              } else {
-                async.eachSeries(items, function(item, next) {
-                  ReplicateCourse.prototype.copyAssetToTenant(item, user, function(error, newAssetId) {
-                    if (error || !newAssetId || 'object' != typeof newAssetId) {
-                      var copyError = error || "Error - cannot copy asset to tenant";
-                      return cb(copyError);
-                    }
-
-                    parentIdMap[item._id] = newAssetId._id;
-                    next();
-                  });
-                }, function(error) {
-                  if (error) {
-                    logger.log('error', error);
-                    return cb(error);
-                  } else {
-                    cb(null, user, parentIdMap);
-                  }
-                });
               }
+              // Assuming there are no errors the assets must set the course assets
+              // TODO use ContentPlugin courseassets to get assets
+              assetmanager.retrieveAsset({ _id: course.heroImage }, function(error, items) {
+                if (error) {
+                  logger.log('error', error);
+                  return cb(error);
+                } else {
+                  async.eachSeries(items, function(item, next) {
+                    ReplicateCourse.prototype.copyAssetToTenant(item, user, function(error, newAssetId) {
+                      if (error || !newAssetId || 'object' != typeof newAssetId) {
+                        var copyError = error || "Error - cannot copy asset to tenant";
+                        return cb(copyError);
+                      }
+
+                      parentIdMap[item._id] = newAssetId._id;
+                      next();
+                    });
+                  }, function(error) {
+                    if (error) {
+                      logger.log('error', error);
+                      return cb(error);
+                    } else {
+                      cb(null, user, parentIdMap);
+                    }
+                  });
+                }
+              });
             });
-          });
+          } else {
+            // do nothing if no hero image
+            cb(null, user, parentIdMap);
+          }
         } else {
           // do nothing if no hero image
           cb(null, user, parentIdMap);

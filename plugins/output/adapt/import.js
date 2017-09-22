@@ -103,7 +103,7 @@ function Import(req, done) {
           sortMetadata(cb);
         });
       },
-      checkVersionCompatibility: ['loadMetadata', function(cb) {
+      checkVersionCompatibility: ['loadMetadata', function(results, cb) {
         helpers.checkFrameworkVersion(metadata, cb);
       }]
     }, function doneAuto(error, data) {

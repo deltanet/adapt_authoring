@@ -159,7 +159,7 @@ function ImportSource(req, done) {
           helpers.checkFrameworkVersion(versionJson, cb);
         });
       },
-      checkContentJson: ['checkFramework', function(cb) {
+      checkContentJson: ['checkFramework', function(results, cb) {
         async.eachSeries(Object.keys(contentMap), function(type, cb2) {
           fs.readJson(path.join(COURSE_JSON_PATH, COURSE_LANG, contentMap[type] + '.json'), function(error, contentJson) {
             if(error) {

@@ -206,21 +206,20 @@ ReplicateCourse.prototype.copyAssetToTenant = function (id, user, next) {
 
       //if (assetRec && assetRec.tags) {
       if (!assetRec || 'object' !== typeof assetRec) {
-        cb(null, assetRec, tenantNames, newTags);
+        return cb(null, assetRec, tenantNames, newTags);
       } else {
         var assetTags = assetRec.tags
 
         createTags(assetTags, user, function(error, newTags) {
           if (error || !newTags) {
             var tagError = error || "Error: cannot create tags";
-            cb(tagError);
+            return cb(tagError);
           }
           return cb(null, assetRec, tenantNames, newTags);
         });
       }
     },
     function copyAsset(assetRec, tenantNames, newTags, cb) {
-      var repository = configuration.getConfig('filestorage') || 'localfs';
       var oldAsset = assetRec.toObject();
       var repository = configuration.getConfig('filestorage') || 'localfs';
 

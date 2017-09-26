@@ -712,7 +712,7 @@ function appendToItems (list, item, counter) {
 function createTags (tags, user, cb) {
   var newTags = [];
   if (!user || 'object' !== typeof user) {
-    cb("Error creating tags, no user");
+    return cb("Error creating tags, no user");
   }
 
   if (tags && tags.length > 0) {
@@ -769,7 +769,7 @@ function createTags (tags, user, cb) {
       });
     }, user._tenantId);
   } else {
-    cb("Error creating tags, no user");
+    cb(null, newTags);
   }
 };
 

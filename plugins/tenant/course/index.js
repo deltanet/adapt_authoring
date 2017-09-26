@@ -219,7 +219,7 @@ ReplicateCourse.prototype.copyAssetToTenant = function (id, user, next) {
         });
       }
     },
-    function copyAsset(assetRec, tenantNames, newTags, cb) {
+    function duplicateAsset(assetRec, tenantNames, newTags, cb) {
       var oldAsset = assetRec.toObject();
       var repository = configuration.getConfig('filestorage') || 'localfs';
 
@@ -239,10 +239,11 @@ ReplicateCourse.prototype.copyAssetToTenant = function (id, user, next) {
           return cb(null, {_id: results[0]._id});
         } else {
           // write the file to some file storage
-          filestorage.getStorage(repository, function (error, storage) {
-            if (error) {
-              return next(error);
+          filestorage.getStorage(repository, function (storageError, storage) {
+            if (storageError) {
+              return next(storageError);
             }
+
             storage.copyAsset(oldAsset, tenantNames.oldTenantName, tenantNames.newTenantName, function (error) {
               if (error) {
                 logger.log('error', error);
@@ -307,9 +308,9 @@ function replicate (data, cb) {
     function getUserData(cb) {
       usermanager.retrieveUser({ _id: data.userId }, function(error, result) {
         if (error) {
-          cb(error);
+          return cb(error);
         } else if (result) {
-          cb(null, result);
+          return cb(null, result);
         } else {
           cb(new Error('No matching user record found'));
         }
@@ -363,7 +364,7 @@ function replicate (data, cb) {
             });
           } else {
             // do nothing if no hero image
-            cb(null, user, parentIdMap);
+            return cb(null, user, parentIdMap);
           }
         } else {
           // do nothing if no hero image
@@ -463,7 +464,7 @@ function replicate (data, cb) {
               }, function (error) {
                 if (error) {
                   logger.log('error', error);
-                  cb(error, newCourse);
+                  return cb(error, newCourse);
                 } else {
                   cb(null, user, newCourse, parentIdMap);
                 }
@@ -571,7 +572,7 @@ function replicate (data, cb) {
           } else {
             async.eachSeries(items, function(item, next) {
               if (!item && 'string' !== typeof item._assetId) {
-                next("Asset cannot be found");
+                return next("Asset cannot be found");
               }
 
               if (parentIdMap[item._contentTypeParentId]) {
@@ -721,13 +722,13 @@ function createTags (tags, user, cb) {
       }
       async.eachSeries(tags, function(item, next) {
         if (!item) {
-          next("Tag cannot be found");
+          return next("Tag cannot be found");
         }
         db.retrieve('tag', {title: item.title}, { fields: '_id' }, function(error, tagData) {
 
           if (error) {
             logger.log('error', error);
-            next("Error finding tags");
+            return next("Error finding tags");
           } else {
             // if match then return matching ID otherwise create new tag.
             if (tagData.length == 0) {

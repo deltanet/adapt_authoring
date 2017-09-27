@@ -56,11 +56,6 @@ define(function(require) {
     var superPerms = ["*/*:create","*/*:read","*/*:update","*/*:delete"];
     if (Origin.permissions.hasPermissions(superPerms)) {
       courseItems.push({
-        title: window.polyglot.t('app.export'),
-        className: 'context-menu-item',
-        callbackEvent: 'export'
-      });
-      courseItems.push({
         title: window.polyglot.t('app.cleanassets'),
         className: 'context-menu-item',
         callbackEvent: 'cleanassets'

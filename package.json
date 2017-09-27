@@ -144,10 +144,13 @@
     "rimraf": "~2.2.5",
     "semver": "^5.0.3",
     "serve-favicon": "^2.3.0",
+    "traverse": "^0.6.6",
     "underscore": "~1.8.3",
     "unzip": "0.1.8",
     "validator": "4.2.1",
-    "winston": "1.0.2"
+    "winston": "2.3.1",
+    "winston-mongodb": "^2.0.10",
+    "yauzl": "2.8.0"
   },
   "devDependencies": {
     "mocha": "~1.13.0",

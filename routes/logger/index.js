@@ -20,7 +20,7 @@ function initialise() {
     db: getDb(),
     collection: COLLECTION_NAME
   });
-  // needs to be triggered at a different time causing install issue, https://github.com/deltanet/adapt_authoring/issues/115
+
   trimLogs();
 };
 
@@ -42,7 +42,7 @@ function getDb() {
 // Trims DB logs to DB_LOG_LENGTH, removing oldest first
 function trimLogs() {
   database.getDatabase(function(error, db) {
-    if(error) return console.log(error);
+    if(error) return logger.log(error);
     db.retrieve('log', {}, { operators: { sort: { timestamp: 1 } } }, function(error, results) {
       if(results.length > DB_LOG_LENGTH) {
         var noToDelete = results.length - DB_LOG_LENGTH;

@@ -31,7 +31,7 @@ util.inherits(CourseContent, ContentPlugin);
 
 var DASHBOARD_COURSE_FIELDS = [
     '_id', '_tenantId', '_type', '_isShared', 'title', 'heroImage',
-    'updatedAt', 'updatedBy', 'createdAt', 'createdBy', 'tags', 'projectInformation'
+    'updatedAt', 'updatedBy', 'createdAt', 'createdBy', 'tags'
 ];
 /**
  * essential setup

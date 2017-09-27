@@ -665,55 +665,6 @@
     },
     "externalReferences": {
       "type" : "object"
-    },
-    "projectInformation": {
-      "type": "object",
-      "properties": {
-        "_reference": {
-          "type": "string",
-          "required": false,
-          "default": "",
-          "title": "Reference",
-          "inputType": "Text",
-          "validators": []
-        },
-        "releaseStatus": {
-          "type": "string",
-          "required": false,
-          "default": "",
-          "title": "Release status",
-          "inputType": "Text",
-          "validators": []
-        },
-        "notes": {
-          "type": "array",
-          "title": "Notes",
-          "items": {
-            "type": "object",
-            "properties": {
-              "comment": {
-                "type": "string",
-                "default": "",
-                "title": "Comment",
-                "inputType": "TextArea",
-                "validators": []
-              },
-              "_reviewer": {
-                "type": "string",
-                "inputType": "Text",
-                "required": true,
-                "title": "Reviewer"
-              },
-              "_date": {
-                "type": "string",
-                "inputType": "Text",
-                "required": true,
-                "title": "Date"
-              }
-            }
-          }
-        }
-      }
     }
   }
 }

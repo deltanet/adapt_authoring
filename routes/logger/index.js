@@ -3,6 +3,7 @@
  * TODO switch this to use the DB rather than a file
  **/
 var _ = require('underscore');
+var async = require('async');
 var fs = require('fs');
 var configuration = require('../../lib/configuration');
 var database = require('../../lib/database');

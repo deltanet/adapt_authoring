@@ -4,7 +4,7 @@ var async = require('async');
 var fs = require("fs-extra");
 var path = require("path");
 var IncomingForm = require('formidable').IncomingForm;
-
+var configuration = require('../../../lib/configuration');
 var database = require("../../../lib/database");
 var logger = require("../../../lib/logger");
 var Constants = require('../../../lib/outputmanager').Constants;
@@ -159,7 +159,7 @@ function ImportSource(req, done) {
           helpers.checkFrameworkVersion(versionJson, cb);
         });
       },
-      checkContentJson: ['checkFramework', function(cb) {
+      checkContentJson: ['checkFramework', function(results, cb) {
         async.eachSeries(Object.keys(contentMap), function(type, cb2) {
           fs.readJson(path.join(COURSE_JSON_PATH, COURSE_LANG, contentMap[type] + '.json'), function(error, contentJson) {
             if(error) {

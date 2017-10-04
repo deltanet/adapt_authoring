@@ -4,7 +4,7 @@ var async = require('async');
 var fs = require("fs-extra");
 var path = require("path");
 var IncomingForm = require('formidable').IncomingForm;
-
+var configuration = require('../../../lib/configuration');
 var origin = require('../../../')();
 var database = require("../../../lib/database");
 var logger = require("../../../lib/logger");
@@ -103,7 +103,7 @@ function Import(req, done) {
           sortMetadata(cb);
         });
       },
-      checkVersionCompatibility: ['loadMetadata', function(cb) {
+      checkVersionCompatibility: ['loadMetadata', function(results, cb) {
         helpers.checkFrameworkVersion(metadata, cb);
       }]
     }, function doneAuto(error, data) {

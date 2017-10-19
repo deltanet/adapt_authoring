@@ -44,7 +44,7 @@ define(function(require){
             }
 
             // FIX: Purely and lovingly put in for a rendering issue with chrome.
-            // For when the items being re-rendering after a search return an 
+            // For when the items being re-rendering after a search return an
             // amount of items that means the container is not scrollable
             if (this.assetLimit < this.assetDenominator) {
                 $('.asset-management-assets-container').hide();
@@ -63,7 +63,7 @@ define(function(require){
             $assetContainer.off('scroll');
 
             $assetContainer.on('scroll', _.bind(function() {
-    
+
                 var scrollTop = $assetContainer.scrollTop();
                 var scrollableHeight = $assetContainerInner.height();
                 var containerHeight = $assetContainer.height();
@@ -96,7 +96,7 @@ define(function(require){
 
             if (!Origin.permissions.hasPermissions(["*"])) {
                 this.search = _.extend(this.search, {_isDeleted: false});
-            } 
+            }
 
             this.search = _.extend(this.search, {
                 tags: {
@@ -122,7 +122,7 @@ define(function(require){
                   skip: this.assetLimit,
                   limit: this.assetDenominator,
                   sort: this.sort
-                } 
+                }
               },
               success: _.bind(function() {
                 // On successful collection fetching set lazy render to enabled
@@ -181,7 +181,7 @@ define(function(require){
 
         filterBySearchInput: function (filterText) {
             var pattern = '.*' + filterText.toLowerCase() + '.*';
-            this.search = { title: pattern, description: pattern };
+            this.search = { title: pattern, description: pattern, filename: pattern };
             this.updateCollection(true);
 
             $(".asset-management-modal-filter-search" ).focus();

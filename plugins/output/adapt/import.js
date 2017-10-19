@@ -313,6 +313,9 @@ function Import(req, done) {
         async.each(importedAssets, function deleteAsset(asset, assetDeleted) {
           origin.assetmanager.destroyAsset(metadata.idMap[asset.oldId], assetDeleted);
         }, cb);
+      },
+      function removeFiles(cb) {
+        helpers.cleanUpImport(cleanupDirs, cb);
       }
       // TODO - Need to check if plugin has been installed with this import before removing
       /* function deletePlugins(cb) {

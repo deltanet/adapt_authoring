@@ -245,7 +245,9 @@ function Import(req, done) {
           createdBy: origin.usermanager.getCurrentUser()._id
         });
         if(!fileMeta) {
-          return doneAsset(new helpers.ImportError('No metadata found for asset: ' + assetName));
+          // just log error if no matching metadata, must be orphaned asset file
+          logger.log('error', 'No metadata found for asset: ' + assetName);
+          return doneAsset();
         }
         helpers.importAsset(fileMeta, metadata, doneAsset);
       }, cb);

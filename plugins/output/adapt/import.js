@@ -245,7 +245,9 @@ function Import(req, done) {
           createdBy: origin.usermanager.getCurrentUser()._id
         });
         if(!fileMeta) {
-          return doneAsset(new helpers.ImportError('No metadata found for asset: ' + assetName));
+          // just log error if no matching metadata, must be orphaned asset file
+          logger.log('error', 'No metadata found for asset: ' + assetName);
+          return doneAsset();
         }
         helpers.importAsset(fileMeta, metadata, doneAsset);
       }, cb);
@@ -311,6 +313,9 @@ function Import(req, done) {
         async.each(importedAssets, function deleteAsset(asset, assetDeleted) {
           origin.assetmanager.destroyAsset(metadata.idMap[asset.oldId], assetDeleted);
         }, cb);
+      },
+      function removeFiles(cb) {
+        helpers.cleanUpImport(cleanupDirs, cb);
       }
       // TODO - Need to check if plugin has been installed with this import before removing
       /* function deletePlugins(cb) {

@@ -1,15 +1,15 @@
 // LICENCE https://github.com/adaptlearning/adapt_authoring/blob/master/LICENSE
 define(function(require) {
-  var Origin = require('coreJS/app/origin');
-  var AssetModel = require('coreJS/assetManagement/models/assetModel');
-  var AssetCollection = require('coreJS/assetManagement/collections/assetCollection');
-  var AssetManagementView = require('coreJS/assetManagement/views/assetManagementView');
-  var AssetManagementSidebarView = require('coreJS/assetManagement/views/assetManagementSidebarView');
-  var AssetManagementNewAssetView = require('coreJS/assetManagement/views/assetManagementNewAssetView');
-  var AssetManagementNewAssetSidebarView = require('coreJS/assetManagement/views/assetManagementNewAssetSidebarView');
-  var AssetManagementUploadAssetsView = require('coreJS/assetManagement/views/assetManagementUploadAssetsView');
-  var AssetManagementUploadAssetsSidebarView = require('coreJS/assetManagement/views/assetManagementUploadAssetsSidebarView');
-  var TagsCollection = require('coreJS/tags/collections/tagsCollection');
+  var Origin = require('core/origin');
+  var AssetModel = require('./models/assetModel');
+  var AssetCollection = require('./collections/assetCollection');
+  var AssetManagementView = require('./views/assetManagementView');
+  var AssetManagementSidebarView = require('./views/assetManagementSidebarView');
+  var AssetManagementNewAssetView = require('./views/assetManagementNewAssetView');
+  var AssetManagementNewAssetSidebarView = require('./views/assetManagementNewAssetSidebarView');
+  var AssetManagementUploadAssetsView = require('./views/assetManagementUploadAssetsView');
+  var AssetManagementUploadAssetsSidebarView = require('./views/assetManagementUploadAssetsSidebarView');
+  var TagsCollection = require('core/collections/tagsCollection');
 
   Origin.on('router:assetManagement', function(location, subLocation, action) {
     Origin.assetManagement = {};

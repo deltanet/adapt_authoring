@@ -2,10 +2,9 @@
 define(function(require){
 
   var Backbone = require('backbone');
-  var OriginView = require('coreJS/app/views/originView');
-  var Origin = require('coreJS/app/origin');
-  var AssetModel = require('coreJS/assetManagement/models/assetModel');
-  var TagsInput = require('core/libraries/jquery.tagsinput.min');
+  var OriginView = require('core/views/originView');
+  var Origin = require('core/origin');
+  var AssetModel = require('../models/assetModel');
 
   var AssetManagementNewAssetView = OriginView.extend({
 

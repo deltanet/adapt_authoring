@@ -684,7 +684,7 @@ BowerPlugin.prototype.addPackage = function(plugin, packageInfo, options, cb) {
 
                     logger.log('error', 'Failed to add package: ' + packageName, err);
                     return addedToDb(null);
-                  }
+                  });
 
                   logger.log('info', 'Added package: ' + packageName);
 

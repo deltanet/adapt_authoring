@@ -3,39 +3,44 @@
  * Adapt Output plugin
  */
 
-var origin = require('../../../')();
-var OutputPlugin = require('../../../lib/outputmanager').OutputPlugin;
-var Constants = require('../../../lib/outputmanager').Constants;
-var configuration = require('../../../lib/configuration');
-var filestorage = require('../../../lib/filestorage');
-var database = require('../../../lib/database');
-var util = require('util')
-var path = require('path')
-var fs = require('fs-extra');
-var async = require('async');
-var archiver = require('archiver');
-var helpers = require('../../../lib/helpers');
-var _ = require('underscore');
-var usermanager = require('../../../lib/usermanager');
-var assetmanager = require('../../../lib/assetmanager');
-var exec = require('child_process').exec;
-var semver = require('semver');
-var version = require('../../../version');
-var logger = require('../../../lib/logger');
+var origin = require('../../../'),
+    OutputPlugin = require('../../../lib/outputmanager').OutputPlugin,
+    Constants = require('../../../lib/outputmanager').Constants,
+    configuration = require('../../../lib/configuration'),
+    filestorage = require('../../../lib/filestorage'),
+    database = require('../../../lib/database'),
+    util = require('util'),
+    path = require('path'),
+    fs = require('fs'),
+    fse = require('fs-extra'),
+    async = require('async'),
+    archiver = require('archiver'),
+    _ = require('underscore'),
+    ncp = require('ncp').ncp,
+    rimraf = require('rimraf'),
+    mkdirp = require('mkdirp'),
+    usermanager = require('../../../lib/usermanager'),
+    assetmanager = require('../../../lib/assetmanager'),
+    exec = require('child_process').exec,
+    semver = require('semver'),
+    installHelpers = require('../../../lib/installHelpers'),
+    logger = require('../../../lib/logger');
 
 function AdaptOutput() {
 }
 
 util.inherits(AdaptOutput, OutputPlugin);
 
-AdaptOutput.prototype.publish = function(courseId, isPreview, request, response, next) {
+AdaptOutput.prototype.publish = function(courseId, mode, request, response, next) {
+  var app = origin();
   var self = this;
-  var user = usermanager.getCurrentUser();
-  var tenantId = user.tenant._id;
-  var outputJson = {};
-  var isRebuildRequired = false;
-  var themeName = '';
-  var menuName = Constants.Defaults.MenuName;
+  var user = usermanager.getCurrentUser(),
+    tenantId = user.tenant._id,
+    outputJson = {},
+    isRebuildRequired = false,
+    themeName = '',
+    menuName = Constants.Defaults.MenuName,
+    frameworkVersion;
 
   var resultObject = {};
 
@@ -79,7 +84,7 @@ AdaptOutput.prototype.publish = function(courseId, isPreview, request, response,
         });
       },
       function(callback) {
-        self.sanitizeCourseJSON(outputJson, function(err, data) {
+        self.sanitizeCourseJSON(mode, outputJson, function(err, data) {
           if (err) {
             return callback(err);
           }
@@ -142,8 +147,13 @@ AdaptOutput.prototype.publish = function(courseId, isPreview, request, response,
           if (err) {
             return callback(err);
           }
-
           callback(null);
+        });
+      },
+      function(callback) {
+        installHelpers.getInstalledFrameworkVersion(function(error, version) {
+          frameworkVersion = version;
+          callback(error);
         });
       },
       function(callback) {
@@ -155,7 +165,7 @@ AdaptOutput.prototype.publish = function(courseId, isPreview, request, response,
             var outputFolder = COURSE_FOLDER.replace(FRAMEWORK_ROOT_FOLDER + path.sep,'');
 
             // Append the 'build' folder to later versions of the framework
-            if (semver.gte(semver.clean(version.adapt_framework), semver.clean('2.0.0'))) {
+            if (semver.gte(semver.clean(frameworkVersion), semver.clean('2.0.0'))) {
               outputFolder = path.join(outputFolder, Constants.Folders.Build);
             }
 
@@ -211,7 +221,7 @@ AdaptOutput.prototype.publish = function(courseId, isPreview, request, response,
         });
       },
       function(callback) {
-        if (!isPreview) {
+        if (mode === Constants.Modes.publish) {
           // Now zip the build package
           var filename = path.join(COURSE_FOLDER, Constants.Filenames.Download);
           var zipName = helpers.slugify(outputJson['course'].title);

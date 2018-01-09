@@ -8,6 +8,7 @@ define(function(require) {
 	var ScaffoldItemsModalView = require('./views/scaffoldItemsModalView');
 	var ScaffoldImageView = require('./views/scaffoldAssetView');
 	var ScaffoldBooleanView = require('./views/scaffoldBooleanView');
+	var ScaffoldTenantUsersView = require('./views/scaffoldTenantUsersView');
 	var ScaffoldTagsView = require('./views/scaffoldTagsView');
 	var ScaffoldQuestionButtonView = require('./views/scaffoldQuestionButtonView');
 	var ScaffoldColorPickerView = require('./views/scaffoldColorPickerView');
@@ -75,7 +76,7 @@ define(function(require) {
 						subSchema: field.items.properties,
             confirmDelete: Origin.l10n.t('app.confirmdelete'),
 						fieldType: 'List'
-					}
+					};
 				}
 
 			} else {
@@ -97,7 +98,7 @@ define(function(require) {
 						itemType:field.items.inputType,
 						subSchema: field.items,
 						fieldType: field.items.inputType
-					}
+					};
 				}
 			}
 
@@ -156,7 +157,7 @@ define(function(require) {
 			scaffoldSchema[key] = {
 				type: 'Object',
 				subSchema: field.properties
-			}
+			};
 
 			var objectSchema = (schema[key].properties || schema[key].subSchema);
 			var scaffoldObjectSchema = scaffoldSchema[key].subSchema;
@@ -180,7 +181,7 @@ define(function(require) {
 
     	try {
             // These types of schemas change frequently and cannot be cached.
-    	    var volatileTypes = ['course', 'config', 'article', 'block', 'component'];
+    	    var volatileTypes = ['course', 'config', 'contentobject', 'article', 'block', 'component'];
 
     	    if (_.indexOf(volatileTypes, type) == -1 && builtSchemas[type]) {
     	       return builtSchemas[type];
@@ -249,6 +250,7 @@ define(function(require) {
 				} else {
 
 					fieldsets[key] = {
+						id: key,
 						legend: Helpers.keyToTitleString(key),
 						fields: [key]
 					};

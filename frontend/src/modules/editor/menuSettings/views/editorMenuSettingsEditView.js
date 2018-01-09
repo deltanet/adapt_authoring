@@ -41,6 +41,13 @@ define(function(require) {
       Origin.trigger('editorSidebarView:removeEditView', this.model);
     },
 
+    refreshData: function() {
+      var self = this;
+      Origin.trigger('scaffold:updateSchemas', function() {
+        console.log('Menu schema refreshed');
+      }, this);
+    },
+
     saveData: function(event) {
       event && event.preventDefault();
 

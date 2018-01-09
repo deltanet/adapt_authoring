@@ -10,7 +10,7 @@ define(function(require) {
     className: "forgot-password",
 
     events: {
-      'click button.submit' : 'requestResetToken',
+      'click .forgotPasswordButton' : 'requestResetToken',
       'click button.cancel' : 'goToLogin',
       'click button.return' : 'goToLogin',
       'keydown .input-username-email' : 'handleKeydown'

@@ -27,6 +27,21 @@ define(function(require) {
                         delete schema._extensions.properties[key];
                     }
                 });
+                if(_.isEmpty(schema._extensions.properties)) {
+                    delete schema._extensions;
+                }
+            }
+
+            if (schema.menuSettings) {
+                var appliedMenus = [ configModel.get('_menu')];
+                _.each(schema.menuSettings.properties, function(value, key) {
+                    if(!_.contains(appliedMenus, value.name)) {
+                        delete schema.menuSettings.properties[key];
+                    }
+                });
+                if (_.isEmpty(schema.menuSettings.properties)) {
+                  delete schema.menuSettings;
+                }
             }
 
             if (schemaName == 'course') {
@@ -62,6 +77,11 @@ define(function(require) {
 
             }
 
+            // only tenant admins should be able to change course owners
+            if (!(schemaName === 'course' && Origin.permissions.hasTenantAdminPermission())) {
+                delete schema.createdBy;
+            }
+
             // trim off any empty fieldsets
             _.each(schema, function(value, key) {
                 if(value.hasOwnProperty('properties') && _.isEmpty(value.properties)) {
@@ -76,6 +96,7 @@ define(function(require) {
             delete schema._extensions;
             // Remove globals as these are appended to the course model
             delete schema.globals;
+            if(!schema.menuSettings.properties) delete schema.menuSettings;
             return schema;
         }
     };

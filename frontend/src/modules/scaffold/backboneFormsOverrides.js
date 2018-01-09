@@ -65,7 +65,7 @@ define(function(require) {
 		//Pretty print the object keys and values
 		var parts = [];
 		_.each(this.nestedSchema, function(schema, key) {
-			
+
 			var desc = schema.title ? schema.title : createTitle(key),
 			val = value[key];
 
@@ -164,16 +164,16 @@ define(function(require) {
             { name: 'editing', groups: [ 'find', 'selection', 'spellchecker' ], items: [ 'Find', 'Replace', '-', 'SelectAll' ] },
             { name: 'paragraph', groups: [ 'list', 'indent', 'blocks', 'align', 'bidi' ], items: [ 'NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote', 'CreateDiv' ] },
             {name: 'direction', items: ['BidiLtr', 'BidiRtl']},
+            { name: 'insert', items: [ 'SpecialChar', 'Table' ] },
             '/',
-            { name: 'basicstyles', groups: [ 'basicstyles', 'cleanup' ], items: [ 'Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', '-', 'RemoveFormat'] },
+            { name: 'basicstyles', groups: [ 'basicstyles', 'cleanup' ], items: [ 'Font','FontSize', 'Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', '-', 'RemoveFormat'] },
             { name: 'styles', items: ['JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock']},
             { name: 'links', items: [ 'Link', 'Unlink' ] },
             { name: 'colors', items: [ 'TextColor', 'BGColor' ] },
-            { name: 'insert', items: [ 'SpecialChar', 'Table' ] },
             { name: 'tools', items: [  ] },
             { name: 'others', items: [ '-' ] }
           ],
-          extraAllowedContent: 'span(*)',
+          extraAllowedContent: 'span(*)[*]{*}; div(*)[*]{*}; button(*)[*]{*}; ol(*)[*]{*}; ul(*)[*]{*}; a(*)[*]{*}; img(*)[*]{*}; svg(*)[*]{*}',
           disableNativeSpellChecker: false
         });
 
@@ -186,14 +186,14 @@ define(function(require) {
 		if (!value && typeof this.schema.default !== 'undefined') {
       value = this.schema.default;
     }
-    
+
     this.$el.val(value);
 	}
 
 	Backbone.Form.editors.TextArea.prototype.getValue = function() {
 		return this.editor.getData().replace(/[\t\n]/g, '');
 	}
-  
+
   Backbone.Form.editors.TextArea.prototype.remove = function() {
     this.editor.removeAllListeners();
     CKEDITOR.remove(this.editor);

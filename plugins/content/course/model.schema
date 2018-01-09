@@ -67,7 +67,8 @@
           "editorOnly": true,
           "inputType": "Checkbox",
           "validators": [],
-          "title": "Enabled?"
+          "title": "Enabled?",
+          "help": "The start controller allows you to control which page is rendered when a course loads, potentially bypassing the menu"
         },
         "_startIds": {
           "type": "array",
@@ -580,7 +581,7 @@
     },
     "_isShared": {
       "type": "boolean",
-      "default": false,
+      "default": true,
       "editorOnly": true,
       "inputType": "Checkbox",
       "validators": [],

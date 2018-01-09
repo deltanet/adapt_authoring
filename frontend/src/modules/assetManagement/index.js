@@ -7,6 +7,8 @@ define(function(require) {
   var AssetManagementSidebarView = require('./views/assetManagementSidebarView');
   var AssetManagementNewAssetView = require('./views/assetManagementNewAssetView');
   var AssetManagementNewAssetSidebarView = require('./views/assetManagementNewAssetSidebarView');
+  var AssetManagementUploadAssetsView = require('./views/assetManagementUploadAssetsView');
+  var AssetManagementUploadAssetsSidebarView = require('./views/assetManagementUploadAssetsSidebarView');
   var TagsCollection = require('core/collections/tagsCollection');
 
   Origin.on('router:assetManagement', function(location, subLocation, action) {

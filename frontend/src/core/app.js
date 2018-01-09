@@ -68,8 +68,9 @@
       'modules/projects/index',
       'modules/scaffold/index',
       'modules/sidebar/index',
+      'modules/tenantManagement/index',
       'modules/user/index',
-      'modules/userManagement/index',
+      'modules/userManagement/index',      
     ], callback);
   }
 

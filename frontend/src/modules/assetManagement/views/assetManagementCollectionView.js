@@ -88,6 +88,7 @@ define(function(require){
             sort: this.sort
           }
         },
+
         success: _.bind(function(collection, response) {
           this.isCollectionFetching = false;
           this.fetchCount += response.length;

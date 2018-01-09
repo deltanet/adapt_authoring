@@ -3,6 +3,7 @@
  * Menu content plugin
  *
  */
+
 var _ = require('underscore');
 var async = require('async');
 var bower = require('bower');
@@ -427,10 +428,10 @@ BowerPlugin.prototype.initialize.call(new Menu(), bowerConfig);
                      }
                    });
 
-              app.emit('rebuildCourse', tenantId, courseId);
-
-              res.statusCode = 200;
-              return res.json({ success: true });
+                   res.statusCode = 200;
+                   return res.json({success: true});
+                });
+              }
             });
           });
         }, configuration.getConfig('dbName'));

@@ -13,7 +13,7 @@ define(function(require) {
     allTenants: new Backbone.Collection()
   };
 
-  Origin.on('app:dataReady login:changed', function() {
+  Origin.on('origin:dataReady login:changed', function() {
     Origin.permissions.addRoute('tenantManagement', data.featurePermissions);
     if(Origin.permissions.hasPermissions('tenantManagement')){
       data.allTenants.on('sync', onDataFetched);
@@ -69,6 +69,7 @@ define(function(require) {
       window.model = data.allTenants.where({_id:tenantId});
 
       if (Origin.permissions.hasPermissions(data.featurePermissions) && model.length > 0 && model[0].get('isMaster') == true) {
+
         var globalMenuObject = {
           "location": "global",
           "text":  Origin.l10n.t('app.tenantmanagement'),

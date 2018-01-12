@@ -27,7 +27,7 @@ define(function(require) {
         data.allTenants.url = 'api/tenant';
       }else{
         data.allTenants.url = 'api/tenant/'+ Origin.sessionModel.get('tenantId');
-      }    
+      }
       data.allTenants.fetch();
 
       data.allRoles.on('sync', onDataFetched);
@@ -38,7 +38,7 @@ define(function(require) {
         "location": "global",
         "text": Origin.l10n.t('app.usermanagement'),
         "icon": "fa-users",
-        "sortOrder": 3,
+        "sortOrder": 4,
         "callbackEvent": "userManagement:open"
       });
   	} else {
@@ -92,7 +92,7 @@ define(function(require) {
       data.hasTenantAdminPermissions = true;
     }
   }
-  
+
   var onDataFetched = function() {
     // ASSUMPTION we always have roles and tenants
     if(data.allRoles.length > 0 && data.allTenants.length > 0) {

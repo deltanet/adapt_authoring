@@ -17,6 +17,7 @@ define(function(require) {
     };
     if(!location) return loadAssetsView();
     if(location === 'new') loadNewAssetView();
+    if(location === 'upload') loadUploadAssetView();
     if(subLocation === 'edit') loadEditAssetView(location);
   });
 
@@ -56,6 +57,12 @@ define(function(require) {
     Origin.trigger('location:title:update', { title: 'New Asset' });
     Origin.sidebar.addView(new AssetManagementNewAssetSidebarView().$el);
     Origin.contentPane.setView(AssetManagementNewAssetView, { model: new AssetModel });
+  }
+
+  function loadUploadAssetView() {
+    Origin.trigger('location:title:update', { title: 'Upload Assets' });
+    Origin.sidebar.addView(new AssetManagementUploadAssetsSidebarView().$el);
+    Origin.contentPane.setView(AssetManagementUploadAssetsView, { model: new AssetModel });
   }
 
   function loadEditAssetView(location) {

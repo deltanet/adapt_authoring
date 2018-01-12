@@ -12,7 +12,7 @@ define(function(require) {
         },
 
         onUploadAssetsClicked: function() {
-            this.updateButton('.asset-management-upload-sidebar-upload-button', window.polyglot.t('app.saving'));
+            this.updateButton('.asset-management-upload-sidebar-upload-button', Origin.l10n.t('app.saving'));
             Origin.trigger('assetManagement:uploadAssets');
         },
 

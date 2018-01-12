@@ -11,6 +11,7 @@ define(function(require){
     },
 
     initialize: function(options) {
+      // Set form on view
       if (options && options.form) {
         this.form = options.form;
         this.filters = [];
@@ -53,7 +54,7 @@ define(function(require){
       } else {
         $('.form-container > form > div > fieldset').addClass('display-none');
         _.each(this.filters, function(filter) {
-          $('.fieldset-' + filter).removeClass('display-none');
+          $('.fieldset-' + Helpers.lowerCase(filter)).removeClass('display-none');
         });
       }
     },
@@ -122,6 +123,7 @@ define(function(require){
         return;
       }
       var errors = this.form.validate();
+
       // MUST trigger as sidebar needs to know when the form has been resubmitted
       Origin.trigger('editorSidebar:showErrors', errors);
 
@@ -129,6 +131,7 @@ define(function(require){
         var errorText =
           Origin.l10n.t('app.validationfailedmessage') + "<br/><br/>" +
           this.buildErrorMessage(errors, '');
+
         // TODO remove when we've got a better solution
         this.onSaveError(Origin.l10n.t('app.validationfailed'), errorText);
 

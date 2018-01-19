@@ -247,8 +247,7 @@
   "app.validationfailed": "Validation failed",
   "app.validationfailedmessage": "You need to fix the following before you can save your data:",
   "app.successdefaulttitle": "Success",
-  "app.downloadbackup": "Export for authoring",
-  "app.exportdev": "Export for framework",
+  "app.exportdev": "Export source code",
   "app.exporting": "Exporting source code",
   "app.exporterrortitle": "Course export failed",
   "app.exportcoursesuccess": "Course exported successfully!",
@@ -355,6 +354,5 @@
   "app.page": "page",
   "app.article": "article",
   "app.block": "block",
-  "app.component": "component",
-  "app.export": "Export source code"
+  "app.component": "component"
 }

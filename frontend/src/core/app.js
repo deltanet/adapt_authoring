@@ -57,6 +57,7 @@
       'modules/contextMenu/index',
       'modules/editor/index',
       'modules/filters/index',
+      'modules/frameworkImport/index',
       'modules/globalMenu/index',
       'modules/help/index',
       'modules/location/index',

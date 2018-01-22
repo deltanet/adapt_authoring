@@ -80,6 +80,11 @@ define(function(require) {
         title: Origin.l10n.t('app.delete'),
         className: 'context-menu-item',
         callbackEvent: "delete"
+      },
+      {
+        title: Origin.l10n.t('app.cleanassets'),
+        className: 'context-menu-item',
+        callbackEvent: "cleanassets"
       }
     ];
     if(!blacklist) {

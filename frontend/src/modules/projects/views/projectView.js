@@ -27,7 +27,8 @@ define(function(require) {
         'contextMenu:course:edit': this.editProject,
         'contextMenu:course:delete': this.deleteProjectPrompt,
         'contextMenu:course:copy': this.duplicateProject,
-        'contextMenu:course:copyID': this.copyIdToClipboard
+        'contextMenu:course:copyID': this.copyIdToClipboard,
+        'contextMenu:course:cleanassets': this.cleanAssets
       });
       this.listenTo(Origin, {
         'dashboard:dashboardView:removeSubViews': this.remove,
@@ -146,6 +147,44 @@ define(function(require) {
         event.stopPropagation();
       }
       this.$('.tag-container').velocity({ opacity: 0 }).hide();
+    },
+
+    cleanAssets: function() {
+      // aleady processing, don't try again
+      if(this.exporting) return;
+
+      this.$el.css('cursor', 'progress');
+
+      var courseId = this.model.get('_id');
+      var tenantId = Origin.sessionModel.get('tenantId');
+
+      this.exporting = true;
+
+      var self = this;
+      $.ajax({
+         url: '/api/cleanassets/course/' + courseId,
+         success: function(data, textStatus, jqXHR) {
+           var messageText = Origin.l10n.t('app.cleanassetsmessage');
+           self.exporting = false;
+           self.$el.css('cursor', 'default');
+           Origin.Notify.alert({
+             type: 'success',
+             title: Origin.l10n.t('app.cleanassetssuccess'),
+             text: messageText
+           });
+         },
+         error: function(jqXHR, textStatus, errorThrown) {
+           var messageText = errorThrown;
+           if(jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) messageText += ':<br/>' + jqXHR.responseJSON.message;
+           self.exporting = false;
+           self.$el.css('cursor', 'default');
+           Origin.Notify.alert({
+             type: 'error',
+             title: Origin.l10n.t('app.cleanassetsfailed'),
+             text: messageText
+           });
+         }
+      });
     }
   }, {
     template: 'project'

@@ -74,7 +74,7 @@ define(function(require) {
            Origin.trigger('location:title:update', {title: 'Dashboard - viewing tenant courses'});
            Origin.contentPane.setView(ProjectsView, {collection: new TenantProjectCollection});
          }
-         break;  
+         break;
       case 'all':
         Origin.trigger('location:title:update', {title: 'Dashboard - viewing my courses'});
         Origin.contentPane.setView(ProjectsView, { collection: new MyProjectCollection });
@@ -84,11 +84,11 @@ define(function(require) {
   });
 
   Origin.on('globalMenu:dashboard:open', function() {
-    Origin.router.navigateTo('dashboard');
+    Origin.router.navigateTo('dashboard/shared');
   });
 
   Origin.on('origin:dataReady login:changed', function() {
-    Origin.router.setHomeRoute('dashboard');
+    Origin.router.setHomeRoute('dashboard/shared');
     Origin.globalMenu.addItem({
       "location": "global",
       "text": Origin.l10n.t('app.dashboard'),

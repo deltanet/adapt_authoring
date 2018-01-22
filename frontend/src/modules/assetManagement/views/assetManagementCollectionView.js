@@ -144,7 +144,7 @@ define(function(require){
     filterBySearchInput: function (filterText) {
       this.resetCollection(null, false);
       var pattern = '.*' + filterText.toLowerCase() + '.*';
-      this.search = { title: pattern, description: pattern };
+      this.search = { title: pattern, description: pattern, filename: pattern };
       this.fetchCollection();
 
       $(".asset-management-modal-filter-search" ).focus();

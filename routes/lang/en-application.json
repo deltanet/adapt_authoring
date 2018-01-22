@@ -247,7 +247,7 @@
   "app.validationfailed": "Validation failed",
   "app.validationfailedmessage": "You need to fix the following before you can save your data:",
   "app.successdefaulttitle": "Success",
-  "app.exportdev": "Export source code",
+  "app.export": "Export source code",
   "app.exporting": "Exporting source code",
   "app.exporterrortitle": "Course export failed",
   "app.exportcoursesuccess": "Course exported successfully!",

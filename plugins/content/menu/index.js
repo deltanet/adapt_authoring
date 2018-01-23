@@ -22,6 +22,7 @@ var logger = require('../../../lib/logger');
 var origin = require('../../../');
 var rest = require('../../../lib/rest');
 var usermanager = require('../../../lib/usermanager');
+var helpers = require('../../../lib/helpers');
 
 var ContentPlugin = contentmanager.ContentPlugin;
 var ContentTypeError = contentmanager.errors.ContentTypeError;

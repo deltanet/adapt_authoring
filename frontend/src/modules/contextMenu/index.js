@@ -35,12 +35,12 @@ define(function(require) {
   };
 
   function setUpMenuItems() {
-    ContextMenu.addItem('article', getDefaultItems());
-    ContextMenu.addItem('block', getDefaultItems());
-    ContextMenu.addItem('component', getDefaultItems());
-    ContextMenu.addItem('page', getDefaultItems());
-    ContextMenu.addItem('menu', getDefaultItems(['copy']));
-    ContextMenu.addItem('page-min', getDefaultItems(['copy','delete']));
+    ContextMenu.addItem('article', getDefaultItems(['cleanassets']));
+    ContextMenu.addItem('block', getDefaultItems(['cleanassets']));
+    ContextMenu.addItem('component', getDefaultItems(['cleanassets']));
+    ContextMenu.addItem('page', getDefaultItems(['cleanassets']));
+    ContextMenu.addItem('menu', getDefaultItems(['copy','cleanassets']));
+    ContextMenu.addItem('page-min', getDefaultItems(['copy','delete','cleanassets']));
     ContextMenu.addItem('sharedcourse', [
       {
         title: Origin.l10n.t('app.duplicate'),

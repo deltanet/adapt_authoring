@@ -40,7 +40,7 @@
               <a class="save"><i class="fa fa-check-square-o"></i></a>
               <a class="cancel"><i class="fa fa-times"></i></a>
             </div>
-          {{/unless}} 
+          {{/unless}}
         {{/ifUserNotSuperAdmin}}{{/ifUserNotMe}}
       </div>
     </div>
@@ -65,7 +65,7 @@
                         <option value="{{this.attributes._id}}"{{#ifValueEquals ../roles.[0]._id this.attributes._id}} selected{{/ifValueEquals}}>{{this.attributes.name}}</option>
                       {{/ifValueNotEquals}}
                     {{/each}}
-                    
+
                   {{else}}
                      {{#each globalData.allRoles.models}}
                        {{!NOTE this won't do if we introduce multiple roles (../roles.[0])}}
@@ -94,51 +94,43 @@
     <div class="col-15">
       <div class="tb-col-inner">
         <div class="buttons edit-mode">
-            {{#ifUserSuperAdmin roleNames}}
-               <div class="group">
-                  {{t 'app.changesuperadminaccounts'}}
-               </div>
-            {{/ifUserSuperAdmin}}
-            {{#ifUserNotSuperAdmin roleNames}}
-              {{#ifUserIsMe _id}}
+            {{#ifUserIsMe _id}}
+              <div class="group">
+                {{t 'app.changeadminaccounts'}}
+              </div>
+            {{/ifUserIsMe}}
+            {{#if _isDeleted}}
+            {{else}}
+              <div class="group">
+                {{#ifMailEnabled}}
+                  <button class="btn primary resetPassword">{{t 'app.resetpassword'}}</button>
+                {{/ifMailEnabled}}
+                <button class="btn tertiary changePassword">{{t 'app.changepassword'}}</button>
+              </div>
+              {{#if _isLocked}}
                 <div class="group">
-                  {{t 'app.changeadminaccounts'}}
+                  <button class="btn secondary unlock">{{t 'app.unlockuser'}}</button>
                 </div>
-              {{/ifUserIsMe}}
-              {{#if _isDeleted}}
               {{else}}
-                <div class="group">
-                  {{#ifMailEnabled}}
-                    <button class="btn primary resetPassword">{{t 'app.resetpassword'}}</button>
-                  {{/ifMailEnabled}}
-                  <button class="btn tertiary changePassword">{{t 'app.changepassword'}}</button>
-                </div>
-                {{#if _isLocked}}
-                  <div class="group">
-                    <button class="btn secondary unlock">{{t 'app.unlockuser'}}</button>
-                  </div>
+                {{#ifValueEquals failedLoginCount 0}}
                 {{else}}
-                  {{#ifValueEquals failedLoginCount 0}}
-                  {{else}}
-                    <div class="group">
-                      <button class="btn secondary unlock">{{t 'app.resetlogins'}}</button>
-                    </div>
-                  {{/ifValueEquals}}
-                {{/if}}
-              {{/if}}
-               {{#ifUserNotMe _id}} 
                   <div class="group">
-                    {{#if _isDeleted}}
-                      <button class="btn action-primary restore">{{t 'app.restoreuser'}}</button>
-                    {{else}}
-                      <button class="btn warning disable">{{t 'app.disableuser'}}</button>
-                    {{/if}}
-                      <button class="btn alert edit-input delete">{{t 'app.deleteuser'}}</button>
+                    <button class="btn secondary unlock">{{t 'app.resetlogins'}}</button>
                   </div>
-              {{/ifUserNotMe}}
-            {{/ifUserNotSuperAdmin}}
-            
-           </div>
+                {{/ifValueEquals}}
+              {{/if}}
+            {{/if}}
+            {{#ifUserNotMe _id}}
+              <div class="group">
+                {{#if _isDeleted}}
+                  <button class="btn action-primary restore">{{t 'app.restoreuser'}}</button>
+                {{else}}
+                  <button class="btn warning disable">{{t 'app.disableuser'}}</button>
+                {{/if}}
+                  <button class="btn alert edit-input delete">{{t 'app.deleteuser'}}</button>
+              </div>
+            {{/ifUserNotMe}}
+         </div>
       </div>
     </div>
 </div>

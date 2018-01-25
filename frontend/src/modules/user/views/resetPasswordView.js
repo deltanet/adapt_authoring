@@ -51,11 +51,7 @@ define(function(require) {
     resetPassword: function(event) {
       event.preventDefault();
 
-      this.model.set('password', this.$('#password').val());
-      this.model.set('confirmPassword', this.$('#confirmPassword').val());
-
       var toChange = {
-        this.model.set('confirmPassword', this.$('#confirmPassword').val());
         password: this.$('#password').val(),
         confirmPassword: this.$('#confirmPassword').val(),
         id: this.model.get('_id'),

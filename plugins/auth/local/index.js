@@ -214,24 +214,28 @@ LocalAuth.prototype.internalRegisterUser = function(retypePasswordRequired, user
 };
 
 LocalAuth.prototype.resetPassword = function (req, res, next) {
-  var user = {
-    id: req.body.user,
-    password: req.body.password,
-    token: req.body.token
-  };
+  var resetPasswordToken = req.body.token;
+  var self = this;
 
-  this.internalResetPassword(user, function (error, user) {
-    if (error) {
-      logger.log('error', error);
-      res.statusCode = 200;
-      return res.json({ success: false });
-      // return next(error);
-    }
+  if (!resetPasswordToken) {
+    return next(new auth.errors.UserResetPasswordError('Token was not found'));
+  }
 
-    res.statusCode = 200;
-    return res.json({ success: true });
+  usermanager.retrieveUserPasswordReset({ token: resetPasswordToken }, function (err, usrReset) {
+    //get the user from the usrReset
+    var user = {
+      id: usrReset.user,
+      password: req.body.password
+    };
+    self.internalResetPassword(user, function (error, user) {
+      if (error) {
+        logger.log('error', error);
+        return res.status(500).json({ success: false });
+      }
+      res.status(200).json({ success: true });
+    });
   });
- };
+};
 
 LocalAuth.prototype.internalResetPassword = function (user, next) {
   if (!user.id || !user.password) {

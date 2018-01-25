@@ -54,7 +54,17 @@ define(function(require) {
       this.model.set('password', this.$('#password').val());
       this.model.set('confirmPassword', this.$('#confirmPassword').val());
 
-      this.model.save({}, {
+      var toChange = {
+        this.model.set('confirmPassword', this.$('#confirmPassword').val());
+        password: this.$('#password').val(),
+        confirmPassword: this.$('#confirmPassword').val(),
+        id: this.model.get('_id'),
+        _id: this.model.get('_id'),
+        token: this.model.get('token')
+      };
+
+      this.model.save(toChange, {
+        patch: true,
         success: _.bind(function(model, response, options) {
           if (response.success) {
             this.$('.form-reset-password').addClass('display-none');

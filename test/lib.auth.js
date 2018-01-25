@@ -108,25 +108,6 @@ it('should reject a user with an incorrect login', function(done) {
     });
 });
 
-// TODO not sure what this functionality's for
-it('should accept authenticated requests to log in as another user', function(done) {
-  helper.userAgent
-    .post('/api/loginas')
-    .set('Accept', 'application/json')
-    .send({
-      "email": testData.testUser.email,
-      "password": testData.testUser.plainPassword
-    })
-    .expect(200)
-    .expect('Content-Type', /json/)
-    .end(function(error, res) {
-      should.not.exist(error);
-      res.body.success.should.be.true;
-      helper.userId = res.body.id;
-      done();
-    });
-});
-
 it('should accept requests to verify if a user is authenticated', function(done) {
   helper.userAgent
     .get('/api/authcheck')

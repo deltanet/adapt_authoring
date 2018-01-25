@@ -158,27 +158,6 @@ LocalAuth.prototype.disavow = function (req, res, next) {
   return res.json({ success: true });
 };
 
-LocalAuth.prototype.registerUser = function (req, res, next) {
-  // presently, all we need is email, password and retyped password
-  var user = {
-    email: req.body.email,
-    password: req.body.password,
-    retypePassword: req.body.retypePassword
-  };
-
-  this.internalRegisterUser(false, user, function (error, user) {
-    if (error) {
-      return next(error);
-    }
-
-
-    res.statusCode = 200;
-    return res.json({ _id:user._id, email: user.email });
-
-  });
-
-};
-
 LocalAuth.prototype.internalRegisterUser = function(retypePasswordRequired, user, cb) {
   if (retypePasswordRequired) {
     if (!user.email || !user.password || !user.retypePassword) {

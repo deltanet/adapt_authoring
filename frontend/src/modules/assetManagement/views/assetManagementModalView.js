@@ -17,7 +17,8 @@ define(function(require) {
       this.setupSubViews();
       this.setupFilterAndSearchView();
       if (this.options.assetType === "Asset:image" && Origin.scaffold.getCurrentModel().get('_component') === 'graphic') {
-      	this.setupImageAutofillButton();
+        // TODO - removed until autofill issues can be resolved, see issue #35
+      	//this.setupImageAutofillButton();
       }
       this.resizePanels();
     },

@@ -80,13 +80,18 @@ define(function(require) {
         title: Origin.l10n.t('app.delete'),
         className: 'context-menu-item',
         callbackEvent: "delete"
-      },
-      {
+      }
+    ];
+
+    var superPerms = ["*/*:create","*/*:read","*/*:update","*/*:delete"];
+    if (Origin.permissions.hasPermissions(superPerms)) {
+      DEFAULT_ITEMS.push({
         title: Origin.l10n.t('app.cleanassets'),
         className: 'context-menu-item',
         callbackEvent: "cleanassets"
-      }
-    ];
+      });
+    }
+
     if(!blacklist) {
       return DEFAULT_ITEMS;
     }

@@ -38,10 +38,12 @@ function ImportSource(req, done) {
     idMap: {},
     componentMap: {},
     extensionMap: {},
+    menuMap: {},
     assetNameMap: {}
   };
   var extensionLocations = {};
   var enabledExtensions = {};
+  var menuLocations = {};
   var tenantId = app.usermanager.getCurrentUser().tenant._id;
   var unzipFolder = tenantId + '_unzipped';
   var COURSE_ROOT_FOLDER = path.join(configuration.tempDir, configuration.getConfig('masterTenantID'), Constants.Folders.Framework, Constants.Folders.AllCourses, tenantId, unzipFolder);
@@ -280,6 +282,24 @@ function ImportSource(req, done) {
             }, cb);
           });
         },
+        function storeMenutypes(cb) {
+          db.retrieve('menutype', {}, { jsonOnly: true }, function(error, results) {
+            if(error) return cb(error);
+            async.each(results, function(menu, cb2) {
+              metadata.menuMap[menu.menu] = {
+                "targetAttribute": menu.targetAttribute,
+                "version": menu.version,
+                "name": menu.name,
+                "_id": menu._id
+              };
+
+              if(menu.properties.pluginLocations) {
+                menuLocations[menu.targetAttribute] = menu.properties.pluginLocations;
+              }
+              cb2();
+            }, cb);
+          });
+        }
       ], done);
     });
   }
@@ -416,9 +436,11 @@ function ImportSource(req, done) {
             var genericPropKeys = Object.keys(db.getModel(type).schema.paths);
             var customProps = _.pick(data, _.difference(Object.keys(data), genericPropKeys));
             var extensions = _.pick(customProps, _.intersection(Object.keys(customProps),Object.keys(extensionLocations)));
+            var menuSettings = _.pick(customProps, _.intersection(Object.keys(customProps),Object.keys(menuLocations)));
             customProps = _.omit(customProps, Object.keys(extensions));
             data.properties = customProps;
             data._extensions = extensions;
+            data.menuSettings = menuSettings;
             data = _.omit(data, Object.keys(customProps));
             cb();
           });

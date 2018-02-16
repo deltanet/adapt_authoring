@@ -320,7 +320,7 @@ function replicate (data, cb) {
       if (!user || 'object' !== typeof user) {
         return cb("there was an error copying assets");
       }
-      var parentIdMap = [];
+      var parentIdMap = {};
 
       ReplicateCourse.prototype.retrieve({_id: data._id}, {}, function (error, courses) {
         if (error) {
@@ -497,9 +497,10 @@ function replicate (data, cb) {
               return cb(error);
             } else {
               newCourse._start._startIds = newStartIds;
-              delete newCourse._id
+              var newCourseId = newCourse._id;
+              delete newCourse._id;
               // update the course with the new or empty start ID's
-              db.update('course', {_id: newCourse._id}, newCourse, function(err, doc) {
+              db.update('course', {_id: newCourseId}, newCourse, function(err, doc) {
                 if (err) {
                   return cb(err);
                 }

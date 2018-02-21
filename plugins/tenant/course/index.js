@@ -305,6 +305,15 @@ function replicate (data, cb) {
   var self = this;
   logger.log('info', 'Copying course to tenant');
   async.waterfall([
+    function validateData(cb) {
+      if (!data.userId) {
+        cb(new Error('No user Id found'));
+      } else if (!data._id) {
+        cb(new Error('No course Id found'));
+      } else {
+        cb(null);
+      }
+    },
     function getUserData(cb) {
       usermanager.retrieveUser({ _id: data.userId }, function(error, result) {
         if (error) {
@@ -471,6 +480,8 @@ function replicate (data, cb) {
               }); // end async.eachSeries()
             });
           });
+        } else {
+          cb(new Error('Could not find course. You probably do not have permissions to copy this course.'));
         }
       });
     },

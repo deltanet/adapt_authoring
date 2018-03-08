@@ -191,11 +191,16 @@ function initialize () {
     });
 
     // All Courses for a given Tenant
-    rest.get('/tenant/course/:tenantId', function (req, res, next) {
+    rest.get('/course/tenantid/:tenantId', function (req, res, next) {
       var tenantId = req.params.tenantId;
       var options = _.keys(req.body).length
       ? req.body
       : req.query;
+
+      if (!tenantId) {
+        res.statusCode = 500;
+        return res.json('Could not find Tenant Id');
+      }
 
       options.jsonOnly = true;
       options.fields = DASHBOARD_COURSE_FIELDS.join(' ');

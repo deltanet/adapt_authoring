@@ -189,7 +189,33 @@ function initialize () {
         });
       });
     });
-    
+
+    // All Courses for a given Tenant
+    rest.get('/tenant/course/:tenantId', function (req, res, next) {
+      var tenantId = req.params.tenantId;
+      var options = _.keys(req.body).length
+      ? req.body
+      : req.query;
+
+      options.jsonOnly = true;
+      options.fields = DASHBOARD_COURSE_FIELDS.join(' ');
+
+      options = _.extend(options, { _tenantId: tenantId });
+
+      // Only return courses for this tenant id
+      var query = { _tenantId: tenantId };
+
+      new CourseContent().retrieve(query, options, function (err, results) {
+        if (err) {
+          res.statusCode = 500;
+          return res.json(err);
+        }
+
+        return res.json(results);
+      });
+    });
+
+
     /**
      * API Endpoint to duplicate a course
      *

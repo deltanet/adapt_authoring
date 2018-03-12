@@ -30,7 +30,7 @@ server.get('/download/:tenant/:course', function(req, res, next) {
         res.json({ success: false, message: error.message });
         return res.end();
       } else {
-        plugin.publish(course, mode, req, res, function (error, result) {
+        plugin.publish(tenant, course, mode, req, res, function (error, result) {
           if (error) {
             logger.log('error', 'Unable to publish');
             return res.json({ success: false, message: error.message });
@@ -45,7 +45,7 @@ server.get('/download/:tenant/:course', function(req, res, next) {
     // User doesn't have access to this course
     res.statusCode = 401;
     return res.json({success: false});
-  }  
+  }
 });
 
 server.get('/download/:tenant/:course/:title/download.zip', function (req, res, next) {
@@ -56,7 +56,8 @@ server.get('/download/:tenant/:course/:title/download.zip', function (req, res, 
   var zipName = req.params.title;
   var currentUser = usermanager.getCurrentUser();
 
-  if (currentUser && (currentUser.tenant._id == tenantId)) {
+  // HACK - allow API user to download sub tenants courses
+  if (currentUser && (currentUser.email == 'api@delta-net.co.uk' || currentUser.tenant._id == tenantId)) {
     fs.stat(downloadZipFilename, function(err, stat) {
       if (err) {
         logger.log('error', 'Error calling fs.stat');

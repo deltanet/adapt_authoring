@@ -31,12 +31,22 @@ function AdaptOutput() {
 
 util.inherits(AdaptOutput, OutputPlugin);
 
-AdaptOutput.prototype.publish = function(courseId, mode, request, response, next) {
+AdaptOutput.prototype.publish = function(courseTenantId, courseId, mode, request, response, next) {
   var app = origin();
+
+  // shuffle params
+  if ('function' === typeof response) {
+    next = response;
+    response = request;
+    request = mode;
+    mode = courseId;
+    courseId = courseTenantId;
+    courseTenantId = undefined;
+  }
 
   var self = this;
   var user = usermanager.getCurrentUser();
-  var tenantId = user.tenant._id;
+  var tenantId = courseTenantId || user.tenant._id;
   var outputJson = {};
   var isRebuildRequired = false;
   var themeName = '';

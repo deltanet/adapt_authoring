@@ -31,3 +31,5 @@
 
 .idea
 .project
+
+newrelic_agent.log

@@ -33,3 +33,5 @@
 .project
 
 newrelic_agent.log
+
+newrelic.js

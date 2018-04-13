@@ -6,6 +6,8 @@
         <div class="project-settings">
           <div class="project-settings-inner">
             <a href="#" class="open-context-icon open-context-course"><i class="fa fa-cog fa-fw"></i></a>
+            <a href="#" class="download-icon download-project"><i class="fa fa-download fa-fw"></i></a>
+            <a href="#" class="downloading-icon display-none"><i class="fa fa-refresh fa-spin fa-fw"></i></a>
             <a href="#" class="course-delete editor-delete-course-element" title="{{ t 'app.clicktodelete'}}">
                 <i class="fa fa-trash-o"></i>
             </a>
@@ -51,6 +53,6 @@
         {{/if}}
       </div>
     </div>
-
+    <form id="downloadForm" method="get" action=""></form>
 
 </div>

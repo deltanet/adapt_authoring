@@ -65,7 +65,6 @@ define(function(require) {
     },
 
     validateProject: function(next) {
-      console.log('validateProject');
       Helpers.validateCourseContent(this.model, _.bind(function(error) {
         if(error) {
           Origin.Notify.alert({ type: 'error', text: "There's something wrong with your course:<br/><br/>" + error });
@@ -75,7 +74,6 @@ define(function(require) {
     },
 
     downloadProject: function() {
-      console.log('downloadProject');
       if(Origin.editor.isDownloadPending) {
         return;
       }
@@ -94,7 +92,7 @@ define(function(require) {
         }
         if (jqXHR.payload && typeof(jqXHR.payload.pollUrl) !== undefined && jqXHR.payload.pollUrl) {
           // Ping the remote URL to check if the job has been completed
-          this.updateDownloadProgress(jqXHR.payload.pollUrl);
+          this.updateDownloadProgress(courseId, jqXHR.payload.pollUrl);
           return;
         }
         this.resetDownloadProgress(courseId);
@@ -117,7 +115,7 @@ define(function(require) {
       Origin.editor.isDownloadPending = false;
     },
 
-    updateDownloadProgress: function(url) {
+    updateDownloadProgress: function(id, url) {
       // Check for updated progress every 3 seconds
       var pollId = setInterval(_.bind(function pollURL() {
         $.get(url, function(jqXHR, textStatus, errorThrown) {
@@ -125,10 +123,10 @@ define(function(require) {
             return;
           }
           clearInterval(pollId);
-          this.resetDownloadProgress();
+          this.resetDownloadProgress(id);
         }).fail(function(jqXHR, textStatus, errorThrown) {
           clearInterval(pollId);
-          this.resetDownloadProgress();
+          this.resetDownloadProgress(id);
           Origin.Notify.alert({ type: 'error', text: errorThrown });
         });
       }, this), 3000);

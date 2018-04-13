@@ -15,6 +15,7 @@ define(function(require) {
       'dblclick': 'editProject',
       'click': 'selectProject',
       'click a.open-context-course': 'openContextMenu',
+      'click a.download-project': 'startDownloadProject',
       'click a.course-delete': 'deleteProjectPrompt',
       'click .projects-details-tags-button-show': 'onProjectShowTagsButtonClicked',
       'click .projects-details-tags-button-hide': 'onProjectHideTagsButtonClicked',
@@ -56,6 +57,79 @@ define(function(require) {
     editProject: function(event) {
       event && event.preventDefault();
       Origin.router.navigateTo('editor/' + this.model.get('_id') + '/menu');
+    },
+
+    startDownloadProject: function(event) {
+      event && event.preventDefault();
+      this.validateProject(_.bind(this.downloadProject, this));
+    },
+
+    validateProject: function(next) {
+      Helpers.validateCourseContent(this.model, _.bind(function(error) {
+        if(error) {
+          Origin.Notify.alert({ type: 'error', text: "There's something wrong with your course:<br/><br/>" + error });
+        }
+        next(this, error);
+      }, this));
+    },
+
+    downloadProject: function() {
+      if(Origin.editor.isDownloadPending) {
+        return;
+      }
+      var courseId = this.model.get('_id');
+      $('.project-inner[data-id="' + courseId + '"]').find('.download-icon').addClass('display-none');
+      $('.project-inner[data-id="' + courseId + '"]').find('.downloading-icon').removeClass('display-none');
+      $('.projects-inner').addClass('downloading');
+      $('.project-list-item').addClass('downloading');
+
+      $.get('/api/output/' + Origin.constants.outputPlugin + '/publish/' + courseId, _.bind(function(jqXHR, textStatus, errorThrown) {
+
+        if (!jqXHR.success) {
+          Origin.Notify.alert({ type: 'error', text: Origin.l10n.t('app.errorgeneric') });
+          this.resetDownloadProgress(courseId);
+          return;
+        }
+        if (jqXHR.payload && typeof(jqXHR.payload.pollUrl) !== undefined && jqXHR.payload.pollUrl) {
+          // Ping the remote URL to check if the job has been completed
+          this.updateDownloadProgress(courseId, jqXHR.payload.pollUrl);
+          return;
+        }
+        this.resetDownloadProgress(courseId);
+
+        var $downloadForm = $('#downloadForm');
+        $downloadForm.attr('action', '/download/' + Origin.sessionModel.get('tenantId') + '/' + courseId + '/' + jqXHR.payload.zipName + '/download.zip');
+        $downloadForm.submit();
+
+      }, this)).fail(_.bind(function (jqXHR, textStatus, errorThrown) {
+        this.resetDownloadProgress(courseId);
+        Origin.Notify.alert({ type: 'error', text: Origin.l10n.t('app.errorgeneric') });
+      }, this));
+    },
+
+    resetDownloadProgress: function(id) {
+      $('.project-inner[data-id="' + id + '"]').find('.download-icon').removeClass('display-none');
+      $('.project-inner[data-id="' + id + '"]').find('.downloading-icon').addClass('display-none');
+      $('.projects-inner').removeClass('downloading');
+      $('.project-list-item').removeClass('downloading');
+      Origin.editor.isDownloadPending = false;
+    },
+
+    updateDownloadProgress: function(id, url) {
+      // Check for updated progress every 3 seconds
+      var pollId = setInterval(_.bind(function pollURL() {
+        $.get(url, function(jqXHR, textStatus, errorThrown) {
+          if (jqXHR.progress < "100") {
+            return;
+          }
+          clearInterval(pollId);
+          this.resetDownloadProgress(id);
+        }).fail(function(jqXHR, textStatus, errorThrown) {
+          clearInterval(pollId);
+          this.resetDownloadProgress(id);
+          Origin.Notify.alert({ type: 'error', text: errorThrown });
+        });
+      }, this), 3000);
     },
 
     selectProject: function(event) {

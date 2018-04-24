@@ -28,7 +28,8 @@ define(function(require) {
       'themeSettings',
       '_onScreen',
       '_isVisible',
-      '_isHidden'
+      '_isHidden',
+      'instruction'
     ]
   });
 

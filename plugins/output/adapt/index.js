@@ -22,6 +22,7 @@ var origin = require('../../../'),
     assetmanager = require('../../../lib/assetmanager'),
     exec = require('child_process').exec,
     semver = require('semver'),
+    helpers = require('../../../lib/helpers'),
     installHelpers = require('../../../lib/installHelpers'),
     helpers = require('../../../lib/helpers'),
     logger = require('../../../lib/logger');
@@ -234,10 +235,10 @@ AdaptOutput.prototype.publish = function(courseTenantId, courseId, mode, request
       function(callback) {
         if (mode !== Constants.Modes.Preview) {
           // Now zip the build package
-          var filename = path.join(COURSE_FOLDER, Constants.Filenames.Download);
+          var filename = path.join(FRAMEWORK_ROOT_FOLDER, Constants.Folders.AllCourses, tenantId, courseId, Constants.Filenames.Download);
           var zipName = helpers.slugify(outputJson['course'].title);
-          var output = fs.createWriteStream(filename);
-          var archive = archiver('zip');
+          var output = fs.createWriteStream(filename),
+            archive = archiver('zip');
 
           output.on('close', function() {
             resultObject.filename = filename;
@@ -254,10 +255,7 @@ AdaptOutput.prototype.publish = function(courseTenantId, courseId, mode, request
           });
 
           archive.pipe(output);
-
-          archive.glob('**/*', { cwd: path.join(BUILD_FOLDER) });
-          archive.finalize();
-
+          archive.glob('**/*', {cwd: path.join(BUILD_FOLDER)}).finalize();
         } else {
           // No download required -- skip this step
           callback();
@@ -282,14 +280,11 @@ AdaptOutput.prototype.importsource = require('./importsource');
 AdaptOutput.prototype.export = function (courseId, request, response, next) {
   var self = this;
   var tenantId = usermanager.getCurrentUser().tenant._id;
-  var timestamp = new Date().toISOString().replace('T', '-').replace(/:/g, '').substr(0,17);
+  var userId = usermanager.getCurrentUser()._id;
 
   var FRAMEWORK_ROOT_FOLDER = path.join(configuration.tempDir, configuration.getConfig('masterTenantID'), Constants.Folders.Framework);
   var COURSE_ROOT_FOLDER = path.join(FRAMEWORK_ROOT_FOLDER, Constants.Folders.AllCourses, tenantId, courseId);
-
-  // set in getCourseName
-  var exportName;
-  var exportDir;
+  var exportDir = path.join(FRAMEWORK_ROOT_FOLDER, Constants.Folders.Exports, userId);
 
   var mode = Constants.Modes.export;
 
@@ -297,27 +292,7 @@ AdaptOutput.prototype.export = function (courseId, request, response, next) {
     function publishCourse(callback) {
       self.publish(courseId, mode, request, response, callback);
     },
-    function getCourseName(results, callback) {
-      database.getDatabase(function (error, db) {
-        if (error) {
-          return callback(err);
-        }
-
-        db.retrieve('course', { _id: courseId }, { jsonOnly: true }, function (error, results) {
-          if (error) {
-            return callback(error);
-          }
-          if(!results || results.length > 1) {
-            return callback(new Error('Unexpected results returned for course ' + courseId + ' (' + results.length + ')', self));
-          }
-
-          exportName = self.slugify(results[0].title) + '-export-' + timestamp;
-          exportDir = path.join(FRAMEWORK_ROOT_FOLDER, Constants.Folders.Exports, exportName);
-          callback();
-        });
-      });
-    },
-    function copyFiles(callback) {
+    function copyFiles(results, callback) {
       self.generateIncludesForCourse(courseId, function(error, includes) {
         if(error) {
           return callback(error);
@@ -363,25 +338,24 @@ AdaptOutput.prototype.export = function (courseId, request, response, next) {
     },
     function zipExport(callback) {
       var archive = archiver('zip');
-      var output = fs.createWriteStream(exportDir +  '.zip');
-
+      var zipPath = exportDir +  '.zip';
+      var output = fs.createWriteStream(zipPath);
       archive.on('error', callback);
       output.on('close', callback);
       archive.on('warning', function(err) {
           logger.log('warn', err);
       });
       archive.pipe(output);
-      archive.glob('**/*', { cwd: path.join(exportDir) });
-      archive.finalize();
-
-    },
-    function cleanUp(callback) {
-      fs.remove(exportDir, function (error) {
-        callback(error, { zipName: exportName + '.zip' });
-      });
+      archive.glob('**/*', {cwd: exportDir}).finalize();
     }
   ],
-  next);
+  function onDone(asyncError) {
+    // remove the exportDir, if there is one
+    fs.remove(exportDir, function(removeError) {
+      // async error more important
+      next(asyncError || removeError);
+    });
+  });
 };
 
 

@@ -34,7 +34,10 @@ define(function(require) {
           validationErrors.confirmPassword = Origin.l10n.t('app.validationpasswordmatch');
         }
       }
-      return _.isEmpty(validationErrors) ? null : validationErrors;
+
+      return _.isEmpty(validationErrors)
+        ? null
+        : validationErrors;
     }
   });
 

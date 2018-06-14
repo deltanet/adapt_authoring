@@ -55,7 +55,6 @@ define(function(require) {
         password: this.$('#password').val(),
         confirmPassword: this.$('#confirmPassword').val(),
         id: this.model.get('_id'),
-        _id: this.model.get('_id'),
         token: this.model.get('token')
       };
 

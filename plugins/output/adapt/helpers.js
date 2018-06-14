@@ -104,7 +104,7 @@ function importPlugin(pluginDir, pluginType, pluginImported) {
             bowerJson.isLocalPackage = true;
             app.bowermanager.addPackage(contentPlugin.bowerConfig, { canonicalDir: pluginDir, pkgMeta: bowerJson }, { strict: true }, cb);
           } else {
-            logger.log('info', "Can't install " + bowerJson.displayName + ", it requires framework v" + pluginVersion + " (" + frameworkVersion + " installed)");
+            logger.log('info', "Can't install " + bowerJson.displayName + ", it requires framework v" + pluginRange + " (" + frameworkVersion + " installed)");
             cb();
           }
         })
@@ -134,7 +134,7 @@ function importPlugin(pluginDir, pluginType, pluginImported) {
 */
 function importAsset(fileMetadata, metadata, assetImported) {
   var search = {
-    title: fileMetadata.title,
+    filename: fileMetadata.filename,
     size: fileMetadata.size
   };
   origin.assetmanager.retrieveAsset(search, function gotAsset(error, results) {
@@ -146,7 +146,6 @@ function importAsset(fileMetadata, metadata, assetImported) {
       return assetImported();
     }
 
-    var date = new Date();
     var hash = crypto.createHash('sha1');
     var rs = fs.createReadStream(fileMetadata.path);
 
@@ -178,8 +177,7 @@ function importAsset(fileMetadata, metadata, assetImported) {
           if (error) {
             return assetImported(error);
           }
-          // It's better not to set thumbnailPath if it's not set.
-          if (storedFile.thumbnailPath) storedFile.thumbnailPath = storedFile.thumbnailPath;
+
           var asset = _.extend(fileMetadata, storedFile);
           _.each(asset.tags, function iterator(tag, index) {
             if (metadata.idMap[tag]) {

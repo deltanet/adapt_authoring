@@ -121,7 +121,6 @@ define(function(require){
       }
 
       _.extend(toChange, {
-        id: self.model.get('_id'),
         _id: self.model.get('_id'),
         email: self.model.get('email')
       });

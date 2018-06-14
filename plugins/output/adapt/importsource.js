@@ -56,14 +56,19 @@ function ImportSource(req, done) {
   var courseId;
   var configId;
   var cleanupDirs = [];
-  var assetFields = [];
   var PATH_REXEX = new RegExp(/(course\/)((\w)*\/)*(\w)*.[a-zA-Z0-9]+/gi);
+  var assetFolders = [];
 
   form.parse(req, function (error, fields, files) {
 
     if (error) return next(error);
 
     var formTags = (fields.tags && fields.tags.length) ? fields.tags.split(',') : [];
+    var formAssetDirs = (fields.formAssetFolders && fields.formAssetFolders.length) ? fields.formAssetFolders.split(',') : [];
+    var cleanFormAssetDirs = formAssetDirs.map(function(item) {
+      return item.trim();
+    });
+
 
     /**
     * Main process
@@ -71,79 +76,45 @@ function ImportSource(req, done) {
     */
     async.series([
       function asyncUnzip(cb) {
-        // socket unzipping files
         helpers.unzip(files.file.path, COURSE_ROOT_FOLDER, function(error) {
-          if(error) return cb(error);
-          // socket files unzipped
-          var zipPath = files.file.path;
-          cleanupDirs.push(zipPath,COURSE_ROOT_FOLDER);
+          if(error) return cb(error)
+          cleanupDirs.push(files.file.path, COURSE_ROOT_FOLDER);
           cb();
         });
       },
-      function findLanguages(cb) {
-        // socket import setup
-        var courseLangs = [];
-        fs.readdir(COURSE_JSON_PATH, function (error, files) {
-            if (error) {
-              return cb(error);
-            }
-            files.map(function (file) {
-              return path.join(COURSE_JSON_PATH, file);
-            }).filter(function (file) {
-              return fs.statSync(file).isDirectory();
-            }).forEach(function (file) {
-              courseLangs.push(path.basename(file));
-            });
-            COURSE_LANG = courseLangs[0] ? courseLangs[0] : 'en';
-            cb();
-        });
-      },
-      function asyncValidate(cb) {
-        // socket validating package
-        validateCoursePackage(function(error) {
-          if(error) return cb(error);
-          // socket package passed validation
-          cb();
-        });
-      },
-      function asyncInstallPlugins(cb) {
-        // socket installing custom plugins
-        installPlugins(function(error) {
-          if(error) return cb(error);
-          // socket custom plugins installed
-          cb();
-        });
-      },
-      function asyncAddAssets(cb) {
-        // socket importing assets
-        addAssets(formTags, function(error) {
-          if(error) return cb(error);
-          // socket assets imported
-          cb();
-        });
-      },
-      function asyncCacheMetadata(cb) {
-        cacheMetadata(cb);
-      },
-      function asyncImportContent(cb) {
-        // socket importing course content
-        importContent(formTags, function(error) {
-          if(error) return cb(error);
-          // socket course content imported successfully
-          cb();
-        });
-      },
-      function cleanUpTasks(cb) {
-        helpers.cleanUpImport(cleanupDirs, cb);
-      }
+      async.apply(findLanguages),
+      async.apply(validateCoursePackage, cleanFormAssetDirs),
+      async.apply(installPlugins),
+      async.apply(addAssets, formTags),
+      async.apply(cacheMetadata),
+      async.apply(importContent, formTags),
+      async.apply(helpers.cleanUpImport, cleanupDirs)
     ], done);
   });
 
 
+  function findLanguages(cb) {
+    var courseLangs = [];
+    fs.readdir(COURSE_JSON_PATH, function (error, files) {
+      if (error) {
+        return cb(new Error(app.polyglot.t('app.importinvalidpackage')));
+      }
+      files.map(function (file) {
+        return path.join(COURSE_JSON_PATH, file);
+      }).filter(function (file) {
+        return fs.statSync(file).isDirectory();
+      }).forEach(function (file) {
+        courseLangs.push(path.basename(file));
+      });
+      COURSE_LANG = courseLangs[0] ? courseLangs[0] : 'en';
+      cb();
+    });
+  }
+
   /**
   * Checks course for any potential incompatibilities
   */
-  function validateCoursePackage(done) {
+  function validateCoursePackage(cleanFormAssetDirs, done) {
     // - Check framework version compatibility
     // - check we have all relevant json files using contentMap
     async.auto({
@@ -166,6 +137,28 @@ function ImportSource(req, done) {
             cb2();
           });
         }, cb);
+      }],
+      checkAssetFolders: ['checkContentJson', function(results, cb) {
+        if (!cleanFormAssetDirs.length) {
+          assetFolders = Constants.Folders.ImportAssets;
+          return cb();
+        }
+        var assetFolderError = false;
+        var missingFolders = [];
+        assetFolders = cleanFormAssetDirs;
+        for (index = 0; index < assetFolders.length; ++index) {
+          var assetFolderPath = path.join(COURSE_JSON_PATH , COURSE_LANG, assetFolders[index]);
+          if (!fs.existsSync(assetFolderPath)) {
+            assetFolderError = true;
+            missingFolders.push(assetFolders[index]);
+          }
+        }
+        // if a user input folder is missing log error and abort early
+        if (assetFolderError) {
+          var folderError = 'Cannot find asset folder/s ' + missingFolders.toString() + ' in framework import.';
+          return cb(folderError);
+        }
+        cb();
       }]
     }, function doneAuto(error, data) {
       done(error);
@@ -173,78 +166,105 @@ function ImportSource(req, done) {
   }
 
   /**
-  * Imports assets to the library
+  * Imports assets to the library. If the course to be imported contains an assets.json file
+  * (it was exported from the authoring tool) then use metadata from this file to populate the
+  * title, description and tag fields, these will be used to create a new asset if an asset
+  * with matching filename is not found in the database.
   */
   function addAssets(assetTags, done) {
-    var assetsGlob = path.join(COURSE_JSON_PATH, COURSE_LANG, Constants.Folders.Assets, '*');
-    glob(assetsGlob, function (error, assets) {
-      if(error) {
-        return cb(error);
+
+    async.eachSeries(assetFolders, function iterator(assetDir, doneAssetFolder) {
+      var assetDirPath = path.join(COURSE_JSON_PATH, COURSE_LANG, assetDir);
+
+      if (!fs.existsSync(assetDirPath)) {
+        logger.log('error', 'Framework import error. Cannot find folder: ' + assetDirPath);
+        return doneAssetFolder();
       }
-      var repository = configuration.getConfig('filestorage') || 'localfs';
-      async.eachSeries(assets, function iterator(assetPath, doneAsset) {
-        if (error) {
-          return doneAsset(error);
-        }
-        var assetName = path.basename(assetPath);
-        var assetExt = path.extname(assetPath);
-        var assetId = path.basename(assetPath, assetExt);
-        var fileStat = fs.statSync(assetPath);
+      var assetsGlob = path.join(COURSE_JSON_PATH, COURSE_LANG, assetDir, '*');
+      var assetsJsonFilename = path.join(COURSE_JSON_PATH, COURSE_LANG, Constants.Filenames.Assets);
+      var assetsJson = {};
 
-        var fileMeta = {
-          oldId: assetId,
-          title: assetName,
-          type: mime.lookup(assetName),
-          size: fileStat["size"],
-          filename: assetName,
-          description: assetName,
-          path: assetPath,
-          tags: assetTags,
-          repository: repository,
-          createdBy: app.usermanager.getCurrentUser()._id
-        };
-
-        if(!fileMeta) {
-          return doneAsset(new helpers.ImportError('No metadata found for asset: ' + assetName));
+      if (fs.existsSync(assetsJsonFilename)) {
+        assetsJson = fs.readJSONSync(assetsJsonFilename);
+      }
+      glob(assetsGlob, function (error, assets) {
+        if(error) {
+          return doneAssetFolder(error);
         }
-        helpers.importAsset(fileMeta, metadata, doneAsset);
-      }, done);
-    });
+        var repository = configuration.getConfig('filestorage') || 'localfs';
+        async.eachSeries(assets, function iterator(assetPath, doneAsset) {
+          if (error) {
+            return doneAsset(error);
+          }
+          var assetName = path.basename(assetPath);
+          var assetExt = path.extname(assetPath);
+          var assetId = path.basename(assetPath);
+          var fileStat = fs.statSync(assetPath);
+          var assetTitle = assetName;
+          var assetDescription = assetName;
+          var tags = assetTags.slice();
+
+          if (assetsJson[assetName]) {
+            assetTitle = assetsJson[assetName].title;
+            assetDescription = assetsJson[assetName].description;
+
+            assetsJson[assetName].tags.forEach(function(tag) {
+              tags.push(tag._id);
+            });
+          }
+          var fileMeta = {
+            oldId: assetId,
+            title: assetTitle,
+            type: mime.getType(assetName),
+            size: fileStat["size"],
+            filename: assetName,
+            description: assetDescription,
+            path: assetPath,
+            tags: tags,
+            repository: repository,
+            createdBy: app.usermanager.getCurrentUser()._id
+          };
+          if(!fileMeta) {
+            return doneAsset(new helpers.ImportError('No metadata found for asset: ' + assetName));
+          }
+          helpers.importAsset(fileMeta, metadata, doneAsset);
+        }, doneAssetFolder);
+      });
+    }, done);
   }
 
   /**
   * Installs any custom plugins
   */
   function installPlugins(done) {
-    async.series([
-      function mapPluginIncludes(cb) {
-        async.each(plugindata.pluginTypes, function iterator(pluginType, doneMapIterator) {
+    async.each(plugindata.pluginTypes, function iterator(pluginType, doneMapIterator) {
+      var srcDir = path.join(COURSE_ROOT_FOLDER, Constants.Folders.Source, pluginType.folder);
 
-          var srcDir = path.join(COURSE_ROOT_FOLDER, Constants.Folders.Source, pluginType.folder);
-          fs.readdir(srcDir, function (err, files) {
-              if (err) {
-                return done(err);
-              }
-              files.map(function (file) {
-                return path.join(srcDir, file);
-              }).filter(function (file) {
-                return fs.statSync(file).isDirectory();
-              }).forEach(function (file) {
-                var thisPluginType = _.clone(pluginType);
-                var data = _.extend(thisPluginType, { location: file });
-                plugindata.pluginIncludes.push(data);
-              });
-              doneMapIterator();
-          });
-        }, cb);
-      },
-      function importPlugins(cb) {
-        async.each(plugindata.pluginIncludes, function(pluginData, donePluginIterator) {
-          helpers.importPlugin(pluginData.location, pluginData.type, donePluginIterator);
-        }, cb);
-      },
-    ], function(error, results) {
-      done(error);
+      if (!fs.existsSync(srcDir)) {
+        logger.log('info', 'No plugins found.');
+        return doneMapIterator();
+      }
+      fs.readdir(srcDir, function (err, files) {
+        if (err) {
+          return doneMapIterator(err);
+        }
+        files.map(function (file) {
+          return path.join(srcDir, file);
+        }).filter(function (file) {
+          return fs.statSync(file).isDirectory();
+        }).forEach(function (file) {
+          var data = _.extend(_.clone(pluginType), { location: file });
+          plugindata.pluginIncludes.push(data);
+        });
+        doneMapIterator();
+      });
+    }, function(err) {
+      if(err) {
+        return done(err);
+      }
+      async.each(plugindata.pluginIncludes, function(pluginData, donePluginIterator) {
+        helpers.importPlugin(pluginData.location, pluginData.type, donePluginIterator);
+      }, done);
     });
   }
 
@@ -253,7 +273,7 @@ function ImportSource(req, done) {
   */
   function cacheMetadata(done) {
     database.getDatabase(function(error, db) {
-      if(error) return cb(error);
+      if(error) return done(error);
       async.parallel([
         function storeComponentypes(cb) {
           db.retrieve('componenttype', {}, { jsonOnly: true }, function(error, results) {
@@ -333,7 +353,7 @@ function ImportSource(req, done) {
               });
               break;
             case 'theme':
-              // add the theme value to config JSON
+              // add the theme name to config JSON
               fs.readJson(path.join(pluginData.location, Constants.Filenames.Bower), function(error, themeJson) {
                 if(error) return cb(error);
                 plugindata.theme.push({ _theme: themeJson.name});
@@ -341,7 +361,7 @@ function ImportSource(req, done) {
               });
               break;
             case 'menu':
-              // add the theme value to config JSON
+              // add the menu name to config JSON
               fs.readJson(path.join(pluginData.location, Constants.Filenames.Bower), function(error, menuJson) {
                 if(error) return cb(error);
                 plugindata.menu.push({ _menu: menuJson.name});
@@ -446,9 +466,7 @@ function ImportSource(req, done) {
           });
         },
         function updateAssetData(cb) {
-          var replaceRegex = new RegExp(/(course\/)((\w){2}\/)/gi);
-          var newAssetPath = Constants.Folders.Course + path.sep;
-
+          var newAssetPath = Constants.Folders.Course + '/' + Constants.Folders.Assets; // always use '/' for paths in content
           var traverse = require('traverse');
 
           traverse(data).forEach(function (value) {
@@ -457,16 +475,24 @@ function ImportSource(req, done) {
 
             if (!isPath) return;
             var dirName = path.dirname(value);
-            var newDirName = dirName.replace(replaceRegex, newAssetPath);
-            var fileExt = path.extname(value);
-            var fileName = path.basename(value, fileExt);
+            var newDirName;
 
-            if (dirName && fileName && fileExt) {
+            for (index = 0; index < assetFolders.length; ++index) {
+              var folderMatch = "(course\/)((\\w){2}\/)" + '(' + assetFolders[index] + ')';
+              var assetFolderRegex = new RegExp(folderMatch, "gi");
+
+              if (!dirName.match(assetFolderRegex)) continue;
+              newDirName = dirName.replace(assetFolderRegex, newAssetPath);
+            }
+
+            var fileExt = path.extname(value);
+            var fileName = path.basename(value);
+            if (newDirName && fileName && fileExt) {
               try {
                 var fileId = metadata.idMap[fileName];
                 var newFileName = metadata.assetNameMap[fileId];
                 if (newFileName) {
-                  this.update(path.join(newDirName, newFileName));
+                  this.update(newDirName + '/' + newFileName); // always use '/' for paths in content
                 }
               } catch (e) {
                 logger.log('error', e);
@@ -506,76 +532,59 @@ function ImportSource(req, done) {
   */
   function createCourseAssets(type, contentData, cb) {
     var courseAssetsArray;
-    var assetData = {};
     var componentPlugin;
     var extensionPlugins;
-    // courseassets values change depending on what content type they are for
+    var assetData = {
+      _courseId : contentData._courseId,
+      _contentType: type,
+      _contentTypeParentId: contentData._parentId
+    };
+    // some courseassets values change depending on what content type they're for
     switch(type) {
       case 'course':
-        assetData = {
-            _courseId : contentData._id,
-            _contentType : type,
-            _contentTypeId : contentData._id,
-            _contentTypeParentId: contentData._id
-        };
+        assetData._courseId = assetData._contentTypeId = assetData._contentTypeParentId = contentData._id;
         break;
       case 'article', 'block', 'config':
-        assetData = {
-            _courseId : contentData._courseId,
-            _contentType : type,
-            _contentTypeId : contentData._componentType,
-            _contentTypeParentId: contentData._parentId
-        };
+        assetData._contentTypeId = contentData._componentType;
         break;
       default:
-        assetData = {
-            _courseId : contentData._courseId,
-            _contentType : type,
-            _contentTypeId : contentData._id,
-            _contentTypeParentId: contentData._parentId
-        };
+        assetData._contentTypeId = contentData._id;
         break;
     }
-
     var contentDataString = JSON.stringify(contentData);
     var assetArray = contentDataString.match(PATH_REXEX);
-
     // search through object values for file paths
     async.each(assetArray, function(data, callback) {
       delete assetData._assetId;
-      if (!_.isString(data)) return callback();
-
+      if (!_.isString(data)) {
+        return callback();
+      }
       var assetBaseName = path.basename(data);
       // get asset _id from lookup of the key of metadata.assetNameMap mapped to assetBaseName
-      _.findKey(metadata.assetNameMap, function(value, key) {
-        if (value === assetBaseName) {
-          var assetId = key;
-          var search = {
-            _id: assetId
-          };
-          app.assetmanager.retrieveAsset(search, function gotAsset(error, results) {
-            if (error) {
-              logger.log('error', error);
+      _.findKey(metadata.assetNameMap, function(value, assetId) {
+        if (value !== assetBaseName) {
+          return;
+        }
+        app.assetmanager.retrieveAsset({ _id: assetId }, function gotAsset(error, results) {
+          if (error) {
+            logger.log('error', error);
+          }
+          Object.assign(assetData, {
+            _assetId: assetId,
+            createdBy: app.usermanager.getCurrentUser(),
+            _fieldName: results.length > 0 ? _.pluck(results, 'filename') : assetBaseName
+          });
+          app.contentmanager.getContentPlugin('courseasset', function(error, plugin) {
+            if(error) {
+              return cb(error);
             }
-
-            assetData._assetId = assetId;
-            assetData.createdBy = app.usermanager.getCurrentUser();
-
-            if (results.length > 0) {
-              assetData._fieldName = _.pluck(results, 'filename');
-            } else {
-              assetData._fieldName = assetBaseName;
-            }
-            app.contentmanager.getContentPlugin('courseasset', function(error, plugin) {
-              if(error) return cb(error);
-              plugin.create(assetData, function(error, assetRecord) {
-                if(error) {
-                  logger.log('warn', 'Failed to create courseasset ' + type + ' ' + (assetRecord || '') + ' ' + error);
-                }
-              });
+            plugin.create(assetData, function(error, assetRecord) {
+              if(error) {
+                logger.log('warn', `Failed to create courseasset ${type} ${assetRecord || ''} ${error}`);
+              }
             });
           });
-        }
+        });
       });
     }, cb(null, contentData));
   }

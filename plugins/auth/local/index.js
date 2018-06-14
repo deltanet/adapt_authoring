@@ -153,9 +153,13 @@ LocalAuth.prototype.authenticate = function (req, res, next) {
 };
 
 LocalAuth.prototype.disavow = function (req, res, next) {
-  req.logout();
-  res.statusCode = 200;
-  return res.json({ success: true });
+  permissions.invalidateUserPermissions(function(error) {
+    if(error) {
+      return next(error);
+    }
+    req.logout();
+    return res.status(200).end();
+  });
 };
 
 LocalAuth.prototype.internalRegisterUser = function(retypePasswordRequired, user, cb) {
@@ -199,19 +203,20 @@ LocalAuth.prototype.resetPassword = function (req, res, next) {
   if (!resetPasswordToken) {
     return next(new auth.errors.UserResetPasswordError('Token was not found'));
   }
-
-  usermanager.retrieveUserPasswordReset({ token: resetPasswordToken }, function (err, usrReset) {
-    //get the user from the usrReset
-    var user = {
-      id: usrReset.user,
-      password: req.body.password
-    };
-    self.internalResetPassword(user, function (error, user) {
+  usermanager.retrieveUserPasswordReset({ token: resetPasswordToken }, function (error, usrReset) {
+    if (error) {
+      logger.log('error', error);
+      return res.status(500).end();
+    }
+    if (!usrReset) {
+      return res.status(200).end();
+    }
+    self.internalResetPassword({ id: usrReset.user, password: req.body.password }, function (error, user) {
       if (error) {
         logger.log('error', error);
-        return res.status(500).json({ success: false });
+        return res.status(500).end();
       }
-      res.status(200).json({ success: true });
+      res.status(200).end();
     });
   });
 };

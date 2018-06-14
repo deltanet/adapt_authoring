@@ -24,7 +24,6 @@ var filestorage = require('../../../lib/filestorage');
 function ReplicateCourse () {
 }
 
-util.inherits(ReplicateCourse, ContentPlugin);
 
 /**
  * essential setup
@@ -79,7 +78,7 @@ function initialize () {
  * @param {object} a content item
  * @param {callback} next (function (err, isAllowed))
  */
-ReplicateCourse.prototype.hasPermission = function (action, userId, tenantId, contentItem, next) {
+function hasPermission (action, userId, tenantId, contentItem, next) {
   helpers.hasCoursePermission(action, userId, tenantId, contentItem, function(err, isAllowed) {
     if (err) {
       return next(err);
@@ -105,7 +104,7 @@ ReplicateCourse.prototype.hasPermission = function (action, userId, tenantId, co
  *
  * @return {string}
  */
-ReplicateCourse.prototype.getModelName = function () {
+function getModelName () {
   return 'course';
 };
 
@@ -114,16 +113,17 @@ ReplicateCourse.prototype.getModelName = function () {
  *
  * @return {string}
  */
-ReplicateCourse.prototype.getChildType = function () {
+function getChildType () {
   return ['contentobject', 'config'];
 };
 
 /**
- * Overrides base.create
+ * Overrides base.create in order to pass the new tenant ID to the getDatabase function
  * @param {object} data
  * @param {callback} next
  */
-ReplicateCourse.prototype.create = function (data, options, next) {
+
+ function create (data, options, next) {
   // shuffle params
   if ('function' === typeof options) {
     next = options;
@@ -134,27 +134,46 @@ ReplicateCourse.prototype.create = function (data, options, next) {
   var user = data.user || usermanager.getCurrentUser();
   var tenantId = user._tenantId;
 
-  ContentPlugin.prototype.create.call(self, data, { _tenantId: tenantId }, function (err, doc) {
-    if (err) {
-      logger.log('error', err);
-      return next(err);
+  //ContentPlugin.prototype.create.call(self, data, { _tenantId: tenantId }, function (err, doc) {
+  // must have a model name
+  if (!getModelName()) {
+    return next(new ContentTypeError('getModelName() must be set!'));
+  }
+
+  data._type = data._type || getModelName();
+  data._tenantId = options._tenantId || user.tenant._id;
+
+  database.getDatabase(function (error, db) {
+    if (error) {
+      return next(error);
     }
 
-    // grant the creating user full editor permissions
-    permissions.createPolicy(user._id, function (err, policy) {
-      if (err) {
-        logger.log('error', 'there was an error granting editing permissions', err);
-      }
+    data.createdAt = data.createdAt || new Date();
+    data.updatedAt = data.updatedAt || new Date();
 
-      var resource = permissions.buildResourceString(tenantId, '/api/content/course/' + doc._id);
-      permissions.addStatement(policy, ['create', 'read', 'update', 'delete'], resource, 'allow', function (err) {
-        if (err) {
-          logger.log('error', 'there was an error granting editing permissions', err);
-        }
-        return next(null, doc);
+    // Check if the user has permission on this course
+    hasPermission('create', user._id, data._tenantId, data, function (err, isAllowed) {
+      if (!isAllowed) {
+        return next(new ContentPermissionError());
+      }
+      return db.create(getModelName(), data, function(error, doc) {
+        // grant the creating user full editor permissions
+        permissions.createPolicy(user._id, function (err, policy) {
+          if (err) {
+            logger.log('error', 'there was an error granting editing permissions', err);
+          }
+
+          var resource = permissions.buildResourceString(tenantId, '/api/content/course/' + doc._id);
+          permissions.addStatement(policy, ['create', 'read', 'update', 'delete'], resource, 'allow', function (err) {
+            if (err) {
+              logger.log('error', 'there was an error granting editing permissions', err);
+            }
+            return next(null, doc);
+          });
+        });
       });
     });
-  });
+  }, (options && options._tenantId));
 };
 
 /**
@@ -165,7 +184,7 @@ ReplicateCourse.prototype.create = function (data, options, next) {
  * @param {callback} next - function (err)
  */
 
-ReplicateCourse.prototype.copyAssetToTenant = function (id, user, next) {
+function copyAssetToTenant (id, user, next) {
   // TODO need to check for id and user
   var self = this;
   async.waterfall([
@@ -229,7 +248,8 @@ ReplicateCourse.prototype.copyAssetToTenant = function (id, user, next) {
         title: oldAsset.title,
         size: oldAsset.size
       };
-      assetmanager.retrieveAsset(search, { _tenantId: user._tenantId }, function gotAsset(error, results) {
+      //TODO  -  this needs to be duplicated in this class
+      retrieveAsset(search, { _tenantId: user._tenantId }, function gotAsset(error, results) {
         if (error) {
           logger.log('error', error);
           return next(error);
@@ -262,7 +282,7 @@ ReplicateCourse.prototype.copyAssetToTenant = function (id, user, next) {
               delete asset._id;
 
               // Create the asset record
-              assetmanager.createAsset( asset, { _tenantId: user._tenantId }, function (createError, newAsset) {
+              createAsset( asset, { _tenantId: user._tenantId }, function (createError, newAsset) {
                 if (createError) {
                   logger.log('error', createError);
 
@@ -289,6 +309,163 @@ ReplicateCourse.prototype.copyAssetToTenant = function (id, user, next) {
   ], function(error, results) {
     next(error, results);
   });
+};
+
+/**
+ * default implementation of retrieve
+ *
+ * @param {object} search
+ * @param {object} options
+ * @param {callback} next
+ */
+function retrieve (search, options, next) {
+  var user = app.usermanager.getCurrentUser();
+  var tenantId = user.tenant && user.tenant._id;
+  // must have a model name
+  if (!getModelName()) {
+    return next(new ContentTypeError('this.getModelName() must be set!'));
+  }
+
+  // Ensure the tags are populated
+  var pop = { tags: '_id title' };
+  if (!options.populate) {
+    options.populate = pop;
+  } else {
+    options.populate = _.extend(pop, options.populate);
+  }
+
+  var self = this;
+  database.getDatabase(function (error, db) {
+    if (error) {
+      return next(error);
+    }
+
+    db.retrieve(getModelName(), search, options, function (err, records) {
+      if (err) {
+        return next(err);
+      }
+
+      async.each(records, function(contentItem, callback) {
+        if (contentItem._type === 'course') {
+          helpers.hasCoursePermission('retrieve', user._id, tenantId, contentItem, function (err, isAllowed) {
+            if (!isAllowed) {
+              return callback(new ContentPermissionError());
+            }
+
+            callback();
+          });
+        } else {
+          self.hasPermission('retrieve', user._id, tenantId, contentItem, function (err, isAllowed) {
+            if (!isAllowed) {
+              return callback(new ContentPermissionError());
+            }
+
+            callback();
+          });
+        }
+      }, function (error) {
+        if (error) {
+          return next(new ContentPermissionError());
+        }
+
+        return next(null, records);
+      });
+    });
+  }, (options && options.tenantId));
+};
+
+/**
+ * creates a new asset, Like assetmanager.create but creates on the new tenant
+ * This is not very DRY, but perhaps better that hacking the core code until core lib modules can handle different tenants
+ *
+ * @param {object} data - the attributes for the asset
+ * @param {object} [options] - attributes has new tenan
+ * @param {callback} next - function (err, asset)
+ */
+
+function createAsset (data, options, next) {
+  // shuffle params
+  if ('function' === typeof options) {
+    next = options;
+    options = {};
+  }
+
+  var user = options.user || usermanager.getCurrentUser();
+  var tenantId = options && options._tenantId || user.tenant && user.tenant._id;
+  var self = this;
+
+  database.getDatabase(function (error, db) {
+    if (error) {
+      return next(error);
+    }
+
+    // set creation date
+    if (!data.createdAt) {
+      data.createdAt = new Date();
+    }
+
+    db.create('asset', data, function (err, doc) {
+      if (err) {
+        return next(err);
+      }
+
+      permissions.createPolicy(user._id, function (err, policy) {
+        if (err) {
+          logger.log('error', 'there was an error granting editing permissions', err);
+        }
+
+        var resource = permissions.buildResourceString(tenantId, '/api/asset/' + doc._id);
+        permissions.addStatement(policy, ['create', 'read', 'update', 'delete'], resource, 'allow', function (err) {
+          if (err) {
+            logger.log('error', 'there was an error granting editing permissions', err);
+          }
+          return next(null, doc);
+        });
+      });
+    });
+
+  }, tenantId);
+};
+
+
+/**
+ * retrieves an/multiple asset record(s)
+ *
+ * @param {object} search - fields to search on
+ * @param {object} [options] - optional query param
+ * @param {callback} next - function (err, asset)
+ */
+function retrieveAsset (search, options, next) {
+  var __this = this;
+  // shuffle params
+  if ('function' === typeof options) {
+    next = options;
+    options = {};
+  }
+  // Ensure the tags are populated
+  var pop = { tags: '_id title' };
+  if (!options.populate) {
+    options.populate = pop;
+  } else {
+    options.populate = _.extend(pop, options.populate);
+  }
+
+  database.getDatabase(function (error, db) {
+    if (error) {
+      return next(error);
+    }
+    var user = usermanager.getCurrentUser();
+    // only return deleted assets if user has correct permissions
+    hasPermission('delete', user._id, user.tenant._id, '*', function(error, isAllowed) {
+      if (error) {
+        return next(error);
+      }
+      if(!isAllowed) {
+        search = _.extend(search, { _isDeleted: false });
+      }
+      db.retrieve('asset', search, options, next);
+    });
+  }, (options && options._tenantId));
 };
 
 
@@ -331,7 +508,7 @@ function replicate (data, cb) {
       }
       var parentIdMap = {};
 
-      ReplicateCourse.prototype.retrieve({_id: data._id}, {}, function (error, courses) {
+      retrieve({_id: data._id}, {}, function (error, courses) {
         if (error) {
           return cb(error);
         }
@@ -344,14 +521,13 @@ function replicate (data, cb) {
                 return cb(error);
               }
               // Assuming there are no errors the assets must set the course assets
-              // TODO use ContentPlugin courseassets to get assets
               assetmanager.retrieveAsset({ _id: course.heroImage }, function(error, items) {
                 if (error) {
                   logger.log('error', error);
                   return cb(error);
                 } else {
                   async.eachSeries(items, function(item, next) {
-                    ReplicateCourse.prototype.copyAssetToTenant(item, user, function(error, newAssetId) {
+                    copyAssetToTenant(item, user, function(error, newAssetId) {
                       if (error || !newAssetId || 'object' != typeof newAssetId) {
                         var copyError = error || "Error - cannot copy asset to tenant";
                         return cb(copyError);
@@ -383,7 +559,7 @@ function replicate (data, cb) {
     },
     function copyCourse(user, parentIdMap, cb) {
       // Get the original item
-      ReplicateCourse.prototype.retrieve({_id: data._id}, {}, function (error, docs) {
+      retrieve({_id: data._id}, {}, function (error, docs) {
         if (error) {
           return cb(error);
         }
@@ -405,7 +581,7 @@ function replicate (data, cb) {
           doc.user = user;
           doc.heroImage = parentIdMap[doc.heroImage];
 
-          ReplicateCourse.prototype.create(doc, { _tenantId: user._tenantId }, function (error, newCourse) {
+          create(doc, { _tenantId: user._tenantId }, function (error, newCourse) {
             if (error) {
               logger.log('error', error);
               return cb(error);
@@ -444,7 +620,7 @@ function replicate (data, cb) {
                     if (contenttype !== 'config' || contenttype !== 'component') {
                       contentData._tenantId = user._tenantId;
                     }
-                    // TODO - should probably just delegate this to the ContentPlugin.
+
                     database.getDatabase(function (error, db) {
                       if (error) {
                         logger.log('error', error);
@@ -487,7 +663,7 @@ function replicate (data, cb) {
     },
     function updateStartId(user, newCourse, parentIdMap, cb) {
       // TODO - This is a hack to update the start Id's
-      // too tightly coupled, start Id's should probably be altered to not use Id's
+      // too tightly coupled, start Id's should be altered to not use Id's
       if (newCourse && newCourse._id) {
         database.getDatabase(function (error, db) {
           if (error) {
@@ -507,11 +683,11 @@ function replicate (data, cb) {
               logger.log('error', error);
               return cb(error);
             } else {
-              newCourse._start._startIds = newStartIds;
-              var newCourseId = newCourse._id;
-              delete newCourse._id;
+              if (!_.isArray(newStartIds) || newStartIds.length == 0 || 'object' !== typeof newStartIds[0]) {
+                return cb(null, user, newCourse, parentIdMap);
+              }
               // update the course with the new or empty start ID's
-              db.update('course', {_id: newCourseId}, newCourse, function(err, doc) {
+              db.update('course', {_id: newCourse._id}, { _startIds: newStartIds }, function(err, doc) {
                 if (err) {
                   return cb(err);
                 }
@@ -541,14 +717,13 @@ function replicate (data, cb) {
           return cb(error);
         }
         // Assuming there are no errors the assets must set the course assets
-        // TODO use ContentPlugin courseassets to get assets
         db.retrieve('courseasset', {_courseId: data._id}, {operators: {distinct: '_assetId'}}, function(error, items) {
           if (error) {
             logger.log('error', error);
             return cb(error, newCourse);
           } else {
             async.eachSeries(items, function(item, next) {
-              ReplicateCourse.prototype.copyAssetToTenant(item, user, function(error, newAssetId) {
+              copyAssetToTenant(item, user, function(error, newAssetId) {
                 if (error || !newAssetId || 'object' != typeof newAssetId) {
                   var copyError = error || "Error - cannot copy asset to tenant";
                   return cb(copyError);

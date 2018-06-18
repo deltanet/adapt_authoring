@@ -663,7 +663,7 @@ function replicate (data, cb) {
     },
     function updateStartId(user, newCourse, parentIdMap, cb) {
       // TODO - This is a hack to update the start Id's
-      // too tightly coupled, start Id's should be altered to not use Id's
+      // start Id's should be altered to not use Id's
       if (newCourse && newCourse._id) {
         database.getDatabase(function (error, db) {
           if (error) {
@@ -672,6 +672,7 @@ function replicate (data, cb) {
           }
           var newStartIds = [];
           var incrementVar = 0;
+          var newStartObject = _.omit(newCourse._start, '_startIds');
           var startIds = newCourse._start._startIds || [];
           async.eachSeries(startIds, function(startId, next) {
               startId._id = parentIdMap[startId._id];
@@ -683,15 +684,13 @@ function replicate (data, cb) {
               logger.log('error', error);
               return cb(error);
             } else {
-              if (!_.isArray(newStartIds) || newStartIds.length == 0 || 'object' !== typeof newStartIds[0]) {
-                return cb(null, user, newCourse, parentIdMap);
-              }
               // update the course with the new or empty start ID's
-              db.update('course', {_id: newCourse._id}, { _startIds: newStartIds }, function(err, doc) {
+              newStartObject._startIds = newStartIds
+              db.update('course', {_id: newCourse._id}, {_start: newStartObject}, function(err, doc) {
                 if (err) {
                   return cb(err);
                 }
-                cb(null, user, doc, parentIdMap);
+                cb(null, user, newCourse, parentIdMap);
               });
             }
           });

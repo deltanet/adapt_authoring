@@ -5,7 +5,7 @@ define(function(require){
   var OriginView = require('core/views/originView');
   var Origin = require('core/origin');
   var AssetModel = require('../models/assetModel');
-
+  var Helpers = require('core/helpers');
   var AssetManagementNewAssetView = OriginView.extend({
 
 

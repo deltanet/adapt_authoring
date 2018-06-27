@@ -40,7 +40,7 @@ function initialize () {
      * @fires ~courseReplicated
      */
     // add course replicate route - @TODO - Restrict access to this!
-    rest.get('/duplicatecourse/:course/:user', function (req, res, next) {
+    rest.get('/clonecourse/:course/:user', function (req, res, next) {
       var courseId = req.params.course;
       var userId = req.params.user;
 

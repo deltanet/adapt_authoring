@@ -25,7 +25,9 @@
         <label for="role">{{t 'app.role'}}</label>
         <select name="role">
           {{#each globalData.allRoles.models}}
-            <option value="{{{this.attributes._id}}}">{{this.attributes.name}}</option>
+            {{#ifValueNotEquals this.attributes.name "Super Admin"}}
+              <option value="{{{this.attributes._id}}}">{{this.attributes.name}}</option>
+            {{/ifValueNotEquals}}
           {{/each}}
         </select>
       </div>

@@ -40,7 +40,7 @@ define(function(require) {
   Origin.on('origin:dataReady login:changed', function() {
     var permissions = ["{{tenantid}}/extensiontype/*:update"];
     Origin.permissions.addRoute('pluginManagement', permissions);
-    if (Origin.permissions.hasPermissions(permissions)) {
+    if (Origin.permissions.hasSuperPermissions()) {
       Origin.globalMenu.addItem(globalMenuObject);
     }
   });

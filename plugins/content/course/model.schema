@@ -6,20 +6,22 @@
   "properties": {
     "heroImage": {
       "type": "string",
+      "title": "Preview image",
       "default": "",
       "inputType": "Asset:image",
       "validators": [],
-      "editorOnly": true
+      "editorOnly": true,
+      "help": "The image that will be shown in the dashboard for this course"
     },
     "title": {
       "type": "string",
       "required": true,
       "default": "New Course Title",
       "inputType": "Text",
-      "translatable": true,
       "validators": [
         "required"
-      ]
+      ],
+      "translatable": true
     },
     "displayTitle": {
       "type": "string",
@@ -27,7 +29,7 @@
       "default": "New Course Title",
       "inputType": "DisplayTitle",
       "validators": [],
-      "help": "This is the title that will be displayed on the main menu",
+      "help": "This is the title that will be displayed on the course's main menu",
       "translatable": true
     },
     "description": {
@@ -36,7 +38,8 @@
       "default": "",
       "inputType": "Text",
       "validators": [],
-      "translatable": true
+      "translatable": true,
+      "help": "This will be added to the course's manifest file metadata. It is not (currently) displayed anywhere within the course."
     },
     "body": {
       "type": "string",
@@ -56,6 +59,7 @@
     "_start": {
       "type": "object",
       "title": "Start settings",
+      "help": "The start settings allow you to control which page is rendered when a course loads, potentially bypassing the menu.",
       "properties": {
         "_isEnabled": {
           "type": "boolean",
@@ -63,7 +67,7 @@
           "editorOnly": true,
           "inputType": "Checkbox",
           "validators": [],
-          "title": "Enable start controller",
+          "title": "Enabled?",
           "help": "The start controller allows you to control which page is rendered when a course loads, potentially bypassing the menu"
         },
         "_startIds": {
@@ -84,8 +88,8 @@
                 "editorOnly": true,
                 "inputType": "Checkbox",
                 "validators": [],
-                "title": "Skip if complete",
-                "help": "When this is set to 'true', the page will not be selected as the first page if it has been already viewed/completed"
+                "title": "Skip if complete?",
+                "help": "If enabled, the page will not be selected as the first page if it has been already viewed/completed"
               },
               "_className": {
                 "type": "string",
@@ -131,10 +135,10 @@
               "default": "Turn accessibility on?",
               "inputType": "Text",
               "required": true,
-              "translatable": true,
               "validators": [
                 "required"
-              ]
+              ],
+              "translatable": true
             },
             "accessibilityToggleTextOff": {
               "type": "string",
@@ -142,21 +146,21 @@
               "default": "Turn accessibility off?",
               "inputType": "Text",
               "required": true,
-              "translatable": true,
               "validators": [
                 "required"
-              ]
+              ],
+              "translatable": true
             },
             "skipNavigationText": {
               "type": "string",
               "title": "Skip navigation label",
-              "translatable": true,
               "default": "Skip navigation",
               "inputType": "Text",
               "required": true,
               "validators": [
                 "required"
-              ]
+              ],
+              "translatable": true
             },
             "_accessibilityInstructions": {
               "type": "object",
@@ -168,10 +172,10 @@
                   "default": "Usage instructions. Use swipe left for next. Use swipe right for previous. Use a double tab to select. Use a two finger slide up to go to the top of the page.",
                   "inputType": "Text",
                   "required": true,
-                  "translatable": true,
                   "validators": [
                     "required"
-                  ]
+                  ],
+                  "translatable": true
                 },
                 "notouch": {
                   "type": "string",
@@ -179,10 +183,10 @@
                   "default": "Usage instructions. Use tab for next. Use shift tab for previous. Use enter to select. Use escape to go to the top of the page.",
                   "inputType": "Text",
                   "required": true,
-                  "translatable": true,
                   "validators": [
                     "required"
-                  ]
+                  ],
+                  "translatable": true
                 },
                 "ipad": {
                   "type": "string",
@@ -190,10 +194,10 @@
                   "default": "Usage instructions for touchscreens. Use swipe left for next. Use swipe right for previous. Use a double tab to select. Use a two finger slide up to go to the top of the page. Usage instructions for keyboard access. Use left for next. Use right for previous. Use up and down together to select.",
                   "inputType": "Text",
                   "required": true,
-                  "translatable": true,
                   "validators": [
                     "required"
-                  ]
+                  ],
+                  "translatable": true
                 }
               }
             },
@@ -211,40 +215,16 @@
                 },
                 "skipNavigation": {
                   "type": "string",
-                  "translatable": true,
-                  "title": "",
-                  "default": "Skip navigation",
+                  "title": "Skip Navigation",
+                  "default": "Skip Navigation",
                   "inputType": "Text",
-                  "required": true
+                  "required": true,
+                  "translatable": true
                 },
                 "menuLoaded": {
                   "type": "string",
                   "title": "",
                   "default": "Menu loaded",
-                  "inputType": "Text",
-                  "required": true,
-                  "translatable": true
-                },
-                "menu": {
-                  "type": "string",
-                  "title": "",
-                  "default": "Menu",
-                  "inputType": "Text",
-                  "required": true,
-                  "translatable": true
-                },
-                "menuItem": {
-                  "type": "string",
-                  "title": "",
-                  "default": "Menu item",
-                  "inputType": "Text",
-                  "required": true,
-                  "translatable": true
-                },
-                "menuViewButton": {
-                  "type": "string",
-                  "title": "",
-                  "default": "Select here to enter",
                   "inputType": "Text",
                   "required": true,
                   "translatable": true
@@ -273,34 +253,10 @@
                   "required": true,
                   "translatable": true
                 },
-                "navigationBack": {
-                  "type": "string",
-                  "title": "",
-                  "default": "Navigate back",
-                  "inputType": "Text",
-                  "required": true,
-                  "translatable": true
-                },
                 "navigationDrawer": {
                   "type": "string",
                   "title": "",
                   "default": "Open course resources and search",
-                  "inputType": "Text",
-                  "required": true,
-                  "translatable": true
-                },
-                "closeResources": {
-                  "type": "string",
-                  "title": "",
-                  "default": "Close resources",
-                  "inputType": "Text",
-                  "required": true,
-                  "translatable": true
-                },
-                "drawerBack": {
-                  "type": "string",
-                  "title": "",
-                  "default": "Back to drawer",
                   "inputType": "Text",
                   "required": true,
                   "translatable": true
@@ -361,6 +317,14 @@
                   "required": true,
                   "translatable": true
                 },
+                "incorrect": {
+                  "type": "string",
+                  "title": "",
+                  "default": "Incorrect",
+                  "inputType": "Text",
+                  "required": true,
+                  "translatable": true
+                },
                 "locked": {
                   "type": "string",
                   "title": "",
@@ -389,14 +353,6 @@
                   "type": "string",
                   "title": "",
                   "default": "Visited",
-                  "inputType": "Text",
-                  "required": true,
-                  "translatable": true
-                },
-                "menuBack": {
-                  "type": "string",
-                  "title": "",
-                  "default": "Back to menu",
                   "inputType": "Text",
                   "required": true,
                   "translatable": true
@@ -430,10 +386,10 @@
               "default": "Submit",
               "inputType": "Text",
               "required": true,
-              "translatable": true,
               "validators": [
                 "required"
-              ]
+              ],
+              "translatable": true
             },
             "ariaLabel": {
               "type": "string",
@@ -441,10 +397,10 @@
               "default": "Submit",
               "inputType": "Text",
               "required": true,
-              "translatable": true,
               "validators": [
                 "required"
-              ]
+              ],
+              "translatable": true
             }
           }
         },
@@ -457,10 +413,10 @@
               "default": "Reset",
               "inputType": "Text",
               "required": true,
-              "translatable": true,
               "validators": [
                 "required"
-              ]
+              ],
+              "translatable": true
             },
             "ariaLabel": {
               "type": "string",
@@ -468,10 +424,10 @@
               "default": "Reset",
               "inputType": "Text",
               "required": true,
-              "translatable": true,
               "validators": [
                 "required"
-              ]
+              ],
+              "translatable": true
             }
           }
         },
@@ -484,10 +440,10 @@
               "default": "Show correct answer",
               "inputType": "Text",
               "required": true,
-              "translatable": true,
               "validators": [
                 "required"
-              ]
+              ],
+              "translatable": true
             },
             "ariaLabel": {
               "type": "string",
@@ -495,10 +451,10 @@
               "default": "Show correct answer",
               "inputType": "Text",
               "required": true,
-              "translatable": true,
               "validators": [
                 "required"
-              ]
+              ],
+              "translatable": true
             }
           }
         },
@@ -511,10 +467,10 @@
               "default": "Hide correct answer",
               "inputType": "Text",
               "required": true,
-              "translatable": true,
               "validators": [
                 "required"
-              ]
+              ],
+              "translatable": true
             },
             "ariaLabel": {
               "type": "string",
@@ -522,10 +478,10 @@
               "default": "Hide correct answer",
               "inputType": "Text",
               "required": true,
-              "translatable": true,
               "validators": [
                 "required"
-              ]
+              ],
+              "translatable": true
             }
           }
         },
@@ -538,10 +494,10 @@
               "default": "Show feedback",
               "inputType": "Text",
               "required": true,
-              "translatable": true,
               "validators": [
                 "required"
-              ]
+              ],
+              "translatable": true
             },
             "ariaLabel": {
               "type": "string",
@@ -549,10 +505,10 @@
               "default": "Show feedback",
               "inputType": "Text",
               "required": true,
-              "translatable": true,
               "validators": [
                 "required"
-              ]
+              ],
+              "translatable": true
             }
           }
         },
@@ -562,10 +518,10 @@
           "default": "remaining attempts",
           "inputType": "Text",
           "required": true,
-          "translatable": true,
           "validators": [
             "required"
-          ]
+          ],
+          "translatable": true
         },
         "remainingAttemptText": {
           "type": "string",
@@ -573,10 +529,10 @@
           "default": "final attempt",
           "inputType": "Text",
           "required": true,
-          "translatable": true,
           "validators": [
             "required"
-          ]
+          ],
+          "translatable": true
         },
         "disabledAriaLabel": {
           "type": "string",
@@ -584,10 +540,10 @@
           "default": "This button is disabled at the moment",
           "inputType": "Text",
           "required": true,
-          "translatable": true,
           "validators": [
             "required"
-          ]
+          ],
+          "translatable": true
         }
       }
     },
@@ -604,15 +560,6 @@
       "title": "Tags",
       "help": "Add tags to your course by entering one or more words, separated with a comma (,)",
       "editorOnly": true
-    },
-    "createdBy": {
-      "help": "The project owner is the only user that can delete the course",
-      "type": "objectid",
-      "validators": [],
-      "title": "Project Owner",
-      "editorOnly": true,
-      "ref": "user",
-      "inputType": "TenantUsers"
     },
     "_classes": {
       "type": "string",
@@ -639,7 +586,7 @@
       "inputType": "Checkbox",
       "validators": [],
       "title": "Share with other users",
-      "help": "When this is set to 'true', your colleagues will be able to see this course from the 'Shared courses' option"
+      "help": "Controls whether or not your colleagues will be able to see this course from the 'Shared courses' option"
     },
     "themeSettings": {
       "type": "object"

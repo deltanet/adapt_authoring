@@ -1,30 +1,28 @@
 // LICENCE https://github.com/adaptlearning/adapt_authoring/blob/master/LICENSE
 var _ = require('underscore');
 var async = require('async');
-var origin = require('../../../')();
-var yauzl = require("yauzl");
-var fs = require("fs-extra");
-var database = require("../../../lib/database");
-var logger = require("../../../lib/logger");
-var path = require("path");
-var Constants = require('../../../lib/outputmanager').Constants;
-var semver = require('semver');
-var version = require('../../../version');
 var crypto = require('crypto');
-var filestorage = require('../../../lib/filestorage');
+var fs = require("fs-extra");
+var path = require("path");
+var semver = require('semver');
 var util = require('util');
+var yauzl = require("yauzl");
 
-// possible shared functions include:
-// addAssets
-// removeImport
+var Constants = require('../../../lib/outputmanager').Constants;
+var database = require("../../../lib/database");
+var filestorage = require('../../../lib/filestorage');
+var logger = require("../../../lib/logger");
+var installHelpers = require('../../../lib/installHelpers');
+
+var origin = require('../../../')();
 
 /**
 * unzip import
 * @param {string} filePath
+* @param {string} unzipPath
 * @param {callback} done
 */
 function unzip(filePath, unzipPath, done) {
-  // unzip package
   yauzl.open(filePath, { lazyEntries: true }, function(error, zipfile) {
     if (error) {
       return done(error);
@@ -33,7 +31,6 @@ function unzip(filePath, unzipPath, done) {
     zipfile.on("entry", function(entry) {
       var dest = path.join(unzipPath, entry.fileName);
       if (/\/$/.test(entry.fileName)) {
-        // directory file names end with '/'
         fs.ensureDir(dest, function(err) {
           if (error) {
             return done(error);
@@ -41,12 +38,10 @@ function unzip(filePath, unzipPath, done) {
           zipfile.readEntry();
         });
       } else {
-        // file entry
         zipfile.openReadStream(entry, function(err, readStream) {
           if (error) {
             return done(error);
           }
-          // ensure parent directory exists
           fs.ensureDir(path.dirname(dest), function(err) {
             if (error) {
               return done(error);
@@ -71,7 +66,7 @@ function unzip(filePath, unzipPath, done) {
 * @param {callback} pluginImported
 */
 function importPlugin(pluginDir, pluginType, pluginImported) {
-  var bowerJson, contentPlugin;
+  var bowerJson, contentPlugin, frameworkVersion;
 
   async.waterfall([
     function readBowerJson(cb) {
@@ -96,23 +91,18 @@ function importPlugin(pluginDir, pluginType, pluginImported) {
     },
     function addPlugin(records, cb) {
       if(records.length === 0) {
-        var serverVersion = semver.clean(version.adapt_framework);
-        var pluginRange = semver.validRange(bowerJson.framework);
-        // check the plugin's compatible with the framework
-        if(semver.satisfies(serverVersion, pluginRange)) {
-          logger.log('info', 'Installing', pluginType, "'" + bowerJson.displayName + "'");
-          bowerJson.isLocalPackage = true;
-          contentPlugin.addPackage(contentPlugin.bowerConfig, { canonicalDir: pluginDir, pkgMeta: bowerJson }, { strict: true }, cb);
-        } else {
-          logger.log('info', "Can't install " + bowerJson.displayName + ", it requires framework v" + pluginVersion + " (" + version.adapt_framework + " installed)");
-          cb();
-        }
+        logger.log('info', 'Installing', pluginType, "'" + bowerJson.displayName + "'");
+        bowerJson.isLocalPackage = true;
+        app.bowermanager.addPackage(contentPlugin.bowerConfig, { canonicalDir: pluginDir, pkgMeta: bowerJson }, { strict: true }, cb);
       } else {
         var serverPlugin = records[0];
-        // TODO what do we do with newer versions of plugins? (could affect other courses if we install new version)
-        if(semver.gt(bowerJson.version,serverPlugin.version)) {
-          logger.log('info', 'Import contains newer version of ' + bowerJson.displayName + ' (' + bowerJson.version + ') than server (' + serverPlugin.version + '), but not installing');
+        var serverPluginVersion = semver.clean(serverPlugin.version);
+        var bowerVersion = semver.clean(bowerJson.version);
+
+        if(serverPluginVersion && bowerVersion && semver.gt(bowerVersion, serverPluginVersion)) {
+          logger.log('info', 'Import contains newer version of ' + bowerJson.displayName + ' (' + bowerVersion + ') than server (' + serverPluginVersion + '), but not installing');
         }
+
         cb();
       }
     }
@@ -124,15 +114,13 @@ function importPlugin(pluginDir, pluginType, pluginImported) {
 * Adds asset to the DB
 * Checks for a similar asset first (filename & size). if similar found, map that
 * to the import course.
-* TODO adapted from assetmanager.postAsset (...don't duplicate...)
 * @param {object} fileMetadata
 * @param {object} metadata
 * @param {callback} assetImported
 */
 function importAsset(fileMetadata, metadata, assetImported) {
-  // metadata could be idMap or entire import data
   var search = {
-    title: fileMetadata.title,
+    filename: fileMetadata.filename,
     size: fileMetadata.size
   };
   origin.assetmanager.retrieveAsset(search, function gotAsset(error, results) {
@@ -144,7 +132,6 @@ function importAsset(fileMetadata, metadata, assetImported) {
       return assetImported();
     }
 
-    var date = new Date();
     var hash = crypto.createHash('sha1');
     var rs = fs.createReadStream(fileMetadata.path);
 
@@ -153,7 +140,6 @@ function importAsset(fileMetadata, metadata, assetImported) {
     });
     rs.on('close', function onReadClose() {
       var filehash = hash.digest('hex');
-      // TODO get rid of hard-coded assets
       var directory = path.join('assets', filehash.substr(0,2), filehash.substr(2,2));
       var filepath = path.join(directory, filehash) + path.extname(fileMetadata.filename);
       var filename = path.basename(filepath);
@@ -177,15 +163,14 @@ function importAsset(fileMetadata, metadata, assetImported) {
           if (error) {
             return assetImported(error);
           }
-          // It's better not to set thumbnailPath if it's not set.
-          if (storedFile.thumbnailPath) storedFile.thumbnailPath = storedFile.thumbnailPath;
+
           var asset = _.extend(fileMetadata, storedFile);
           _.each(asset.tags, function iterator(tag, index) {
             if (metadata.idMap[tag]) {
               asset.tags[index] = metadata.idMap[tag];
             }
           });
-          // Create the asset record
+
           origin.assetmanager.createAsset(asset, function onAssetCreated(createError, assetRec) {
             if (createError) {
               storage.deleteFile(storedFile.path, assetImported);
@@ -215,26 +200,49 @@ function importAsset(fileMetadata, metadata, assetImported) {
 * @param {callback} cb
 */
 function checkFrameworkVersion(versionMetaData, cb) {
-  var installedVersion = semver.clean(version.adapt_framework);
-  var importVersion = semver.clean(versionMetaData.version);
+  installHelpers.getInstalledFrameworkVersion(function(err, frameworkVersion ) {
+    if (err) {
+      return cb(err)
+    }
 
-  if(!importVersion) {
-    return cb(new ImportError('Invalid version number (' + importVersion + ') found in import package.json'), 400)
-  }
-  // check the import's within the major version number
-  if(semver.satisfies(importVersion,semver.major(installedVersion).toString())) {
-    cb();
-  } else {
-    cb(new ImportError('Import version (' + importVersion + ') not compatible with installed version (' + installedVersion + ')', 400));
-  }
+    var installedVersion = semver.clean(frameworkVersion);
+    var importVersion = semver.clean(versionMetaData.version);
+
+    if (!importVersion) {
+      return cb(new ImportError('Invalid version number (' + importVersion + ') found in import package.json'), 400)
+    }
+    // check the import's within the major version number
+    if (semver.satisfies(importVersion, semver.major(installedVersion).toString())) {
+      cb();
+    } else {
+      cb(new ImportError('Import version (' + importVersion + ') not compatible with installed version (' + installedVersion + ')', 400));
+    }
+  });
 };
 
-// TODO move this to lib/outputmanager
+function checkPluginFrameworkVersion(serverFrameworkVersion, pluginMetaData) {
+  const validFrameworkVersion = (semver.valid(pluginMetaData.framework) || semver.validRange(pluginMetaData.framework));
+  if (!validFrameworkVersion) {
+    return new ImportError(`Invalid version number (${pluginMetaData.framework}) found in ${pluginMetaData.name}`, 400);
+  }
+  if (semver.satisfies(serverFrameworkVersion, pluginMetaData.framework)) {
+    return null;
+  }
+  return new ImportError(`Plugin ${pluginMetaData.name} (${pluginMetaData.framework}) is not compatible with the installed version (${serverFrameworkVersion})`, 400);
+};
+
 function ImportError(message, httpStatus) {
   this.message = message || "Course import failed";
   this.httpStatus = httpStatus || 500;
 };
+
+function PartialImportError(message, httpStatus) {
+  this.message = message || "Partial course import";
+  this.httpStatus = httpStatus || 500;
+}
+
 util.inherits(ImportError, Error);
+util.inherits(PartialImportError, ImportError);
 
 
 /**
@@ -264,7 +272,9 @@ exports = module.exports = {
   importPlugin: importPlugin,
   importAsset: importAsset,
   checkFrameworkVersion: checkFrameworkVersion,
+  checkPluginFrameworkVersion: checkPluginFrameworkVersion,
   ImportError: ImportError,
+  PartialImportError: PartialImportError,
   sortContentObjects: sortContentObjects,
   cleanUpImport: cleanUpImport
 };

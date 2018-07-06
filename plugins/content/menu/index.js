@@ -4,27 +4,27 @@
  *
  */
 
-var origin = require('../../../'),
-    contentmanager = require('../../../lib/contentmanager'),
-    rest = require('../../../lib/rest'),
-    BowerPlugin = require('../bower'),
-    ContentPlugin = contentmanager.ContentPlugin,
-    ContentTypeError = contentmanager.errors.ContentTypeError,
-    configuration = require('../../../lib/configuration'),
-    usermanager = require('../../../lib/usermanager'),
-    database = require('../../../lib/database'),
-    helpers = require('../../../lib/helpers'),
-    logger = require('../../../lib/logger'),
-    defaultOptions = require('./defaults.json'),
-    bower = require('bower'),
-    rimraf = require('rimraf'),
-    async = require('async'),
-    fs = require('fs'),
-    ncp = require('ncp').ncp,
-    mkdirp = require('mkdirp'),
-    _ = require('underscore'),
-    util = require('util'),
-    path = require('path');
+var _ = require('underscore');
+var async = require('async');
+var bower = require('bower');
+var fs = require('fs');
+var path = require('path');
+var util = require('util');
+
+var BowerPlugin = require('../bower');
+var configuration = require('../../../lib/configuration');
+var contentmanager = require('../../../lib/contentmanager');
+var database = require('../../../lib/database');
+var logger = require('../../../lib/logger');
+var origin = require('../../../');
+var rest = require('../../../lib/rest');
+var usermanager = require('../../../lib/usermanager');
+var helpers = require('../../../lib/helpers');
+
+var ContentPlugin = contentmanager.ContentPlugin;
+var ContentTypeError = contentmanager.errors.ContentTypeError;
+
+var defaultOptions = require('./defaults.json');
 
 var bowerConfig = {
   type: 'menutype',

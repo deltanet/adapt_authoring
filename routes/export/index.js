@@ -28,7 +28,6 @@ server.get('/export/:tenant/:course/download.zip', function (req, res, next) {
   var zipDir = path.join(
     configuration.tempDir,
     configuration.getConfig('masterTenantID'),
-    Constants.Folders.Framework,
     Constants.Folders.Exports,
     userId + '.zip'
   );
@@ -56,10 +55,9 @@ server.get('/export/:tenant/:course/download.zip', function (req, res, next) {
   });
 });
 
-server.get('/export/:tenant/:course/:devMode', function (req, res, next) {
+server.get('/export/:tenant/:course', function (req, res, next) {
   var course = req.params.course;
   var tenant = req.params.tenant;
-  var devMode = req.params.devMode;
   var currentUser = usermanager.getCurrentUser();
 
   helpers.hasCoursePermission('', currentUser._id, tenant, {_id: course}, function(err, hasPermission) {
@@ -71,9 +69,13 @@ server.get('/export/:tenant/:course/:devMode', function (req, res, next) {
         if (error) {
           return handleError(error, res);
         } else {
-          plugin.export(course, devMode, req, res, function (error, result) {
+          plugin.export(course, req, res, function (error, result) {
             if (error) {
-              return handleError(error, res);
+              logger.log('error', 'Unable to export:', error);
+              return res.status(500).json({
+                success: false,
+                message: error.message
+              });
             }
             return res.status(200).json({
               success: true,

@@ -187,7 +187,6 @@ define(function(require) {
       }
       if (!attributesToSave) {
         currentModel.pruneAttributes();
-        currentModel.unset('tags');
       }
       currentModel.save(attributesToSave, {
         patch: attributesToSave !== undefined,

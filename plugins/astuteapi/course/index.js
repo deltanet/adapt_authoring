@@ -151,72 +151,11 @@ TenantCourses.prototype.hasCoursePermission = function (action, userId, userTena
   }
 
   var self = this;
-  self.isUserMasterSuperAdmin(userId, userTenantId, function(error, isSuper) {
+  helpers.isUserMasterSuperAdmin(userId, userTenantId, function(error, isSuper) {
     if (isSuper) {
       // Shared courses on the same tenant are open to users on the same tenant
       return next(null, true);
     } else {
-      return next(null, false);
-    }
-  });
-};
-
-/**
- * Checks if user is super admin or tenant admin
- *
- * @param {objectid} userId
- * @param {objectid} userTenantId
- * @param {callback} next
- */
-
-
-TenantCourses.prototype.isUserMasterSuperAdmin = function (userId, userTenantId, next) {
-  if (!userId) {
-    return next(null, false);
-  }
-
-  //verify user's tenant is master
-  var masterTenantID = configuration.getConfig('masterTenantID');
-  if (masterTenantID != userTenantId) return next(null, false);
-
-  // verify the Super Admin role is installed
-  rolemanager.retrieveRoles({ name: ["Super Admin"] }, function (err, roles) {
-    if (err) {
-      return next(null, false);
-    }
-    if (roles  && roles.length >= 1) {
-      database.getDatabase(function (err, db) {
-        if (err) {
-          return next(null, false);
-        }
-
-        db.retrieve('user', { _id: userId }, { fields: 'roles' }, function (err, records) {
-          if (err) {
-            return next(null, false);
-          }
-
-          if (1 !== records.length) {
-            return next(null, false);
-          }
-
-          var userRoles = records[0].roles || [];
-          var isSuper = false;
-
-          roles.forEach(function(role) {
-            if (-1 !== userRoles.indexOf(role._id)) {
-              isSuper = true;
-            }
-          });
-
-          if (isSuper) {
-            return next(null, true);
-          } else {
-            return next(null, false);
-          }
-        });
-      }, configuration.getConfig('dbName'));
-    } else {
-      // super role does not exist
       return next(null, false);
     }
   });

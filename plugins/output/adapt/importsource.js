@@ -67,10 +67,15 @@ function ImportSource(req, done) {
 
     var formTags = (fields.tags && fields.tags.length) ? fields.tags.split(',') : [];
     var formAssetDirs = (fields.formAssetFolders && fields.formAssetFolders.length) ? fields.formAssetFolders.split(',') : [];
+    var formAssetExcludes = (fields.formAssetExcludes && fields.formAssetExcludes.length) ? fields.formAssetExcludes.split(',') : [];
     var cleanFormAssetDirs = formAssetDirs.map(function(item) {
       return item.trim();
     });
 
+    formAssetExcludes = formAssetExcludes.map(function(item) {
+      item.trim();
+      return mime.getType(item);
+    });
 
     /**
     * Main process
@@ -87,11 +92,11 @@ function ImportSource(req, done) {
       async.apply(findLanguages),
       async.apply(validateCoursePackage, cleanFormAssetDirs),
       async.apply(installPlugins),
-      async.apply(addAssets, formTags),
+      async.apply(addAssets, formTags, formAssetExcludes),
       async.apply(cacheMetadata),
       async.apply(importContent, formTags)
     ], function(importError, result) {
-      // cleanup should run regardless of import fail or success  
+      // cleanup should run regardless of import fail or success
       helpers.cleanUpImport(cleanupDirs, function(cleanUpError) {
         const error = importError || cleanUpError;
         done(error);
@@ -178,7 +183,7 @@ function ImportSource(req, done) {
   * title, description and tag fields, these will be used to create a new asset if an asset
   * with matching filename is not found in the database.
   */
-  function addAssets(assetTags, done) {
+  function addAssets(assetTags, formAssetExcludes, done) {
 
     async.eachSeries(assetFolders, function iterator(assetDir, doneAssetFolder) {
       var assetDirPath = path.join(COURSE_JSON_PATH, COURSE_LANG, assetDir);
@@ -234,7 +239,7 @@ function ImportSource(req, done) {
           if(!fileMeta) {
             return doneAsset(new helpers.ImportError('No metadata found for asset: ' + assetName));
           }
-          helpers.importAsset(fileMeta, metadata, doneAsset);
+          helpers.importAsset(formAssetExcludes, fileMeta, metadata, doneAsset);
         }, doneAssetFolder);
       });
     }, done);
@@ -269,7 +274,7 @@ function ImportSource(req, done) {
       if(err) {
         return done(err);
       }
-      // check that all plugins support the installed framework versions 
+      // check that all plugins support the installed framework versions
       installHelpers.getInstalledFrameworkVersion(function(err, frameworkVersion) {
         async.reduce(plugindata.pluginIncludes, [], function checkFwVersion(memo, pluginData, checkFwVersionCb) {
           fs.readJSON(path.join(pluginData.location, Constants.Filenames.Bower), function(error, data) {
@@ -557,7 +562,7 @@ function ImportSource(req, done) {
       if(error) return done(error);
 
       if (detachedElementsMap[originalData._id]) {
-        // do not import detached elements 
+        // do not import detached elements
         return done();
       }
 

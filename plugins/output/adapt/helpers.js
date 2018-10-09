@@ -118,13 +118,13 @@ function importPlugin(pluginDir, pluginType, pluginImported) {
 * @param {object} metadata
 * @param {callback} assetImported
 */
-function importAsset(fileMetadata, metadata, assetImported) {
+function importAsset(formAssetExcludes, fileMetadata, metadata, assetImported) {
   var search = {
     filename: fileMetadata.filename,
     size: fileMetadata.size
   };
   origin.assetmanager.retrieveAsset(search, function gotAsset(error, results) {
-    if(results.length > 0) {
+    if(results.length > 0 && !formAssetExcludes.includes(fileMetadata.type)) {
       metadata.idMap[fileMetadata.oldId] = results[0]._id;
       if (metadata.assetNameMap) {
         metadata.assetNameMap[results[0]._id] = results[0].filename;

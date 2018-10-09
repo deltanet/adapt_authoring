@@ -337,6 +337,8 @@
   "app.importassetfoldersinstruction": "Enter the names of folders that contain assets. If there are multiple folders enter a comma seperated list. Automatically checks for the following folders if no value is entered: assets, images, video, audio.",
   "app.importassetfolderstitle": "Asset Folders",
   "app.importassetfoldersplaceholder": "assets, images, video, audio",
+  "app.importassetexcludesinstruction": "Enter the extensions of files that should not be checked for duplicates. If there are multiple file types enter a comma seperated list. Imported assets with file extensions listed here will not be checked to see if they already exist.",
+  "app.importassetexcludesstitle": "Assets Check Exclusions",
   "app.importinvalidpackage": "Encountered an unexpected file structure. Please check you have uploaded a valid export package and try again.",
   "app.cleanassets": "Clean Assets",
   "app.cleanassetsmessage": "You have removed the orphaned assets from this course.",

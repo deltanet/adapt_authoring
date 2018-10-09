@@ -23,12 +23,21 @@
           {{/if}}
         </div>
         <div class="field field-assets">
-            <label for="tags">{{t 'app.importassetfolderstitle'}}</label>
+            <label for="formAssetFolders">{{t 'app.importassetfolderstitle'}}</label>
             <div class="field-help">
               {{t 'app.importassetfoldersinstruction'}}
             </div>
             <div>
               <input type="text" autocomplete="off" class="width-30" id="formAssetFolders" name="formAssetFolders" placeholder="{{t 'app.importassetfoldersplaceholder'}}" value="" />
+            </div>
+        </div>
+        <div class="field field-asset-excludes">
+            <label for="formAssetExcludes">{{t 'app.importassetexcludesstitle'}}</label>
+            <div class="field-help">
+              {{t 'app.importassetexcludesinstruction'}}
+            </div>
+            <div>
+              <input type="text" autocomplete="off" class="width-30" id="formAssetExcludes" name="formAssetExcludes" value="" />
             </div>
         </div>
         <div class="field field-tags">

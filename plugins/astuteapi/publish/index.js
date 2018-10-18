@@ -33,7 +33,7 @@ AdaptTenantPublish.prototype.publish = function(tenantId, courseId, mode, reques
   var user = usermanager.getCurrentUser();
   var courseTenantId = tenantId || user.tenant._id;
   var outputJson = {};
-  var isRebuildRequired = false;
+  var isRebuildRequired = true;
   var themeName = '';
   var menuName = Constants.Defaults.MenuName;
   var frameworkVersion;
@@ -85,15 +85,6 @@ AdaptTenantPublish.prototype.publish = function(tenantId, courseId, mode, reques
       });
     },
     function(callback) {
-      self.buildFlagExists(path.join(BUILD_FOLDER, Constants.Filenames.Rebuild), function(err, exists) {
-        if (err) {
-          return callback(err);
-        }
-        isRebuildRequired = exists;
-        callback(null);
-      });
-    },
-    function(callback) {
       var temporaryThemeFolder = path.join(SRC_FOLDER, Constants.Folders.Theme, customPluginName);
       self.writeCustomStyle(courseTenantId, courseId, temporaryThemeFolder, function(err) {
         if (err) {
@@ -141,9 +132,8 @@ AdaptTenantPublish.prototype.publish = function(tenantId, courseId, mode, reques
     },
     function(callback) {
       fs.exists(path.join(BUILD_FOLDER, Constants.Filenames.Main), function(exists) {
-        if (!isRebuildRequired && exists) {
-          resultObject.success = true;
-          return callback(null, 'Framework already built, nothing to do');
+        if (exists) {
+          //logger.log('info', 'Framework already built, but building anyway');
         }
 
         logger.log('info', '3.1. Ensuring framework build exists');
@@ -179,6 +169,8 @@ AdaptTenantPublish.prototype.publish = function(tenantId, courseId, mode, reques
 
             if (stdout.length != 0) {
               resultObject.success = true;
+              // Indicate that the course has built successfully
+              app.emit('previewCreated', tenantId, courseId, outputFolder);
 
               return callback(null, 'Framework built OK');
             }
@@ -200,7 +192,7 @@ AdaptTenantPublish.prototype.publish = function(tenantId, courseId, mode, reques
       });
     },
     function(callback) {
-      if (mode === Constants.Modes.Preview) { // No download required -- skip this step
+      if (mode === Constants.Modes.Preview || mode === Constants.Modes.Build) { // No download required -- skip this step
         return callback();
       }
       // Now zip the build package
@@ -212,8 +204,6 @@ AdaptTenantPublish.prototype.publish = function(tenantId, courseId, mode, reques
       output.on('close', function() {
         resultObject.filename = filename;
         resultObject.zipName = zipName;
-        // Indicate that the zip file is ready for download
-        app.emit('zipCreated', courseTenantId, courseId, filename, zipName);
         callback();
       });
       archive.on('error', function(err) {
@@ -251,7 +241,7 @@ function initialize () {
       var tenantId = req.params.tenant;
       var currentUser = usermanager.getCurrentUser();
       var userTenantId = currentUser.tenant && currentUser.tenant._id;
-      var mode = Constants.Modes.Build;
+      var mode = Constants.Modes.Publish;
 
       if (!tenantId) {
         res.statusCode = 500;

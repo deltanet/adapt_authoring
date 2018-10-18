@@ -155,8 +155,7 @@ ConfigContent.prototype.retrieve = function (search, options, next) {
     // this should act as a filter
     app.contentmanager.getContentPlugin('component', function (err, componentPlugin) {
       var courseId = records[0]._courseId;
-      componentPlugin.retrieve({_courseId: courseId}, function(err, components) {
-
+      componentPlugin.retrieve({_courseId: courseId}, function(err, components) { // DELTANET change, added options to call to retrieve
         // Retrieve the component types.
         database.getDatabase(function(err, db) {
           if (err) {

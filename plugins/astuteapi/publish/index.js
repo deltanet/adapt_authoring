@@ -20,11 +20,34 @@ var helpers = require('../../../lib/helpers');
 var installHelpers = require('../../../lib/installHelpers');
 var logger = require('../../../lib/logger');
 var rest = require('../../../lib/rest');
+var tenantmanager = require('../../../lib/tenantmanager');
+var database = require('../../../lib/database');
+var assetmanager = require('../../../lib/assetmanager');
+var filestorage = require('../../../lib/filestorage');
+
 
 function AdaptTenantPublish() {
 }
 
 util.inherits(AdaptTenantPublish, OutputPlugin);
+
+AdaptTenantPublish.prototype.getNewTenantName = function(tenantId, cb) {
+  // get the tenant names
+  tenantmanager.retrieveTenant({ _id: tenantId }, function (error, tenantRecs) {
+    if (error) {
+      logger.log('error', error);
+      return cb(error);
+    }
+
+    if (!tenantRecs) {
+      logger.log('error', "New tenant not found");
+      return cb("New tenant not found");
+    }
+    var tenantNames = { newTenantName: tenantRecs.name };
+    return cb(null, tenantNames);
+
+  });
+};
 
 AdaptTenantPublish.prototype.publish = function(tenantId, courseId, mode, request, response, next) {
   var app = origin();
@@ -37,6 +60,7 @@ AdaptTenantPublish.prototype.publish = function(tenantId, courseId, mode, reques
   var themeName = '';
   var menuName = Constants.Defaults.MenuName;
   var frameworkVersion;
+  var newTenantName;
 
   var resultObject = {};
 
@@ -94,6 +118,15 @@ AdaptTenantPublish.prototype.publish = function(tenantId, courseId, mode, reques
       });
     },
     function(callback) {
+      self.getNewTenantName(courseTenantId, function(err, tenantNames) {
+        if (err) {
+          return callback(err);
+        }
+        newTenantName = tenantNames.newTenantName;
+        callback(null);
+      });
+    },
+    function(callback) {
       var temporaryMenuFolder = path.join(SRC_FOLDER, Constants.Folders.Menu, customPluginName);
       self.applyMenu(courseTenantId, courseId, outputJson, temporaryMenuFolder, function(err, appliedMenuName) {
         if (err) {
@@ -106,8 +139,7 @@ AdaptTenantPublish.prototype.publish = function(tenantId, courseId, mode, reques
     function(callback) {
       var assetsJsonFolder = path.join(BUILD_FOLDER, Constants.Folders.Course, outputJson['config']._defaultLanguage);
       var assetsFolder = path.join(assetsJsonFolder, Constants.Folders.Assets);
-
-      self.writeCourseAssets(courseTenantId, courseId, assetsJsonFolder, assetsFolder, outputJson, function(err, modifiedJson) {
+      self.writeCourseAssets(newTenantName, courseTenantId, courseId, assetsJsonFolder, assetsFolder, outputJson, function(err, modifiedJson) {
         if (err) {
           return callback(err);
         }
@@ -222,6 +254,108 @@ AdaptTenantPublish.prototype.publish = function(tenantId, courseId, mode, reques
     next(null, resultObject);
   });
 };
+
+AdaptTenantPublish.prototype.writeCourseAssets = function(courseTenantName, tenantId, courseId, jsonDestinationFolder, destinationFolder, jsonObject, next) {
+
+  fs.remove(destinationFolder, function(err) {
+    if (err) {
+      return next(err);
+    }
+
+    // Remove any existing assets
+    fs.ensureDir(destinationFolder, function(err) {
+      if (err) {
+        return next(err);
+      }
+      // Fetch assets used in the course
+      database.getDatabase(function (err, db) {
+        if (err) {
+          return next(err);
+        }
+
+        // Retrieve a distinct list of assets.
+        db.retrieve('courseasset', {_courseId: courseId, _contentType: {$ne: 'theme'}}, {operators: {distinct: '_assetId'}}, function (err, results) {
+          if (err) {
+            logger.log('error', err);
+            return next(err);
+          }
+          if (results) {
+            var assetsJson = {};
+
+            // Retrieve the details of every asset used in this course.
+            //Amended for builder multi tenancy
+            assetmanager.retrieveAsset({ _id: {$in: results} }, { _tenantId: tenantId }, function (error, assets) {
+              if (error) {
+                logger.log('error', err);
+                return next(error);
+              }
+
+              async.eachSeries(assets, function(asset, callback) {
+                var outputFilename = path.join(destinationFolder, asset.filename);
+
+                assetsJson[asset.filename] = { 'title': asset.title, 'description': asset.description, 'tags': asset.tags };
+
+                // TODO -- This global replace is intended as a temporary solution
+                var replaceRegex = new RegExp("course/assets/" + asset.filename, 'gi');
+
+                var lang = jsonObject['config']._defaultLanguage;
+                var newAssetPath = "course/" + lang + "/assets/" + encodeURIComponent(asset.filename);
+
+                Object.keys(Constants.CourseCollections).forEach(function(key) {
+                  jsonObject[key] = JSON.parse(JSON.stringify(jsonObject[key]).replace(replaceRegex, newAssetPath));
+                });
+
+                // AB-59 - can't use asset record directly - need to use storage plugin
+                filestorage.getStorage(asset.repository, function (err, storage) {
+                  if (err) {
+                    logger.log('error', err.message, err);
+                    return callback(err);
+                  }
+
+                  // pass through the new tenant name so storage can find the correct asset path.
+                  var options = { tenantName: courseTenantName };
+
+                  return storage && storage.createReadStream(asset.path, options, function (ars) {
+                    var aws = fs.createWriteStream(outputFilename);
+                    ars.on('error', function (err) {
+                      logger.log('error', 'Error copying ' + asset.path + ' to ' + outputFilename + ": " + err.message);
+                      return callback('Error copying ' + asset.path + ' to ' + outputFilename + ": " + err.message);
+                    });
+                    ars.on('end', function () {
+                      return callback();
+                    });
+                    ars.pipe(aws);
+                  });
+                });
+              }, function(err) {
+                if (err) {
+                  logger.log('error', 'Error processing course assets');
+                  return next(err);
+                }
+                var data = JSON.stringify(assetsJson, undefined, 2);
+                var filename = path.join(jsonDestinationFolder, Constants.Filenames.Assets);
+
+                fs.outputFile(filename, data, function(err) {
+                  if (err) {
+                    logger.log('error', 'Error saving assets.json');
+                    return next(err);
+                  }
+                  logger.log('info', 'All assets processed');
+                  return next(null, jsonObject);
+                });
+              });
+            }); // retrieveAsset()
+          } else {
+            // There are no assets to process
+            return next(null, jsonObject);
+          }
+        }); //courseasset
+      }, tenantId);
+    });  // ensureDir()
+  });
+};
+
+
 
 /**
  * essential setup

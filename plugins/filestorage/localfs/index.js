@@ -28,11 +28,13 @@ util.inherits(LocalFileStorage, FileStorage);
  * @return {string} full path
  */
 
-LocalFileStorage.prototype.resolvePath = function (relativePath, forceMaster) {
+LocalFileStorage.prototype.resolvePath = function (relativePath, forceMaster, tagetTenantName) {
   var user = usermanager.getCurrentUser();
   if (user) {
     var tenantName;
-    if (!forceMaster) {
+    if (tagetTenantName && 'string' === typeof tagetTenantName) {
+      tenantName = tagetTenantName;
+    } else if (!forceMaster) {
       tenantName = user.tenant ? user.tenant.name : configuration.getConfig('masterTenantName');
     } else {
       tenantName = configuration.getConfig('masterTenantName');
@@ -135,8 +137,12 @@ LocalFileStorage.prototype.createReadStream = function (filePath, options, callb
   var forceMaster = (options && options.forceMaster)
     ? true
     : false;
+  // tagetTenantName added for multi tenancy copy assets DELTANET
+  var tagetTenantName = (options && options.tenantName)
+    ? options.tenantName
+    : false;
 
-  callback(fs.createReadStream(this.resolvePath(filePath, forceMaster), options));
+  callback(fs.createReadStream(this.resolvePath(filePath, forceMaster, tagetTenantName), options));
 };
 
 /**

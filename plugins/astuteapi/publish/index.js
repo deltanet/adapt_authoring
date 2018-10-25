@@ -20,11 +20,34 @@ var helpers = require('../../../lib/helpers');
 var installHelpers = require('../../../lib/installHelpers');
 var logger = require('../../../lib/logger');
 var rest = require('../../../lib/rest');
+var tenantmanager = require('../../../lib/tenantmanager');
+var database = require('../../../lib/database');
+var assetmanager = require('../../../lib/assetmanager');
+var filestorage = require('../../../lib/filestorage');
+
 
 function AdaptTenantPublish() {
 }
 
 util.inherits(AdaptTenantPublish, OutputPlugin);
+
+AdaptTenantPublish.prototype.getNewTenantName = function(tenantId, cb) {
+  // get the tenant names
+  tenantmanager.retrieveTenant({ _id: tenantId }, function (error, tenantRecs) {
+    if (error) {
+      logger.log('error', error);
+      return cb(error);
+    }
+
+    if (!tenantRecs) {
+      logger.log('error', "New tenant not found");
+      return cb("New tenant not found");
+    }
+    var tenantNames = { newTenantName: tenantRecs.name };
+    return cb(null, tenantNames);
+
+  });
+};
 
 AdaptTenantPublish.prototype.publish = function(tenantId, courseId, mode, request, response, next) {
   var app = origin();
@@ -33,10 +56,11 @@ AdaptTenantPublish.prototype.publish = function(tenantId, courseId, mode, reques
   var user = usermanager.getCurrentUser();
   var courseTenantId = tenantId || user.tenant._id;
   var outputJson = {};
-  var isRebuildRequired = false;
+  var isRebuildRequired = true;
   var themeName = '';
   var menuName = Constants.Defaults.MenuName;
   var frameworkVersion;
+  var newTenantName;
 
   var resultObject = {};
 
@@ -85,20 +109,20 @@ AdaptTenantPublish.prototype.publish = function(tenantId, courseId, mode, reques
       });
     },
     function(callback) {
-      self.buildFlagExists(path.join(BUILD_FOLDER, Constants.Filenames.Rebuild), function(err, exists) {
-        if (err) {
-          return callback(err);
-        }
-        isRebuildRequired = exists;
-        callback(null);
-      });
-    },
-    function(callback) {
       var temporaryThemeFolder = path.join(SRC_FOLDER, Constants.Folders.Theme, customPluginName);
       self.writeCustomStyle(courseTenantId, courseId, temporaryThemeFolder, function(err) {
         if (err) {
           return callback(err);
         }
+        callback(null);
+      });
+    },
+    function(callback) {
+      self.getNewTenantName(courseTenantId, function(err, tenantNames) {
+        if (err) {
+          return callback(err);
+        }
+        newTenantName = tenantNames.newTenantName;
         callback(null);
       });
     },
@@ -115,8 +139,7 @@ AdaptTenantPublish.prototype.publish = function(tenantId, courseId, mode, reques
     function(callback) {
       var assetsJsonFolder = path.join(BUILD_FOLDER, Constants.Folders.Course, outputJson['config']._defaultLanguage);
       var assetsFolder = path.join(assetsJsonFolder, Constants.Folders.Assets);
-
-      self.writeCourseAssets(courseTenantId, courseId, assetsJsonFolder, assetsFolder, outputJson, function(err, modifiedJson) {
+      self.writeCourseAssets(newTenantName, courseTenantId, courseId, assetsJsonFolder, assetsFolder, outputJson, function(err, modifiedJson) {
         if (err) {
           return callback(err);
         }
@@ -140,59 +163,54 @@ AdaptTenantPublish.prototype.publish = function(tenantId, courseId, mode, reques
       });
     },
     function(callback) {
-      fs.exists(path.join(BUILD_FOLDER, Constants.Filenames.Main), function(exists) {
-        if (!isRebuildRequired && exists) {
-          resultObject.success = true;
-          return callback(null, 'Framework already built, nothing to do');
-        }
+      logger.log('info', '3.1. Ensuring framework build exists');
 
-        logger.log('info', '3.1. Ensuring framework build exists');
+      var args = [];
+      var outputFolder = COURSE_FOLDER.replace(FRAMEWORK_ROOT_FOLDER + path.sep,'');
 
-        var args = [];
-        var outputFolder = COURSE_FOLDER.replace(FRAMEWORK_ROOT_FOLDER + path.sep,'');
+      // Append the 'build' folder to later versions of the framework
+      if (semver.gte(semver.clean(frameworkVersion), semver.clean('2.0.0'))) {
+        outputFolder = path.join(outputFolder, Constants.Folders.Build);
+      }
 
-        // Append the 'build' folder to later versions of the framework
-        if (semver.gte(semver.clean(frameworkVersion), semver.clean('2.0.0'))) {
-          outputFolder = path.join(outputFolder, Constants.Folders.Build);
-        }
+      args.push('--outputdir=' + outputFolder);
+      args.push('--theme=' + themeName);
+      args.push('--menu=' + menuName);
 
-        args.push('--outputdir=' + outputFolder);
-        args.push('--theme=' + themeName);
-        args.push('--menu=' + menuName);
+      logger.log('info', '3.2. Using theme: ' + themeName);
+      logger.log('info', '3.3. Using menu: ' + menuName);
 
-        logger.log('info', '3.2. Using theme: ' + themeName);
-        logger.log('info', '3.3. Using menu: ' + menuName);
+      var generateSourcemap = outputJson.config._generateSourcemap;
+      var buildMode = generateSourcemap === true ? 'dev' : 'prod';
 
-        var generateSourcemap = outputJson.config._generateSourcemap;
-        var buildMode = generateSourcemap === true ? 'dev' : 'prod';
+      logger.log('info', 'grunt server-build:' + buildMode + ' ' + args.join(' '));
 
-        logger.log('info', 'grunt server-build:' + buildMode + ' ' + args.join(' '));
-
-        child = exec('grunt server-build:' + buildMode + ' ' + args.join(' '), {cwd: path.join(FRAMEWORK_ROOT_FOLDER)},
-          function(error, stdout, stderr) {
-            if (error !== null) {
-              logger.log('error', 'exec error: ' + error);
-              logger.log('error', 'stdout error: ' + stdout);
-              resultObject.success = true;
-              return callback(error, 'Error building framework');
-            }
-
-            if (stdout.length != 0) {
-              resultObject.success = true;
-
-              return callback(null, 'Framework built OK');
-            }
-
-            if (stderr.length != 0) {
-              logger.log('error', 'stderr: ' + stderr);
-              resultObject.success = false;
-              return callback(stderr, 'Error (stderr) building framework!');
-            }
-
+      child = exec('grunt server-build:' + buildMode + ' ' + args.join(' '), {cwd: path.join(FRAMEWORK_ROOT_FOLDER)},
+        function(error, stdout, stderr) {
+          if (error !== null) {
+            logger.log('error', 'exec error: ' + error);
+            logger.log('error', 'stdout error: ' + stdout);
             resultObject.success = true;
-            return callback(null, 'Framework built');
-          });
-      });
+            return callback(error, 'Error building framework');
+          }
+
+          if (stdout.length != 0) {
+            resultObject.success = true;
+            // Indicate that the course has built successfully
+            app.emit('previewCreated', tenantId, courseId, outputFolder);
+
+            return callback(null, 'Framework built OK');
+          }
+
+          if (stderr.length != 0) {
+            logger.log('error', 'stderr: ' + stderr);
+            resultObject.success = false;
+            return callback(stderr, 'Error (stderr) building framework!');
+          }
+
+          resultObject.success = true;
+          return callback(null, 'Framework built');
+        });
     },
     function(callback) {
       self.clearBuildFlag(path.join(BUILD_FOLDER, Constants.Filenames.Rebuild), function(err) {
@@ -200,7 +218,7 @@ AdaptTenantPublish.prototype.publish = function(tenantId, courseId, mode, reques
       });
     },
     function(callback) {
-      if (mode === Constants.Modes.Preview) { // No download required -- skip this step
+      if (mode === Constants.Modes.Preview || mode === Constants.Modes.Build) { // No download required -- skip this step
         return callback();
       }
       // Now zip the build package
@@ -212,8 +230,6 @@ AdaptTenantPublish.prototype.publish = function(tenantId, courseId, mode, reques
       output.on('close', function() {
         resultObject.filename = filename;
         resultObject.zipName = zipName;
-        // Indicate that the zip file is ready for download
-        app.emit('zipCreated', courseTenantId, courseId, filename, zipName);
         callback();
       });
       archive.on('error', function(err) {
@@ -233,6 +249,107 @@ AdaptTenantPublish.prototype.publish = function(tenantId, courseId, mode, reques
   });
 };
 
+AdaptTenantPublish.prototype.writeCourseAssets = function(courseTenantName, tenantId, courseId, jsonDestinationFolder, destinationFolder, jsonObject, next) {
+
+  fs.remove(destinationFolder, function(err) {
+    if (err) {
+      return next(err);
+    }
+
+    // Remove any existing assets
+    fs.ensureDir(destinationFolder, function(err) {
+      if (err) {
+        return next(err);
+      }
+      // Fetch assets used in the course
+      database.getDatabase(function (err, db) {
+        if (err) {
+          return next(err);
+        }
+
+        // Retrieve a distinct list of assets.
+        db.retrieve('courseasset', {_courseId: courseId, _contentType: {$ne: 'theme'}}, {operators: {distinct: '_assetId'}}, function (err, results) {
+          if (err) {
+            logger.log('error', err);
+            return next(err);
+          }
+          if (results) {
+            var assetsJson = {};
+
+            // Retrieve the details of every asset used in this course.
+            //Amended for builder multi tenancy
+            assetmanager.retrieveAsset({ _id: {$in: results} }, { _tenantId: tenantId }, function (error, assets) {
+              if (error) {
+                logger.log('error', err);
+                return next(error);
+              }
+
+              async.eachSeries(assets, function(asset, callback) {
+                var outputFilename = path.join(destinationFolder, asset.filename);
+
+                assetsJson[asset.filename] = { 'title': asset.title, 'description': asset.description, 'tags': asset.tags };
+
+                // TODO -- This global replace is intended as a temporary solution
+                var replaceRegex = new RegExp("course/assets/" + asset.filename, 'gi');
+
+                var lang = jsonObject['config']._defaultLanguage;
+                var newAssetPath = "course/" + lang + "/assets/" + encodeURIComponent(asset.filename);
+
+                Object.keys(Constants.CourseCollections).forEach(function(key) {
+                  jsonObject[key] = JSON.parse(JSON.stringify(jsonObject[key]).replace(replaceRegex, newAssetPath));
+                });
+
+                // AB-59 - can't use asset record directly - need to use storage plugin
+                filestorage.getStorage(asset.repository, function (err, storage) {
+                  if (err) {
+                    logger.log('error', err.message, err);
+                    return callback(err);
+                  }
+
+                  // pass through the new tenant name so storage can find the correct asset path.
+                  var options = { tenantName: courseTenantName };
+
+                  return storage && storage.createReadStream(asset.path, options, function (ars) {
+                    var aws = fs.createWriteStream(outputFilename);
+                    ars.on('error', function (err) {
+                      logger.log('error', 'Error copying ' + asset.path + ' to ' + outputFilename + ": " + err.message);
+                      return callback('Error copying ' + asset.path + ' to ' + outputFilename + ": " + err.message);
+                    });
+                    ars.on('end', function () {
+                      return callback();
+                    });
+                    ars.pipe(aws);
+                  });
+                });
+              }, function(err) {
+                if (err) {
+                  logger.log('error', 'Error processing course assets');
+                  return next(err);
+                }
+                var data = JSON.stringify(assetsJson, undefined, 2);
+                var filename = path.join(jsonDestinationFolder, Constants.Filenames.Assets);
+
+                fs.outputFile(filename, data, function(err) {
+                  if (err) {
+                    logger.log('error', 'Error saving assets.json');
+                    return next(err);
+                  }
+                  logger.log('info', 'All assets processed');
+                  return next(null, jsonObject);
+                });
+              });
+            }); // retrieveAsset()
+          } else {
+            // There are no assets to process
+            return next(null, jsonObject);
+          }
+        }); //courseasset
+      }, tenantId);
+    });  // ensureDir()
+  });
+};
+
+
 /**
  * essential setup
  *
@@ -251,7 +368,7 @@ function initialize () {
       var tenantId = req.params.tenant;
       var currentUser = usermanager.getCurrentUser();
       var userTenantId = currentUser.tenant && currentUser.tenant._id;
-      var mode = Constants.Modes.Build;
+      var mode = Constants.Modes.Publish;
 
       if (!tenantId) {
         res.statusCode = 500;

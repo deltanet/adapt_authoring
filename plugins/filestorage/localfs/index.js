@@ -357,7 +357,7 @@ LocalFileStorage.prototype.copyAsset = function(asset, sourceTenantName, destina
 
 LocalFileStorage.prototype.createThumbnail = function (filePath, fileType, options, next) {
   // early return if we can't create thumbnails
-  if (!configuration.getConfig('useffmpeg')) {
+  if (!configuration.getConfig('useffmpeg') || !fileType ) {
     return next(null, false);
   }
   var fileFormat = fileType.split('/')[1];
@@ -428,6 +428,8 @@ LocalFileStorage.prototype.inspectFile = function (filePath, fileType, next) {
     assetType: null,
     metadata: null
   };
+
+  if (!fileType) return next(null, false);
 
   fileType = fileType.split('/')[0];
 

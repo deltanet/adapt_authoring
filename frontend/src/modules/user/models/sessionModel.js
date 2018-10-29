@@ -14,12 +14,13 @@ define(['require', 'backbone', 'core/origin'], function(require, Backbone, Origi
     initialize: function() {
     },
 
-    login: function (username, password, shouldPersist) {
+    login: function (username, password, shouldPersist, courseId) { // courseId added for multitenancy DELTANET
       var postData = {
         email: username,
         password: password,
         shouldPersist: shouldPersist
       };
+
       $.post('/api/login', postData, _.bind(function (jqXHR, textStatus, errorThrown) {
         this.set({
           id: jqXHR.id,
@@ -28,8 +29,14 @@ define(['require', 'backbone', 'core/origin'], function(require, Backbone, Origi
           isAuthenticated: true,
           permissions: jqXHR.permissions
         });
+
         Origin.trigger('login:changed');
-        Origin.trigger('schemas:loadData', Origin.router.navigateToHome);
+
+        if (courseId && Origin.permissions.checkRoute('editor/' + courseId + '/menu')) {  // Added for multitenancy DELTANET
+          Origin.trigger('schemas:loadData', Origin.router.navigateTo('editor/' + courseId + '/menu'));
+        } else {
+          Origin.trigger('schemas:loadData', Origin.router.navigateToHome);
+        }
       }, this)).fail(function(jqXHR, textStatus, errorThrown) {
         Origin.trigger('login:failed', (jqXHR.responseJSON && jqXHR.responseJSON.errorCode) || 1);
       });

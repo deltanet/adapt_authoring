@@ -33,7 +33,9 @@ define(['require', 'backbone', 'core/origin'], function(require, Backbone, Origi
         Origin.trigger('login:changed');
 
         if (courseId && Origin.permissions.checkRoute('editor/' + courseId + '/menu')) {  // Added for multitenancy DELTANET
-          Origin.trigger('schemas:loadData', Origin.router.navigateTo('editor/' + courseId + '/menu'));
+          Origin.trigger('schemas:loadData', function() {
+      			Origin.router.navigateTo('editor/' + courseId + '/menu');
+      		});
         } else {
           Origin.trigger('schemas:loadData', Origin.router.navigateToHome);
         }

@@ -53,6 +53,7 @@ define(function(require) {
       var inputUsernameEmail = $.trim(this.$("#login-input-username").val());
       var inputPassword = $.trim(this.$("#login-input-password").val());
       var shouldPersist = this.$('#remember-me').prop('checked');
+      var courseId = Origin.location.route3;  // Added for multitenancy DELTANET
 
       // Validation
       if (inputUsernameEmail === '' || inputPassword === '') {
@@ -63,8 +64,7 @@ define(function(require) {
       }
 
       var userModel = this.model;
-
-      userModel.login(inputUsernameEmail, inputPassword, shouldPersist);
+      userModel.login(inputUsernameEmail, inputPassword, shouldPersist, courseId); // courseId added for multitenancy DELTANET
     },
 
     loginFailed: function(errorCode) {

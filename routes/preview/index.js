@@ -80,7 +80,7 @@ server.get('/preview/:tenant/:course/*', function (req, res, next) {
           res.sendFile(file, options, function(err) {
             if (err) {
               // Display the error to the user.
-              res.status(typeof err.status !== 'undefined' && err.status >= 100 && err.status < 600 ? err.status : 400).end();
+              return res.status(err.status || 500).end();
             }
           });
         }
@@ -113,7 +113,7 @@ server.get('/preview/:tenant/:course/*', function (req, res, next) {
         res.sendFile(file, options, function(err) {
           if (err) {
             // Display the error to the user.
-            res.status(typeof err.status !== 'undefined' && err.status >= 100 && err.status < 600 ? err.status : 400).end();
+            return res.status(err.status || 500).end();
           }
         });
       });
@@ -125,7 +125,7 @@ server.get('/preview/:tenant/:course/*', function (req, res, next) {
         if (err) {
           // Display the error to the user.
           // We don't want to clog the log with 404s, etc.
-          res.status(typeof err.status !== 'undefined' && err.status >= 100 && err.status < 600 ? err.status : 400).end();
+          return res.status(err.status || 500).end();
         }
       });
     } else {

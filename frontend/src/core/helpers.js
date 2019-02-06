@@ -38,9 +38,13 @@ define(function(require){
 
     keyToTitleString: function(key) {
       if (!key) return;
-      // Take in key value and remove all _'s and capitalise
-      var string = key.replace(/_/g, "").toLowerCase();
-      return this.capitalise(string);
+      // check translatable strings first
+      var l10nKey = 'app.scaffold.' + key;
+      if(Origin.l10n.has(l10nKey)) {
+        return Origin.l10n.t(l10nKey);
+      }
+      // fall-back: remove all _ and capitalise
+      return this.capitalise(key.replace(/_/g, "").toLowerCase());
     },
 
     momentFormat: function(date, format) {
@@ -261,6 +265,7 @@ define(function(require){
 
     contentModelMap: function(type) {
       var contentModels = {
+        course: 'core/models/courseModel',
         contentobject: 'core/models/contentObjectModel',
         article: 'core/models/articleModel',
         block: 'core/models/blockModel',
@@ -323,6 +328,13 @@ define(function(require){
         }
         callback(returnArr);
       });
+    },
+
+    maxUploadSize: function(options) {
+      return new Handlebars.SafeString([
+        '<span class="max-fileupload-size">',
+        Origin.l10n.t('app.maxfileuploadsize', {size: Origin.constants.humanMaxFileUploadSize}),
+        '</span>'].join(''))
     }
   };
 

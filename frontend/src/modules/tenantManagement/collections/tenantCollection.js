@@ -4,7 +4,8 @@ define(function(require) {
 
   var TenantCollection = Backbone.Collection.extend({
     model: TenantModel,
-    url: 'api/tenant'
+    url: 'api/tenant',
+    comparator: 'displayName'
   });
   return TenantCollection;
 });

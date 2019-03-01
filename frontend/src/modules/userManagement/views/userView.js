@@ -179,6 +179,23 @@ define(function(require){
       });
     },
 
+    onResetPasswordClicked: function(e) {
+      Origin.Notify.confirm({
+        text: Origin.l10n.t('app.confirmsendreset', { email: this.model.get('email') }),
+        callback: function(confirmed) {
+          if (!confirmed) {
+            return;
+          }
+          var $btn = $(e.currentTarget);
+          $btn.addClass('submitted');
+          Helpers.ajax('/api/createtoken', { email: this.model.get('email') }, 'POST', function() {
+            $btn.removeClass('submitted');
+          });
+        }.bind(this)
+      });
+    },
+
+
     onChangePasswordClicked: function() {
       var self = this;
       Origin.Notify.confirm({

@@ -29,10 +29,14 @@ define(function(require) {
         data.allTenants.url = 'api/tenant/'+ Origin.sessionModel.get('tenantId');
       }
       data.allTenants.fetch();
+      data.allTenants.comparator =  'displayName';
+      data.allTenants.sort();
 
       data.allRoles.on('sync', onDataFetched);
       data.allRoles.url = 'api/role';
       data.allRoles.fetch();
+      data.allRoles.comparator =  'name';
+      data.allRoles.sort();
 
   		Origin.globalMenu.addItem({
         "location": "global",

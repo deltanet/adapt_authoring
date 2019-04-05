@@ -459,6 +459,26 @@ function ImportSource(req, done) {
           });
         }, cb);
       },
+      function updateStartIds(cb) {
+        app.contentmanager.getContentPlugin('course', function (err, coursePlugin) {
+          var search = {_id: courseId};
+          coursePlugin.retrieve(search, function(err, results) {
+            if (err) return cb(err);
+            if (!results || !results[0]._start || !results[0]._start._startIds) return cb();
+            var start = { _start: results[0]._start };
+
+            start._start._startIds.forEach(function(item, index) {
+              if (metadata.idMap[item._id]) {
+                start._start._startIds[index]._id = metadata.idMap[item._id];
+              }
+            });
+            coursePlugin.update(search, start, function(err, results) {
+              if (err) return cb(err);
+              cb()
+            });
+          })
+        });
+      },
       function checkDetachedContent(cb) {
         const detachedIds = Object.keys(detachedElementsMap);
         if (detachedIds.length === 0) return cb();

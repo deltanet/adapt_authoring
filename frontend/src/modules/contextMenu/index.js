@@ -35,29 +35,17 @@ define(function(require) {
   };
 
   function setUpMenuItems() {
-    ContextMenu.addItem('article', getDefaultItems(['cleanassets']));
-    ContextMenu.addItem('block', getDefaultItems(['cleanassets']));
-    ContextMenu.addItem('component', getDefaultItems(['cleanassets']));
-    ContextMenu.addItem('page', getDefaultItems(['cleanassets']));
-    ContextMenu.addItem('menu', getDefaultItems(['copy','cleanassets']));
-    ContextMenu.addItem('page-min', getDefaultItems(['copy','delete','colorLabel','cleanassets']));
-    ContextMenu.addItem('sharedcourse', [
-      {
-        title: Origin.l10n.t('app.duplicate'),
-        className: 'context-menu-item',
-        callbackEvent: 'duplicate'
-      },
-      {
-        title: Origin.l10n.t('app.preview'),
-        className: 'context-menu-item',
-        callbackEvent: 'preview'
-      }
-    ]);
+    ContextMenu.addItem('article', getDefaultItems());
+    ContextMenu.addItem('block', getDefaultItems());
+    ContextMenu.addItem('component', getDefaultItems());
+    ContextMenu.addItem('page', getDefaultItems());
+    ContextMenu.addItem('menu', getDefaultItems(['copy']));
+    ContextMenu.addItem('page-min', getDefaultItems(['copy','delete','colorLabel']));
     ContextMenu.addItem('course', getDefaultItems(['colorLabel']));
   };
 
   /*
-  * returns the default list excluding anything in [blacklist] (uses event name)
+  * returns the default list excluding anything in [blacklist] (uses callbackEvent to filter)
   */
   function getDefaultItems(blacklist) {
     var DEFAULT_ITEMS = [

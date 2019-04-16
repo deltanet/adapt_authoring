@@ -42,7 +42,7 @@
         {{/ifUserNotSuperAdmin}}{{/ifUserNotMe}}
       </div>
     </div>
-    <div class="col-20">
+    <div class="col-15">
       <div class="tb-col-inner">
         <div class="read">
           <ul>
@@ -68,7 +68,7 @@
         {{/ifUserNotSuperAdmin}}{{/ifUserNotMe}}
       </div>
     </div>
-    <div class="col-10 col-centered">
+    <div class="col-15 col-centered">
       <div class="tb-col-inner">
         {{failedLoginCount}}
         {{#if _isLocked}}
@@ -82,7 +82,22 @@
     <div class="col-15">
       <div class="tb-col-inner">
         <div class="buttons edit-mode">
-            {{#ifUserIsMe _id}}
+          {{#ifUserIsMe _id}}
+            <div class="group">
+              {{t 'app.changeadminaccounts'}}
+            </div>
+          {{/ifUserIsMe}}
+          {{#if _isDeleted}}
+          {{else}}
+            <div class="group">
+              {{#ifMailEnabled}}
+                <button class="btn primary invite">{{t 'app.inviteuser'}}</button>
+                <button class="btn primary resetPassword">{{t 'app.resetpassword'}}</button>
+              {{else}}
+                <button class="btn tertiary changePassword">{{t 'app.changepassword'}}</button>
+              {{/ifMailEnabled}}
+            </div>
+            {{#if _isLocked}}
               <div class="group">
                 {{t 'app.changeadminaccounts'}}
               </div>
@@ -107,18 +122,16 @@
                   </div>
                 {{/ifValueEquals}}
               {{/if}}
-            {{/if}}
-            {{#ifUserNotMe _id}}
-              <div class="group">
-                {{#if _isDeleted}}
-                  <button class="btn action-primary restore">{{t 'app.restoreuser'}}</button>
-                {{else}}
-                  <button class="btn warning disable">{{t 'app.disableuser'}}</button>
-                {{/if}}
-                  <button class="btn alert edit-input delete">{{t 'app.deleteuser'}}</button>
-              </div>
-            {{/ifUserNotMe}}
-         </div>
+              <hr>
+              <button class="btn alert edit-input delete">{{t 'app.deleteuser'}}</button>
+              <select name="delete-options">
+                <option value="transfer">{{t 'app.deleteusertransfer'}}</option>
+                <option value="delete">{{t 'app.deleteuserdelete'}}</option>
+                <option value="share">{{t 'app.deleteusershare'}}</option>
+              </select>
+            </div>
+          {{/ifUserNotMe}}
+        </div>
       </div>
     </div>
 </div>

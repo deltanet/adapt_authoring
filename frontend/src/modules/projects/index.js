@@ -10,8 +10,6 @@ define(function(require) {
 
   Origin.on('router:dashboard', function(location, subLocation, action) {
     Origin.trigger('editor:resetData');
-
-    Origin.trigger('location:title:update', {title: 'Dashboard - viewing my courses'});
     Origin.options.addItems([
       {
         title: Origin.l10n.t('app.grid'),
@@ -64,23 +62,16 @@ define(function(require) {
   });
 
   Origin.on('dashboard:loaded', function (options) {
-    switch (options.type) {
-      case 'shared':
-        Origin.trigger('location:title:update', {title: 'Dashboard - viewing shared courses'});
-        Origin.contentPane.setView(ProjectsView, { collection: new SharedProjectCollection });
-        break;
-      case 'tenant':
-        if (Origin.permissions.hasTenantAdminPermission()) {
-           Origin.trigger('location:title:update', {title: 'Dashboard - viewing tenant courses'});
-           Origin.contentPane.setView(ProjectsView, {collection: new TenantProjectCollection});
-         }
-         break;
-      case 'all':
-        Origin.trigger('location:title:update', {title: 'Dashboard - viewing my courses'});
-        Origin.contentPane.setView(ProjectsView, { collection: new MyProjectCollection });
-      default:
-        break;
+    var isMine = options.type === 'all';
+    var isShared = options.type === 'shared';
+    if(!isMine && !isShared) {
+      return;
     }
+    var titleKey = (isMine) ? 'myprojects' : 'sharedprojects';
+    var Coll = (isMine) ? MyProjectCollection : SharedProjectCollection;
+
+    Origin.trigger('location:title:update', { breadcrumbs: ['dashboard'], title: Origin.l10n.t('app.' + titleKey) });
+    Origin.contentPane.setView(ProjectsView, { collection: new Coll, _isShared: options.type === 'shared' });
   });
 
   Origin.on('globalMenu:dashboard:open', function() {

@@ -46,7 +46,6 @@ function ImportSource(req, done) {
   var detachedElementsMap = Object.create(null);
   var pluginLocations = {};
   var enabledExtensions = {};
-  var menuLocations = {};
   var tenantId = app.usermanager.getCurrentUser().tenant._id;
   var unzipFolder = tenantId + '_unzipped';
   var COURSE_ROOT_FOLDER = path.join(configuration.tempDir, configuration.getConfig('masterTenantID'), Constants.Folders.Framework, Constants.Folders.AllCourses, tenantId, unzipFolder);

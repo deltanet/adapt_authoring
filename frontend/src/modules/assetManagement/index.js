@@ -5,6 +5,8 @@ define(function(require) {
   var AssetManagementNewAssetView = require('./views/assetManagementNewAssetView');
   var AssetManagementNewAssetSidebarView = require('./views/assetManagementNewAssetSidebarView');
   var AssetManagementSidebarView = require('./views/assetManagementSidebarView');
+  var AssetManagementUploadAssetsView = require('./views/assetManagementUploadAssetsView');
+  var AssetManagementUploadAssetsSidebarView = require('./views/assetManagementUploadAssetsSidebarView');
   var AssetManagementView = require('./views/assetManagementView');
   var AssetModel = require('./models/assetModel');
   var TagsCollection = require('core/collections/tagsCollection');
@@ -29,6 +31,7 @@ define(function(require) {
     };
     if(!location) return loadAssetsView();
     if(location === 'new') return loadNewAssetView();
+    if(location === 'upload') return loadUploadAssetView();
     if(subLocation === 'edit') loadEditAssetView(location);
   });
 

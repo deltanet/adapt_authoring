@@ -24,7 +24,7 @@ define(function(require) {
     },
 
     setupSubViews: function() {
-    	this.search = {};
+    	this.search = { _isDeleted: false }; // deltanet edit always filter out deleted assets see #337
     	// Replace Asset and : so we can have both filtered and all asset types
     	var assetType = this.options.assetType.replace('Asset', '').replace(':', '');
 

@@ -604,6 +604,9 @@
     "themeSettings": {
       "type": "object"
     },
+    "themeVariables": {
+      "type": "object"
+    },
     "menuSettings": {
       "type": "object"
     },

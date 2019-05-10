@@ -29,7 +29,7 @@ util.inherits(CourseContent, ContentPlugin);
 
 var DASHBOARD_COURSE_FIELDS = [
     '_id', '_tenantId', '_type', '_isShared', 'title', 'heroImage',
-    'updatedAt', 'updatedBy', 'createdAt', 'createdBy', 'tags', '_shareWithUsers'
+    'updatedAt', 'updatedBy', 'createdAt', 'createdBy', 'tags'
 ];
 
 function doQuery(req, res, andOptions, next) {
@@ -83,7 +83,7 @@ function initialize () {
     rest.get('/my/course', (req, res, next) => doQuery(req, res, [{ createdBy: req.user._id }], next));
     // Only return courses which have been shared
     rest.get('/shared/course', (req, res, next) => {
-      req.body.search = Object.assign({}, req.body.search, { $or: [{ _shareWithUsers: req.user._id }, { _isShared: true }] });
+      req.body.search = Object.assign({}, req.body.search, { $or: [{ _isShared: true }] });
       doQuery(req, res, next);
     });
     /**

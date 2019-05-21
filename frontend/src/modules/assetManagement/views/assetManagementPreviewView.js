@@ -52,8 +52,8 @@ define(function(require){
         $.ajax({
           url: '/api/asset/trash/' + self.model.get('_id'),
           type: 'PUT',
-          success: function() { // deltanet edit see #337
-            return self.model.set({_isDeleted: true});
+          success: function() {
+            self.model.set({_isDeleted: true});
             Origin.trigger('assetManagement:assetPreviewView:delete');
           },
           error: function(data) {

@@ -11,7 +11,7 @@ define(function(require) {
     },
 
     url: function () {
-      return "/api/userpasswordreset/" + this.get('token');
+      return "api/userpasswordreset/" + this.get('token');
     },
 
     initialize : function(options) {},

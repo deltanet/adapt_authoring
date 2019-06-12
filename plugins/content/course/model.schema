@@ -585,10 +585,13 @@
       "editorOnly": true,
       "inputType": "Checkbox",
       "validators": [],
-      "title": "Share with other users",
+      "title": "Share with all users",
       "help": "Controls whether or not your colleagues will be able to see this course from the 'Shared courses' option"
     },
     "themeSettings": {
+      "type": "object"
+    },
+    "themeVariables": {
       "type": "object"
     },
     "menuSettings": {

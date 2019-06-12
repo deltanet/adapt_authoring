@@ -5,6 +5,174 @@ All notable changes to the Adapt authoring tool are documented in this file.
 **IMPORTANT**: For information on how to **correctly and safely** update your installation, please consult **INSTALL.md**.<br/>
 _Note that we adhere to the [semantic versioning](http://semver.org/) scheme for release numbering._
 
+## [0.8.1] - 2019-05-23
+
+Bugfix release.
+
+### Fixed
+- Publish spinner shows through force rebuild button ([#2295](https://github.com/adaptlearning/adapt_authoring/issues/2295))
+- Tag preview not showing via upload asset from component ([#2300](https://github.com/adaptlearning/adapt_authoring/issues/2300))
+- hard-coded placeholder text in sidebarFilter.hbs ([#2309](https://github.com/adaptlearning/adapt_authoring/issues/2309))
+- Admins can see other users' unshared courses ([#2312](https://github.com/adaptlearning/adapt_authoring/issues/2312))
+- No new migrations are run for upgrades ([#2317](https://github.com/adaptlearning/adapt_authoring/issues/2317))
+
+## [0.8.0] - 2019-05-03
+
+Adds a UI to allow the editing of a supported theme.
+
+#### Recommended requirements for full compatibility
+Series | Framework | Vanilla
+-- | -- | --
+2.x | 2.4.0 | [3.1.0](https://github.com/adaptlearning/adapt-contrib-vanilla/releases/tag/v3.1.0)
+4.x | 4.2.0 | [4.1.0](https://github.com/adaptlearning/adapt-contrib-vanilla/releases/tag/v4.1.0)
+
+### Fixed
+- Custom LESS doesn't work in authoring tools which are running framework version 4 ([#2240](https://github.com/adaptlearning/adapt_authoring/issues/2240))
+
+### Added
+- Add UI for theme editing ([#2187](https://github.com/adaptlearning/adapt_authoring/issues/2187))
+
+## [0.7.1] - 2019-04-09
+
+Bugfix release.
+
+### Fixed
+- Error not handled when server is already running ([#2174](https://github.com/adaptlearning/adapt_authoring/issues/2174))
+- Plugin management text is hardcoded ([#2218](https://github.com/adaptlearning/adapt_authoring/issues/2218))
+- Sidebar filters need localising ([#2243](https://github.com/adaptlearning/adapt_authoring/issues/2243))
+- Dashboard paging broken after deleting courses ([#2253](https://github.com/adaptlearning/adapt_authoring/issues/2253))
+- Reset password appears functional even when SMTP isn't enabled ([#2281](https://github.com/adaptlearning/adapt_authoring/issues/2281))
+- Automatic upgrade check broken ([#2290](https://github.com/adaptlearning/adapt_authoring/issues/2290))
+- Sorting broken on shared courses dashboard ([#2294](https://github.com/adaptlearning/adapt_authoring/issues/2294))
+
+### Added
+- Custom LESS should be validated prior to course build ([#1830](https://github.com/adaptlearning/adapt_authoring/issues/1830))
+
+## [0.7.0] - 2019-03-25
+
+Bundle of UI/usability enhancements.
+
+### Fixed
+- CI process should build the app ([#1949](https://github.com/adaptlearning/adapt_authoring/issues/1949))
+- Options buttons broken if not in a group ([#1955](https://github.com/adaptlearning/adapt_authoring/issues/1955))
+- `masterTenantName` is used instead of `masterTenantDisplayName` on install ([#2004](https://github.com/adaptlearning/adapt_authoring/issues/2004))
+- Helpers.hasCoursePermission returns without calling callback on error ([#2113](https://github.com/adaptlearning/adapt_authoring/issues/2113))
+- A user's courses are 'orphaned' on user delete ([#2124](https://github.com/adaptlearning/adapt_authoring/issues/2124))
+- Removing an asset from a component removes all other instances of that asset ([#2141](https://github.com/adaptlearning/adapt_authoring/issues/2141))
+- Child views of backbone-forms' modal are not destroyed ([#2157](https://github.com/adaptlearning/adapt_authoring/issues/2157))
+- Ace Editor's syntax colouring is lost when code is uglified ([#2173](https://github.com/adaptlearning/adapt_authoring/issues/2173))
+- Course preview page favicon path is incorrect ([#2202](https://github.com/adaptlearning/adapt_authoring/issues/2202))
+- Component paste-zone layout broken ([#2214](https://github.com/adaptlearning/adapt_authoring/issues/2214))
+- Roles with lesser permissions cannot see any shared courses ([#2266](https://github.com/adaptlearning/adapt_authoring/issues/2266))
+
+### Added
+- Menu and page editor should display the course/page title ([#1486](https://github.com/adaptlearning/adapt_authoring/issues/1486))
+- Should be able to force a full rebuild of a course ([#1497](https://github.com/adaptlearning/adapt_authoring/issues/1497))
+- Add ability to search/filter user list ([#1509](https://github.com/adaptlearning/adapt_authoring/issues/1509))
+- Custom CSS box should be resizeable ([#1527](https://github.com/adaptlearning/adapt_authoring/issues/1527))
+- Remove requirement for users to install ffmpeg manually ([#1860](https://github.com/adaptlearning/adapt_authoring/issues/1860))
+- Add ability to enable framework plugins by default on new courses ([#1875](https://github.com/adaptlearning/adapt_authoring/issues/1875))
+- Expose authoring tool version in the HTML ([#1944](https://github.com/adaptlearning/adapt_authoring/issues/1944))
+- Should be able to duplicate component list items ([#1961](https://github.com/adaptlearning/adapt_authoring/issues/1961))
+- Change your own email via the profile view  ([#2021](https://github.com/adaptlearning/adapt_authoring/issues/2021))
+- Add colours to differentiate logger messages ([#2105](https://github.com/adaptlearning/adapt_authoring/issues/2105))
+- Share courses with specific users ([#2123](https://github.com/adaptlearning/adapt_authoring/issues/2123))
+- Remove MediaElement.js from asset manager previews ([#2170](https://github.com/adaptlearning/adapt_authoring/issues/2170))
+- Admins should be able to give new users a name ([#2188](https://github.com/adaptlearning/adapt_authoring/issues/2188))
+- Admins should be able to send users a welcome email ([#2189](https://github.com/adaptlearning/adapt_authoring/issues/2189))
+- Admins shouldn't be able to change the passwords of users ([#2190](https://github.com/adaptlearning/adapt_authoring/issues/2190))
+- Admins should be warned that the reset password button will send an email ([#2191](https://github.com/adaptlearning/adapt_authoring/issues/2191))
+- Bundled Underscore is out-of-date ([#2198](https://github.com/adaptlearning/adapt_authoring/issues/2198))
+
+## [0.6.5] - 2019-02-26
+
+Bugfix release.
+
+### Fixed
+- Cannot create property 'path' on string 'required' ([#2245](https://github.com/adaptlearning/adapt_authoring/issues/2245))
+- Buffer() deprecation warning ([#2247](https://github.com/adaptlearning/adapt_authoring/issues/2247))
+
+## [0.6.4] - 2019-02-18
+
+Bugfix release.
+
+### Fixed
+- Plugin globals not always shown in Project settings ([#2223](https://github.com/adaptlearning/adapt_authoring/issues/2223))
+
+## [0.6.3] - 2019-02-14
+
+Bugfix release.
+
+### Upgrade Notes
+:skull: Please also upgrade the Adapt framework if your authoring tool is running a version older than 2.0.14. :skull:
+
+### Fixed
+- Load in schema from framework clone ([#2177](https://github.com/adaptlearning/adapt_authoring/issues/2177))
+
+## [0.6.2] - 2019-01-23
+
+Bugfix release.
+
+### Fixed
+- Gruntfile: `authSource` should be `dbAuthSource` ([#1977](https://github.com/adaptlearning/adapt_authoring/issues/1977))
+- Cannot fully import courses with submenus ([#2178](https://github.com/adaptlearning/adapt_authoring/issues/2178))
+- Theme settings are lost when selecting same theme ([#2179](https://github.com/adaptlearning/adapt_authoring/issues/2179))
+
+## [0.6.1] - 2018-12-20
+
+Bugfix release primarily to resolve issues introduced in v0.6.0.
+
+### Fixed
+- Copy function fails if course has orphaned components ([#1701](https://github.com/adaptlearning/adapt_authoring/issues/1701))
+- Preview route is sending invalid status codes ([#1882](https://github.com/adaptlearning/adapt_authoring/issues/1882))
+- Can't create a course ContentCollection ([#1953](https://github.com/adaptlearning/adapt_authoring/issues/1953))
+- toBoolean not fired for cli arguments ([#2024](https://github.com/adaptlearning/adapt_authoring/issues/2024))
+- Deprecation warning when using MongoDB versions 3.2 or above  ([#2053](https://github.com/adaptlearning/adapt_authoring/issues/2053))
+- Re-add 'server started' log ([#2063](https://github.com/adaptlearning/adapt_authoring/issues/2063))
+- Import of course with SVG asset into AT 0.5.0 seems to yield an error ([#2065](https://github.com/adaptlearning/adapt_authoring/issues/2065))
+- No useful error when attempting to preview course with empty children ([#2067](https://github.com/adaptlearning/adapt_authoring/issues/2067))
+- Password reset displays error alert on success ([#2075](https://github.com/adaptlearning/adapt_authoring/issues/2075))
+- Custom theme/menu settings are not imported ([#2088](https://github.com/adaptlearning/adapt_authoring/issues/2088))
+- Formidable limits file uploads to 200mb ([#2095](https://github.com/adaptlearning/adapt_authoring/issues/2095))
+
+### Added
+- Standard GitHub API limit too low for install ([#1825](https://github.com/adaptlearning/adapt_authoring/issues/1825))
+- Check for compatible node version on start ([#1917](https://github.com/adaptlearning/adapt_authoring/issues/1917))
+- Session secret should be auto-generated ([#2007](https://github.com/adaptlearning/adapt_authoring/issues/2007))
+- Mailer should verify settings on startup ([#2072](https://github.com/adaptlearning/adapt_authoring/issues/2072))
+- Custom LESS should be included on import ([#2108](https://github.com/adaptlearning/adapt_authoring/issues/2108))
+
+## [0.6.0] - 2018-09-25
+
+Release to tidy up the core 'scaffold' code which is used to render the edit forms in the application.
+
+**Main headlines**:
+* All editors given a spring clean for readability and code consistency
+* Backbone 'overrides' using hard-coded strings have been refactored into Handlebars templates where appropriate
+* Switched to Selectize library for tags
+* Fields from the properties schema are now properly passed through to Backbone Forms. This includes:
+`confirmDelete`, `default`, `editorAttrs`, `editorClass`, `fieldAttrs`, `fieldClass`, `help`, `inputType`, `legend`, `title`, `titleHTML`, `validators`
+* Tooltips displaying help text have been added, as well as the underlying attribute name to align with documentation, and to aid troubleshooting
+* A reset button has been added to revert a field to its default state
+* The custom Question Button editor has been replaced with the standard Text editor out since this was only compatible with version 1 of the framework
+* The custom Boolean true/false dropdown has been replaced with the Checkbox editor for consistency. All core plugin schemas have already been switched over
+* The undocumented & unused custom `TextArea:blank` editor has been retired
+
+### Added
+- Theme and menu settings can now be exposed via the `properties.schema` ([\#1116](https://github.com/adaptlearning/adapt_authoring/issues/1116), [\#1495](https://github.com/adaptlearning/adapt_authoring/issues/1495))
+
+### Changed
+- The colour picker widget has been changed to [Spectrum](http://bgrins.github.io/spectrum/) ([\#2014](https://github.com/adaptlearning/adapt_authoring/issues/2014))
+- Form fieldset labels are now localised ([\#1376](https://github.com/adaptlearning/adapt_authoring/issues/1376))
+- List items can now be rearranged via drag and drop ([\#1430](https://github.com/adaptlearning/adapt_authoring/issues/1430))
+- CKEditor's `allowedContent` can now be specified using `ckEditorExtraAllowedContent` in `config.json` to control what's filtered from CK's output ([\#1619](https://github.com/adaptlearning/adapt_authoring/issues/1619))
+
+### Removed
+- The `Gruntfile.js` has been tidied up, and any unused code removed ([\#1993](https://github.com/adaptlearning/adapt_authoring/issues/1993))
+
+### Fixed
+- A Select input's default value is now configurable via the `properties.schema` ([\#1539](https://github.com/adaptlearning/adapt_authoring/issues/1539))
+
 ## [0.5.0] - 2018-06-26
 
 Release which adds the ability to import courses created in the framework, as well as exports from other authoring tool installs.
@@ -26,7 +194,7 @@ We're also switching our Node.js support strategy to only include the current **
 - Custom SMTP servers can now be used with mailer ([\#1447](https://github.com/adaptlearning/adapt_authoring/issues/1447))
 
 ### Changed
--  Bumped archive module dependency version ([\#1930](https://github.com/adaptlearning/adapt_authoring/issues/1930))
+- Bumped archive module dependency version ([\#1930](https://github.com/adaptlearning/adapt_authoring/issues/1930))
 - Core front-end modules are now loaded before any front-end plugins ([\#1913](https://github.com/adaptlearning/adapt_authoring/issues/1913))
 - `Database#addModel` now catches and logs errors ([\#1855](https://github.com/adaptlearning/adapt_authoring/issues/1855))
 - Server now logs more appropriate message if error is caught when loading a route ([\#1853](https://github.com/adaptlearning/adapt_authoring/issues/1853))
@@ -434,6 +602,16 @@ Initial release.
 - Loading screen of death
 - Session cookie security issues
 
+[0.8.1]: https://github.com/adaptlearning/adapt_authoring/compare/v0.8.0...v0.8.1
+[0.8.0]: https://github.com/adaptlearning/adapt_authoring/compare/v0.7.1...v0.8.0
+[0.7.1]: https://github.com/adaptlearning/adapt_authoring/compare/v0.7.0...v0.7.1
+[0.7.0]: https://github.com/adaptlearning/adapt_authoring/compare/v0.6.5...v0.7.0
+[0.6.5]: https://github.com/adaptlearning/adapt_authoring/compare/v0.6.4...v0.6.5
+[0.6.4]: https://github.com/adaptlearning/adapt_authoring/compare/v0.6.3...v0.6.4
+[0.6.3]: https://github.com/adaptlearning/adapt_authoring/compare/v0.6.2...v0.6.3
+[0.6.2]: https://github.com/adaptlearning/adapt_authoring/compare/v0.6.1...v0.6.2
+[0.6.1]: https://github.com/adaptlearning/adapt_authoring/compare/v0.6.0...v0.6.1
+[0.6.0]: https://github.com/adaptlearning/adapt_authoring/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/adaptlearning/adapt_authoring/compare/v0.4.1...v0.5.0
 [0.4.1]: https://github.com/adaptlearning/adapt_authoring/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/adaptlearning/adapt_authoring/compare/v0.3.0...v0.4.0

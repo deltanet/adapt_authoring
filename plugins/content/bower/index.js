@@ -30,7 +30,8 @@ var origin = require('../../../'),
     unzip = require('unzip'),
     exec = require('child_process').exec,
     IncomingForm = require('formidable').IncomingForm,
-    installHelpers = require('../../../lib/installHelpers');
+    installHelpers = require('../../../lib/installHelpers'),
+    bytes = require('bytes');
 
 // errors
 function PluginPackageError (msg) {
@@ -169,6 +170,7 @@ function extractPackageInfo (plugin, pkgMeta, schema) {
     issues: pkgMeta.issues ? pkgMeta.issues : null,
     isLocalPackage: pkgMeta.isLocalPackage ? pkgMeta.isLocalPackage : false,
     properties: schema.properties,
+    targetAttribute: pkgMeta.targetAttribute,
     globals: schema.globals ? schema.globals : null
   };
 
@@ -202,6 +204,20 @@ function initialize () {
     // add plugin upload route
     rest.post('/upload/contentplugin', handleUploadedPlugin);
   });
+
+  app.contentmanager.addContentHook('create', 'config', { when: 'post' }, function(data, next) {
+    app.db.retrieve('extensiontype', { _isAddedByDefault: true }, function(error, results) {
+      if(error) {
+        return next(error);
+      }
+      if(!results.length) {
+        return next(null, data);
+      }
+      app.emit('extensions:enable', data._courseId.toString(), _.pluck(results, '_id'), function(error) {
+        next(error, data);
+      });
+    });
+  });
 }
 
 /**
@@ -211,18 +227,18 @@ function initialize () {
 
 BowerPlugin.prototype.updatePluginType = function (req, res, next) {
   var self = this;
-  var delta = _.pick(req.body, '_isAvailableInEditor'); // only allow update of certain attributes
-
+  var whitelistedAttrs = [ // only certain attributes are allowed
+    '_isAvailableInEditor',
+    '_isAddedByDefault'
+  ];
   database.getDatabase(function (err, db) {
     if (err) {
       return next(err);
     }
-
-    db.update(self.getPluginType(), { _id: req.params.id }, delta, function (err) {
+    db.update(self.getPluginType(), { _id: req.params.id }, _.pick(req.body, whitelistedAttrs), function (err) {
       if (err) {
         return next(err);
       }
-
       return res.json({ success: true });
     });
   });
@@ -802,7 +818,7 @@ BowerPlugin.prototype.updatePackages = function (plugin, options, cb) {
                       return next(error);
                     }
                     // If the plugin defines a framework, ensure that it is compatible
-                    if (!semver.satisfies(semver.clean(frameworkVersion), packageInfo[key].pkgMeta.framework)) {
+                    if (!semver.satisfies(semver.clean(frameworkVersion), packageInfo[key].pkgMeta.framework, { includePrerelease: true })) {
                       logger.log('warn', 'Unable to install ' + packageInfo[key].pkgMeta.name + ' as it is not supported in the current version of the Adapt framework');
                       return next();
                     }
@@ -854,7 +870,7 @@ function checkIfHigherVersionExists (package, options, cb) {
             }
             var installedVersion = results[0].version;
             var latestVersionIsNewer = semver.gt(latestPkg.version, installedVersion);
-            var satisfiesFrameworkReq = semver.satisfies(semver.clean(frameworkVersion), latestPkg.framework);
+            var satisfiesFrameworkReq = semver.satisfies(semver.clean(frameworkVersion), latestPkg.framework, { includePrerelease: true });
 
             if(!latestVersionIsNewer) {
               logger.log('info', `Already using the latest version of ${packageName} (${latestPkg.version})`);
@@ -884,8 +900,15 @@ function checkIfHigherVersionExists (package, options, cb) {
 
 function handleUploadedPlugin (req, res, next) {
   var form = new IncomingForm();
+  form.maxFileSize = configuration.getConfig('maxFileUploadSize');
   form.parse(req, function (error, fields, files) {
-    if (error) {
+    if(error) {
+      if (form.bytesExpected > form.maxFileSize) {
+        return res.status(400).json(new PluginPackageError(app.polyglot.t('app.uploadsizeerror', {
+          max: bytes.format(form.maxFileSize),
+          size: bytes.format(form.bytesExpected)
+        })));
+      }
       return next(error);
     }
 
@@ -964,7 +987,7 @@ function handleUploadedPlugin (req, res, next) {
                 return next(error);
               }
               // Check if the framework has been defined on the plugin and that it's not compatible
-              if (packageInfo.pkgMeta.framework && !semver.satisfies(semver.clean(frameworkVersion), packageInfo.pkgMeta.framework)) {
+              if (packageInfo.pkgMeta.framework && !semver.satisfies(semver.clean(frameworkVersion), packageInfo.pkgMeta.framework, { includePrerelease: true })) {
                 return next(new PluginPackageError('This plugin is incompatible with version ' + frameworkVersion + ' of the Adapt framework'));
               }
               app.contentmanager.getContentPlugin(pluginType, function (error, contentPlugin) {

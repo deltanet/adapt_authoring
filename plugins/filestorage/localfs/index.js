@@ -2,17 +2,21 @@
 /**
  * Local LocalFileStorage module
  */
-var async = require('async');
-var ffmpeg = require('fluent-ffmpeg');
-var fs = require('fs-extra');
-var path = require('path');
-var probe = require('node-ffprobe');
-var util = require('util');
+const async = require('async');
+const ffmpegStatic = require('ffmpeg-static');
+const ffprobeStatic = require('ffprobe-static');
+const ffmpeg = require('fluent-ffmpeg');
+const fs = require('fs-extra');
+const path = require('path');
+const ffprobe = require('ffprobe');
+const util = require('util');
 
-var configuration = require('../../../lib/configuration');
-var FileStorage = require('../../../lib/filestorage').FileStorage;
-var logger = require('../../../lib/logger');
-var usermanager = require('../../../lib/usermanager');
+ffmpeg.setFfmpegPath(ffmpegStatic.path);
+
+const configuration = require('../../../lib/configuration');
+const FileStorage = require('../../../lib/filestorage').FileStorage;
+const logger = require('../../../lib/logger');
+const usermanager = require('../../../lib/usermanager');
 
 function LocalFileStorage() {
   this.dataRoot = path.join(configuration.serverRoot, configuration.getConfig('dataRoot'));
@@ -356,14 +360,10 @@ LocalFileStorage.prototype.copyAsset = function(asset, sourceTenantName, destina
  */
 
 LocalFileStorage.prototype.createThumbnail = function (filePath, fileType, options, next) {
-  // early return if we can't create thumbnails
-  if (!configuration.getConfig('useffmpeg') || !fileType ) {
-    return next(null, false);
-  }
   var fileFormat = fileType.split('/')[1];
   fileType = fileType.split('/')[0];
   // also check fileType is supported
-  if(!isThumbnailTypeSupported(fileType)) {
+  if(!isThumbnailTypeSupported(fileType, fileFormat)) {
     return next(null, false);
   }
   var self = this;
@@ -404,12 +404,12 @@ LocalFileStorage.prototype.createThumbnail = function (filePath, fileType, optio
   return ff.run();
 };
 
-function isThumbnailTypeSupported(type) {
+function isThumbnailTypeSupported(type, format) {
   switch(type) {
     case 'video':
     case 'image':
-      return true;
-      break;
+      // https://github.com/adaptlearning/adapt_authoring/issues/2065
+      return format !== 'svg+xml';
     default:
       return false;
   }
@@ -444,13 +444,8 @@ LocalFileStorage.prototype.inspectFile = function (filePath, fileType, next) {
       break;
   }
 
-  // early return if we can't create thumbnails
-  if (!configuration.getConfig('useffmpeg')) {
-    return next(null, data);
-  }
-
   // Interrogate the uploaded file
-  probe(filePath, function (err, probeData) {
+  ffprobe(filePath, { path: ffprobeStatic.path }, function (err, probeData) {
     if (probeData) {
       // Store extra metadata depending on the type of file uploaded
       switch (fileType) {
@@ -462,14 +457,14 @@ LocalFileStorage.prototype.inspectFile = function (filePath, fileType, next) {
           break;
         case 'video':
           data.metadata = {
-            duration: probeData.streams[0].duration,
+            duration: parseInt(probeData.streams[0].duration),
             width: probeData.streams[0].width,
             height: probeData.streams[0].height
           }
           break;
         case 'audio':
           data.metadata = {
-            duration: probeData.streams[0].duration
+            duration: parseInt(probeData.streams[0].duration)
           }
           break;
       }

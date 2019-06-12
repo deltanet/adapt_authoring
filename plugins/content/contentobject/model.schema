@@ -78,6 +78,15 @@
       "help": "Indicate how long this page or section should take to complete",
       "translatable": true
     },
+    "_lockedBy": {
+      "type": "array",
+      "required": false,
+      "default": [],
+      "title": "Locked by",
+      "inputType": "List",
+      "validators": [],
+      "help": "If the course is using a 'custom' Menu Lock Type, this should contain the unique ID of the item(s) which must be completed before this is unlocked"
+    },
     "_lockType": {
       "type": "string",
       "default": "",
@@ -92,17 +101,8 @@
         ]
       },
       "title": "Menu lock type",
-      "help": "Defines which (if any) locking mechanism will be used for menu items. This should only be used on menus to lock sub menu pages.",
+      "help": "Defines which (if any) locking mechanism will be used. To be used only on submenus.",
       "validators": []
-    },
-    "_lockedBy": {
-      "type": "array",
-      "required": false,
-      "default": [],
-      "title": "Locked by",
-      "inputType": "List",
-      "validators": [],
-      "help": "If the course is using a 'custom' Menu Lock Type, this should contain the unique ID of the item(s) which must be completed before this is unlocked"
     },
     "_classes": {
       "type": "string",
@@ -193,6 +193,9 @@
       "editorOnly": true
     },
     "menuSettings": {
+      "type": "object"
+    },
+    "themeSettings": {
       "type": "object"
     }
   }

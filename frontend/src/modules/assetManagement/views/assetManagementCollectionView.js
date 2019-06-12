@@ -144,7 +144,7 @@ define(function(require){
     filterBySearchInput: function (filterText) {
       this.resetCollection(null, false);
       var pattern = '.*' + filterText.toLowerCase() + '.*';
-      this.search = { title: pattern, description: pattern, filename: pattern };
+      this.search = { _isDeleted: false, title: pattern, description: pattern, filename: pattern }; // deltanet edit always filter out deleted assets see #337
       this.fetchCollection();
 
       $(".asset-management-modal-filter-search" ).focus();

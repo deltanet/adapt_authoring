@@ -15,12 +15,6 @@ addons:
     packages:
       - g++-4.8
 
-branches:
-  only:
-    - master
-    - develop
-    - productionLive
-
 git:
   depth: 10
 
@@ -30,13 +24,12 @@ services:
 before_install:
   - git --version
   - mongod --version
-  - npm install -g adapt-cli
-  - adapt --version
   - npm install -g grunt-cli
 
 install:
   - npm config set spin false
   - npm install
+  - grunt build:prod
 
 matrix:
   fast_finish: true

@@ -30,8 +30,12 @@ define(function(require) {
       this.model.set('tags', _.pluck(this.model.get('tags'), '_id'));
 
       var changedAttributes = this.model.changedAttributes(this.originalAttributes);
+      // should also include anything that's new 
+      var newAttributes = _.omit(this.model.attributes, Object.keys(this.originalAttributes));
+      _.extend(changedAttributes, newAttributes);
+
       if(changedAttributes) {
-        return _.pick(this.model.attributes, _.keys(changedAttributes));
+        return _.pick(this.model.attributes, Object.keys(changedAttributes));
       }
       return null;
     },
@@ -110,7 +114,7 @@ define(function(require) {
       // Store the component types
       var componentTypes = new EditorCollection(null, {
         model: ComponentTypeModel,
-        url: '/api/componenttype',
+        url: 'api/componenttype',
         _type: 'componentTypes'
       });
       componentTypes.fetch({
@@ -128,7 +132,7 @@ define(function(require) {
           componentModel.save(null, {
             error: _.bind(this.onSaveError, this),
             success: function() {
-              Origin.router.navigateTo('/editor/' + componentModel.get('_courseId') + '/menu');
+              Origin.router.navigateTo('editor/' + componentModel.get('_courseId') + '/menu');
             }
           });
         }, this)

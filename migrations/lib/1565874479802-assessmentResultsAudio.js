@@ -20,6 +20,7 @@ exports.up = function up(done) {
         componentData._setCompletionOn = setCompletionOn;
         delete componentData._requireAssessmentPassed;
         updateCount++;
+        db.update('component', { _id: component._id }, {
           properties: componentData
         }, callback);
 

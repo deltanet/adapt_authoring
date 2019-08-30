@@ -9,6 +9,7 @@ exports.up = function up(done) {
       let updateCount = 0;
       async.eachSeries(components, (component, callback) => {
         if (component._component !== 'assessmentResultsAudio')  return callback();
+        if (!component.properties)  return callback();
 
         let oldRequireAssessmentPassed = false;
         let setCompletionOn = 'inview';

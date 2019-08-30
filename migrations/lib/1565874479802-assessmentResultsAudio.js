@@ -10,9 +10,13 @@ exports.up = function up(done) {
       async.eachSeries(components, (component, callback) => {
         if (component._component !== 'assessmentResultsAudio')  return callback();
 
-        let oldRequireAssessmentPassed = component.properties._requireAssessmentPassed;
+        let oldRequireAssessmentPassed = false;
         let setCompletionOn = 'inview';
         let componentData = component.properties;
+
+        if (component.properties && component.properties._requireAssessmentPassed)  {
+          oldRequireAssessmentPassed = component.properties._requireAssessmentPassed;
+        }
 
         if (oldRequireAssessmentPassed === true) {
           setCompletionOn = 'pass';

@@ -44,9 +44,9 @@ define(function(require) {
         'editorView:copy': this.addToClipboard,
         'editorView:copyID': this.copyIdToClipboard,
         'editorView:paste': this.pasteFromClipboard,
-        'editorCommon:download': function() {
+        'editorCommon:download': function(isXapiDownload) {
           this.validateProject(function(error) {
-            this.downloadProject();
+            this.downloadProject(isXapiDownload);
           });
         },
         'editorCommon:preview': function(isForceRebuild) {
@@ -171,14 +171,21 @@ define(function(require) {
       }
     },
 
-    downloadProject: function() {
+    downloadProject: function(xapiDownload) {
       if(Origin.editor.isDownloadPending) {
         return;
       }
       $('.editor-common-sidebar-download-inner').addClass('display-none');
       $('.editor-common-sidebar-downloading').removeClass('display-none');
 
-      var url = 'api/output/' + Origin.constants.outputPlugin + '/publish/' + this.currentCourseId;
+      var url = "";
+
+      if (xapiDownload) {
+        url = 'api/output/' + Origin.constants.outputPlugin + '/publishxapi/' + this.currentCourseId;
+      } else {
+        url = 'api/output/' + Origin.constants.outputPlugin + '/publish/' + this.currentCourseId;
+      }
+
       $.get(url, function(data, textStatus, jqXHR) {
         if (!data.success) {
           Origin.Notify.alert({

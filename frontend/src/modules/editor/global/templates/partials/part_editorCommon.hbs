@@ -16,12 +16,25 @@
     </div>
   </div>
 
-  <button class="editor-common-sidebar-download action-secondary">
-    <span class="editor-common-sidebar-download-inner">{{ t 'app.download'}}</span>
-    <span class="editor-common-sidebar-downloading display-none">
-      <i class="fa fa-circle-o-notch fa-spin"></i>{{ t 'app.downloading'}}
-    </span>
-  </button>
+
+
+  <div class="editor-common-sidebar-download-wrapper">
+    <button class="editor-common-sidebar-download action-primary">
+      <span class="editor-common-sidebar-download-inner">{{ t 'app.download'}}</span>
+      <span class="editor-common-sidebar-downloading display-none">
+        <i class="fa fa-circle-o-notch fa-spin"></i>{{ t 'app.downloading'}}
+      </span>
+    </button>
+    <div class="download-dropdown">
+      <button class=""><i class="fa fa-caret-down"></i></button>
+      <ul>
+        <li>
+          <button class="editor-common-sidebar-download-xapi">{{ t 'app.downloadxapi'}}</button>
+        </li>
+      </ul>
+    </div>
+  </div>
+
 
   {{#ifHasPermissions "*/*:create,*/*:read,*/*:update,*/*:delete"}}
   <button class="editor-common-sidebar-export action-secondary">

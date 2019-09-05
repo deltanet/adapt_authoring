@@ -15,7 +15,7 @@ const origin = require('../../../');
 const usermanager = require('../../../lib/usermanager');
 const database = require('../../../lib/database');
 
-function publishXAPI(tenant, courseId, mode, request, response, next) {
+function publishXAPI(courseId, mode, request, response, next) {
 
   var app = origin();
   var self = this;
@@ -150,6 +150,19 @@ function publishXAPI(tenant, courseId, mode, request, response, next) {
       });
     },
     function(callback) {
+      // TODO this need to be changed to clean the build folder
+      logger.log('info', 'Build folder: ' + BUILD_FOLDER);
+      fs.exists(path.join(BUILD_FOLDER), function(exists) {
+        // Ensure that the build folder is empty
+        fs.emptyDir(BUILD_FOLDER, err => {
+          if (err) return logger.log('error', err);
+          logger.log('info', 'Build directory emptied');
+
+          callback(err);
+        })
+      });
+    },
+    function(callback) {
       fs.exists(path.join(BUILD_FOLDER, Constants.Filenames.Main), function(exists) {
         if (!isRebuildRequired && exists) {
           resultObject.success = true;
@@ -165,6 +178,7 @@ function publishXAPI(tenant, courseId, mode, request, response, next) {
         if (semver.gte(semver.clean(frameworkVersion), semver.clean('2.0.0'))) {
           outputFolder = path.join(outputFolder, Constants.Folders.Build);
         }
+
         // hack to allow courses to build pre FW v2.3.1 where theme and menu defaults were defines in schema
         if (!themeName) themeName = "adapt-contrib-vanilla";
 
@@ -285,7 +299,6 @@ function publishXAPI(tenant, courseId, mode, request, response, next) {
           version: extensionItem.version,
           targetAttribute: targetAttribute
         };
-        logger.log('info', 'xapiExtension: ' + xapiExtension);
         courseData.config._enabledExtensions.xapi = xapiExtension;
         // replace build.includes
         let buildArray = _.toArray(courseData.config.build.includes);
@@ -303,7 +316,6 @@ function publishXAPI(tenant, courseId, mode, request, response, next) {
         // replace _globals
         courseData.course._globals._extensions._xapi = xapiGlobals;
 
-        logger.log('info', JSON.stringify(courseData));
         return cb(null, courseData);
       });
     }, configuration.getConfig('dbName'));

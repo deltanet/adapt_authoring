@@ -18,11 +18,13 @@ define(function(require) {
       'click button.editor-common-sidebar-menusettings': 'editMenu',
       'click button.editor-common-sidebar-select-theme': 'selectTheme',
       'click button.editor-common-sidebar-download': 'downloadProject',
+      'click button.editor-common-sidebar-download-xapi': 'downloadXAPIProject',
       'click button.editor-common-sidebar-preview': 'previewProject',
       'click button.editor-common-sidebar-preview-force': 'forcePreviewProject',
       'click button.editor-common-sidebar-export': 'exportProject',
       'click button.editor-common-sidebar-close': 'closeProject',
-      'click .editor-common-sidebar-preview-wrapper .dropdown button': 'toggleDropdown'
+      'click .editor-common-sidebar-preview-wrapper .dropdown button': 'toggleDropdown',
+      'click .editor-common-sidebar-download-wrapper .download-dropdown button': 'toggleDownloadDropdown'
     },
 
     initialize: function(options) {
@@ -46,6 +48,7 @@ define(function(require) {
     postRender: function() {
       this._onWindowClick = this.onWindowClick.bind(this);
       this.$dropdown = this.$('.dropdown');
+      this.$downloadDropdown = this.$('.download-dropdown');
       $(window).on('click', this._onWindowClick);
     },
 
@@ -128,7 +131,11 @@ define(function(require) {
     },
 
     downloadProject: function() {
-      Origin.trigger('editorCommon:download');
+      Origin.trigger('editorCommon:download', false);
+    },
+
+    downloadXAPIProject: function() {
+      Origin.trigger('editorCommon:download', true);
     },
 
     previewProject: function() {
@@ -152,8 +159,14 @@ define(function(require) {
       this.$dropdown.toggleClass('active');
     },
 
+    toggleDownloadDropdown: function(event) {
+      event.stopPropagation();
+      this.$downloadDropdown.toggleClass('active');
+    },
+
     onWindowClick: function() {
       this.$dropdown.removeClass('active');
+      this.$downloadDropdown.removeClass('active');
     },
 
     remove: function() {

@@ -171,6 +171,7 @@
   "app.placeholdernewcomponent": "Component title",
   "app.download": "Publish course",
   "app.downloading": "Downloading...",
+  "app.downloadxapi": "Publish as xAPI",
   "app.preview": "Preview course",
   "app.previewing": "Previewing...",
   "app.forcerebuild": "Force rebuild",

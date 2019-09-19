@@ -40,7 +40,7 @@ function exportCourse(pCourseId, request, response, next) {
 
 // creates the EXPORT_DIR if it isn't there
 function ensureExportDir(exportDirEnsured) {
-  fs.ensureDir(EXPORT_DIR, exportDirEnsured);
+  fs.emptyDir(EXPORT_DIR, exportDirEnsured);
 }
 
 function generateLatestBuild(results, courseBuilt) {

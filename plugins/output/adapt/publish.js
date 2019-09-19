@@ -103,6 +103,20 @@ function publishCourse(courseId, mode, request, response, next) {
         callback(null);
       });
     },
+    // delete the existing build folder
+    function(callback) {
+      logger.log('info', 'Build folder: ' + COURSE_FOLDER);
+      fs.exists(path.join(BUILD_FOLDER), function(exists) {
+        if (!exists || !isRebuildRequired) return callback(null);
+        // Ensure that the build folder is empty
+        fs.emptyDir(COURSE_FOLDER, err => {
+          logger.log('info', 'Build directory emptied');
+          if (err) logger.log('error', err);
+
+          callback(err);
+        })
+      });
+    },
     function(callback) {
       var temporaryMenuFolder = path.join(SRC_FOLDER, Constants.Folders.Menu, customPluginName);
       self.applyMenu(tenantId, courseId, outputJson, temporaryMenuFolder, function(err, appliedMenuName) {

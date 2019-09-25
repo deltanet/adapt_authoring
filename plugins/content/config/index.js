@@ -36,6 +36,7 @@ ConfigContent.prototype.hasPermission = function (action, userId, tenantId, cont
     }
 
     if (!isAllowed) {
+      contentItem = JSON.parse(contentItem);
       // Check the permissions string
       var resource = permissions.buildResourceString(tenantId, '/api/content/course/' + contentItem._courseId);
       permissions.hasPermission(userId, action, resource, next);
@@ -149,7 +150,7 @@ ConfigContent.prototype.retrieve = function (search, options, next) {
       return next(new Error(`Unable to retrieve ${modelName} for ${JSON.stringify(search)}`));
     }
 
-    return next(null, [records[0]]);
+    return next(null, [records[0].toObject()]);
   });
 };
 

@@ -51,12 +51,12 @@ exports.up = function down(done) {
                 }
             }
             // If Tenant Admin and Super Admin roles exist convert
-            // all Tenant Admins to Super Admins
-            if (results.tenant && results.super) {
+            // all Tenant Admins to Course Creators
+            if (results.tenant && results.course) {
                 try {
                     userCollection.updateMany(
                         {roles: {$in: [results.tenant._id]}},
-                        {$set: {roles: [results.super._id]}}
+                        {$set: {roles: [results.course._id]}}
                     );
                 } catch (e) {
                     logger.log('error', e);

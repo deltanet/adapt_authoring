@@ -21,8 +21,8 @@ function publishCourse(courseId, mode, request, response, next) {
   var tenantId = user.tenant._id;
   var outputJson = {};
   var isRebuildRequired = false;
-  var themeName = '';
-  var menuName = Constants.Defaults.MenuName;
+  var themeName;
+  var menuName;
   var frameworkVersion;
 
   var resultObject = {};
@@ -170,11 +170,6 @@ function publishCourse(courseId, mode, request, response, next) {
         if (semver.gte(semver.clean(frameworkVersion), semver.clean('2.0.0'))) {
           outputFolder = path.join(outputFolder, Constants.Folders.Build);
         }
-        // hack to allow courses to build pre FW v2.3.1 where theme and menu defaults were defines in schema
-        if (!themeName) themeName = "adapt-contrib-vanilla";
-
-        if (!menuName) menuName = "adapt-contrib-boxMenu";
-
 
         args.push('--outputdir=' + outputFolder);
         args.push('--theme=' + themeName);

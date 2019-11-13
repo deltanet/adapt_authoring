@@ -16,17 +16,16 @@ define(function(require) {
     postRender: function() {
       this.setupSubViews();
       this.setupFilterAndSearchView();
-      if (this.options.assetType === "Asset:image" && Origin.scaffold.getCurrentModel().get('_component') === 'graphic') {
-        // TODO - removed until autofill issues can be resolved, see issue #35
-      	//this.setupImageAutofillButton();
+      if (this.options.assetType === "image" && Origin.scaffold.getCurrentModel().get('_component') === 'graphic') {
+      	this.setupImageAutofillButton();
       }
       this.resizePanels();
     },
 
     setupSubViews: function() {
-    	this.search = { _isDeleted: false }; // deltanet edit always filter out deleted assets see #337
-    	// Replace Asset and : so we can have both filtered and all asset types
-    	var assetType = this.options.assetType.replace('Asset', '').replace(':', '');
+    	this.search = {};
+
+      var assetType = this.options.assetType;
 
       if (assetType) {
         var filters = [assetType];

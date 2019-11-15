@@ -278,7 +278,7 @@ function publishSCORM(courseId, mode, request, response, next) {
 
     let spoorExtensionDef = configuration.getConfig('spoorExtensionDef');
     if ('object' !== typeof spoorExtensionDef) {
-      cb({ message: 'Error: spoorExtensionDef must be populated in application configuration', httpStatus: 500 });
+      return cb({ message: 'Error: spoorExtensionDef must be populated in application configuration', httpStatus: 500 });
     }
     let spoorExtension = {};
     let spoorName = 'adapt-contrib-spoor';

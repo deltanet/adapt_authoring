@@ -171,7 +171,7 @@
   "app.placeholdernewcomponent": "Component title",
   "app.download": "Publish course",
   "app.downloading": "Downloading...",
-  "app.downloadxapi": "Publish as xAPI",
+  "app.downloadscorm": "Publish as SCORM",
   "app.preview": "Preview course",
   "app.previewing": "Previewing...",
   "app.forcerebuild": "Force rebuild",

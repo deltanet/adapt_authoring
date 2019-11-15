@@ -15,7 +15,7 @@ function DownloadOutput() {
 
 util.inherits(DownloadOutput, OutputPlugin);
 
-server.get('/downloadxapi/:tenant/:course', function(req, res, next) {
+server.get('/downloadscorm/:tenant/:course', function(req, res, next) {
   var course = req.params.course;
   var tenant = req.params.tenant;
   logger.log('info', 'tenant: ' + tenant);
@@ -32,9 +32,9 @@ logger.log('info', 'course: ' + course);
         res.json({ success: false, message: error.message });
         return res.end();
       } else {
-        plugin.publishToXAPI(tenant, course, mode, req, res, function (error, result) {
+        plugin.publishSCORM(tenant, course, mode, req, res, function (error, result) {
           if (error) {
-            logger.log('error', 'Unable to publish to xAPI');
+            logger.log('error', 'Unable to publish to SCORM');
             return res.json({ success: false, message: error.message });
           }
           res.statusCode = 200;
@@ -50,7 +50,7 @@ logger.log('info', 'course: ' + course);
   }
 });
 
-server.get('/downloadxapi/:tenant/:course/:title/downloadxapi.zip', function (req, res, next) {
+server.get('/downloadscorm/:tenant/:course/:title/downloadscorm.zip', function (req, res, next) {
   var tenantId = req.params.tenant;
   var courseId = req.params.course;
   var FRAMEWORK_ROOT_FOLDER = path.join(configuration.tempDir, configuration.getConfig('masterTenantID'), Constants.Folders.Framework);

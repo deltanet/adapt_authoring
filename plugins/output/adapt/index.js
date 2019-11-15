@@ -12,6 +12,6 @@ util.inherits(AdaptOutput, OutputPlugin);
 AdaptOutput.prototype.publish = require('./publish');
 AdaptOutput.prototype.importsource = require('./importsource');
 AdaptOutput.prototype.export = require('./export');
-AdaptOutput.prototype.publishToXAPI = require('./publishxapi');
+AdaptOutput.prototype.publishSCORM = require('./publishscorm');
 
 exports = module.exports = AdaptOutput;

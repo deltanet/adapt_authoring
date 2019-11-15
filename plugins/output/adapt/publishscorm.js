@@ -15,7 +15,7 @@ const origin = require('../../../');
 const usermanager = require('../../../lib/usermanager');
 const database = require('../../../lib/database');
 
-function publishXAPI(courseId, mode, request, response, next) {
+function publishSCORM(courseId, mode, request, response, next) {
 
   var app = origin();
   var self = this;
@@ -49,6 +49,19 @@ function publishXAPI(courseId, mode, request, response, next) {
   }
 
   async.waterfall([
+    function(callback) {
+      // TODO this need to be changed to clean the build folder
+      logger.log('info', 'Build folder: ' + BUILD_FOLDER);
+      fs.exists(path.join(BUILD_FOLDER), function(exists) {
+        // Ensure that the build folder is empty
+        fs.emptyDir(BUILD_FOLDER, err => {
+          if (err) return logger.log('error', err);
+          logger.log('info', 'Build directory emptied');
+
+          callback(err);
+        })
+      });
+    },
     // get an object with all the course data
     function(callback) {
       self.getCourseJSON(tenantId, courseId, function(err, data) {
@@ -85,8 +98,8 @@ function publishXAPI(courseId, mode, request, response, next) {
           return callback(err);
         }
 
-        // Update the JSON object with xAPI data
-         replaceSpoorWithXAPI(data, function(error, courseData) {
+        // Update the JSON object with spoor data
+         replaceXapiWithSpoor(data, function(error, courseData) {
            if (error) {
              return callback(error);
            }
@@ -147,19 +160,6 @@ function publishXAPI(courseId, mode, request, response, next) {
       installHelpers.getInstalledFrameworkVersion(function(error, version) {
         frameworkVersion = version;
         callback(error);
-      });
-    },
-    function(callback) {
-      // TODO this need to be changed to clean the build folder
-      logger.log('info', 'Build folder: ' + BUILD_FOLDER);
-      fs.exists(path.join(BUILD_FOLDER), function(exists) {
-        // Ensure that the build folder is empty
-        fs.emptyDir(BUILD_FOLDER, err => {
-          if (err) return logger.log('error', err);
-          logger.log('info', 'Build directory emptied');
-
-          callback(err);
-        })
       });
     },
     function(callback) {
@@ -266,21 +266,24 @@ function publishXAPI(courseId, mode, request, response, next) {
     next(null, resultObject);
   });
 
-  // Process config for xapi
+  // Process config for spoor
 
-  function replaceSpoorWithXAPI(courseData, cb) {
-    // check if we have spoor enabled
-    if (!courseData.config || !courseData.config._enabledExtensions || !courseData.config._enabledExtensions.spoor) return cb(null, courseData);
-    if (!courseData.course && !courseData.course.title) return cb("No Course Title");
+  function replaceXapiWithSpoor(courseData, cb) {
+    // check if we have xapi enabled
+    if (courseData.config && courseData.config._enabledExtensions && courseData.config._enabledExtensions.spoor) return cb({ message: 'Error: SPOOR plugin already installed', httpStatus: 500 });
 
-    // Set activityId replace all non alphanumeric characters
-    let activityId = 'https://delta-net.co.uk/xapi/' + courseData.course.title.replace(/[\W_]+/g,'-').toLowerCase();
-    let xapiExtensionDef = {"_isEnabled":true,"_specification":"xAPI","_activityID":activityId,"_endpoint":"","_user":"","_password":"","_lang":"en-US","_generateIds":false,"_shouldTrackState":true,"_componentBlacklist":"blank,graphic","_coreEvents":{"Adapt":{"router:menu":false,"router:page":false,"questionView:recordInteraction":true,"assessments:complete":true},"contentObjects":{"change:_isComplete":true},"articles":{"change:_isComplete":false},"blocks":{"change:_isComplete":false},"components":{"change:_isComplete":false}},"_lrsFailureBehaviour":"show"};
-    var xapiExtension = {};
+    if (!courseData.config._enabledExtensions) {
+      courseData.config._enabledExtensions = {};
+    }
+
+    let spoorExtensionDef = configuration.getConfig('spoorExtensionDef');
+    if ('object' !== typeof spoorExtensionDef) {
+      cb({ message: 'Error: spoorExtensionDef must be populated in application configuration', httpStatus: 500 });
+    }
+    let spoorExtension = {};
     let spoorName = 'adapt-contrib-spoor';
-    let xapiGlobals = {"confirm":"OK","lrsConnectionErrorTitle":"LRS not available","lrsConnectionErrorMessage":"We were unable to connect to your Learning Record Store (LRS). This means that your progress cannot be recorded."};
 
-    // get the xapi extension data
+    // get the spoor extension data
     database.getDatabase(function (err, db) {
       if (err) {
         return cb(err);
@@ -290,31 +293,30 @@ function publishXAPI(courseId, mode, request, response, next) {
         if (err) {
           return cb(err);
         }
-        //TODO - check we have a result
+
         let extensionItem = results[0];
         let targetAttribute = extensionItem.targetAttribute;
-        xapiExtension = {
+        spoorExtension = {
           _id: extensionItem._id,
           name: extensionItem.name,
           version: extensionItem.version,
           targetAttribute: targetAttribute
         };
-        courseData.config._enabledExtensions.xapi = xapiExtension;
+        courseData.config._enabledExtensions.spoor = spoorExtension;
         // replace build.includes
         let buildArray = _.toArray(courseData.config.build.includes);
-        buildArray.splice(buildArray.indexOf('adapt-contrib-spoor'), 1);
-        buildArray.push('adapt-contrib-xapi');
+        if (buildArray.indexOf('adapt-contrib-xapi') !== -1) {
+          buildArray.splice(buildArray.indexOf('adapt-contrib-xapi'), 1);
+        }
+        buildArray.push(spoorName);
         courseData.config.build.includes = buildArray;
 
-        // delete spoor enabledExtensions
-        delete courseData.config._enabledExtensions.spoor;
+        // delete xapi enabledExtensions
+        delete courseData.config._enabledExtensions.xapi;
 
         // replace config JSON
-        delete courseData.config._spoor;
-        courseData.config._xapi = xapiExtensionDef;
-
-        // replace _globals
-        courseData.course._globals._extensions._xapi = xapiGlobals;
+        delete courseData.config._xapi;
+        Object.assign(courseData.config, spoorExtensionDef);
 
         return cb(null, courseData);
       });
@@ -322,4 +324,4 @@ function publishXAPI(courseId, mode, request, response, next) {
   }
 }
 
-module.exports = publishXAPI;
+module.exports = publishSCORM;

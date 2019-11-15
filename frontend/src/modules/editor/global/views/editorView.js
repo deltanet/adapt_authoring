@@ -44,9 +44,9 @@ define(function(require) {
         'editorView:copy': this.addToClipboard,
         'editorView:copyID': this.copyIdToClipboard,
         'editorView:paste': this.pasteFromClipboard,
-        'editorCommon:download': function(isXapiDownload) {
+        'editorCommon:download': function(isScormDownload) {
           this.validateProject(function(error) {
-            this.downloadProject(isXapiDownload);
+            this.downloadProject(isScormDownload);
           });
         },
         'editorCommon:preview': function(isForceRebuild) {
@@ -171,7 +171,7 @@ define(function(require) {
       }
     },
 
-    downloadProject: function(xapiDownload) {
+    downloadProject: function(scormDownload) {
       if(Origin.editor.isDownloadPending) {
         return;
       }
@@ -180,8 +180,8 @@ define(function(require) {
 
       var url = "";
 
-      if (xapiDownload) {
-        url = 'api/output/' + Origin.constants.outputPlugin + '/publishxapi/' + this.currentCourseId;
+      if (scormDownload) {
+        url = 'api/output/' + Origin.constants.outputPlugin + '/publishscorm/' + this.currentCourseId;
       } else {
         url = 'api/output/' + Origin.constants.outputPlugin + '/publish/' + this.currentCourseId;
       }

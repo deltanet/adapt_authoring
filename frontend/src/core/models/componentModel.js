@@ -29,6 +29,7 @@ define(function(require) {
       '_onScreen',
       '_isVisible',
       '_isHidden',
+      'instruction',
       '_colorLabel'
     ]
   });

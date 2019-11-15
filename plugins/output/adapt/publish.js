@@ -21,8 +21,8 @@ function publishCourse(courseId, mode, request, response, next) {
   var tenantId = user.tenant._id;
   var outputJson = {};
   var isRebuildRequired = false;
-  var themeName = '';
-  var menuName = Constants.Defaults.MenuName;
+  var themeName;
+  var menuName;
   var frameworkVersion;
 
   var resultObject = {};
@@ -103,6 +103,20 @@ function publishCourse(courseId, mode, request, response, next) {
         callback(null);
       });
     },
+    // delete the existing build folder
+    function(callback) {
+      logger.log('info', 'Build folder: ' + COURSE_FOLDER);
+      fs.exists(path.join(BUILD_FOLDER), function(exists) {
+        if (!exists || !isRebuildRequired) return callback(null);
+        // Ensure that the build folder is empty
+        fs.emptyDir(COURSE_FOLDER, err => {
+          logger.log('info', 'Build directory emptied');
+          if (err) logger.log('error', err);
+
+          callback(err);
+        })
+      });
+    },
     function(callback) {
       var temporaryMenuFolder = path.join(SRC_FOLDER, Constants.Folders.Menu, customPluginName);
       self.applyMenu(tenantId, courseId, outputJson, temporaryMenuFolder, function(err, appliedMenuName) {
@@ -156,11 +170,6 @@ function publishCourse(courseId, mode, request, response, next) {
         if (semver.gte(semver.clean(frameworkVersion), semver.clean('2.0.0'))) {
           outputFolder = path.join(outputFolder, Constants.Folders.Build);
         }
-        // hack to allow courses to build pre FW v2.3.1 where theme and menu defaults were defines in schema
-        if (!themeName) themeName = "adapt-contrib-vanilla";
-
-        if (!menuName) menuName = "adapt-contrib-boxMenu";
-
 
         args.push('--outputdir=' + outputFolder);
         args.push('--theme=' + themeName);

@@ -14,6 +14,7 @@ const logger = require('../../../lib/logger');
 const origin = require('../../../');
 const usermanager = require('../../../lib/usermanager');
 const database = require('../../../lib/database');
+const _ = require('underscore');
 
 function publishSCORM(courseId, mode, request, response, next) {
 

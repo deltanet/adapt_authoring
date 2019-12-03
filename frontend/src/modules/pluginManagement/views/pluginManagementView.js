@@ -34,8 +34,9 @@ define(function(require){
       Origin.trigger('location:title:update', { title: Origin.l10n.t('app.' + this.pluginType + 'management') });
       this.getColl().fetch({ success: this.renderPluginTypeViews.bind(this) });
     },
-    
+
     render: function() {
+      console.log('post render: ' + JSON.stringify(this.pluginCollections));
       this.model = {
         toJSON: _.bind(function() {
           return { type: this.pluginType };

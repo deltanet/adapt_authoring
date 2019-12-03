@@ -127,8 +127,12 @@ define(function(require) {
       this.navigateToEditorPage('extensions');
     },
 
+    //downloadProject: function() {
+    //  Origin.trigger('editorCommon:download');
+    //},
+
     downloadProject: function() {
-      Origin.trigger('editorCommon:download');
+      Origin.router.navigateTo('publishoptions/' +  Origin.editor.data.course.get('_id'));
     },
 
     previewProject: function() {

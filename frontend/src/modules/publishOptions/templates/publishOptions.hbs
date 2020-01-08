@@ -1,8 +1,8 @@
 <div class="publishOptions">
-  <form class="frameworkImport forms" action="importsourcecheck" method="post" autocomplete="off">
+  <form class="downloadCourse forms" action="importsourcecheck" method="post" autocomplete="off">
   <div class="inner publish-summary" id="summary-list">
       <div class="title green">Publish settings</div>
-      <div class="description">The course will be published with the following settings.</div>
+      <div class="description">The course will be published using the following tracking plugin.</div>
       <div class="col-row tb-row publish-summary-none">
         <div class="col-100">{{t 'app.noplugintypes'}}</div>
       </div>
@@ -14,12 +14,6 @@
       <div class="col-100">{{t 'app.noplugintypes'}}</div>
     </div>
   </div>
-  <div class="inner error-summary">
-      <div class="title red">Errors</div>
-      <div class="description">The following errors have occured.</div>
-      <div class="col-row tb-row">
-        <div class="col-100"><strong>errors</strong></div>
-      </div>
-  </div>
+  <input type="hidden" name="trackingPluginJson" id="trackingPluginJson" />
   </form>
 </div>

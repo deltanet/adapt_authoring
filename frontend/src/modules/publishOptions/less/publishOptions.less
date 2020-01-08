@@ -15,6 +15,10 @@ li {
   font-weight: @font-weight-bold;
 }
 
+.edit-plugin {
+    font-size: 24px;
+}
+
 .publishOptions .inner {
   max-width: 800px;
   margin: 20px;
@@ -63,4 +67,49 @@ li {
       font-weight: @font-weight-bold;
     }
   }
+}
+
+.publish-config-edit {
+  position: fixed;
+  float: right;
+  top: 0;
+  z-index: 500;
+  height: 100%;
+  width: 100%;
+  transition: right 0.4s cubic-bezier(0.8, 0.0, 0.2, 1);
+  &.show {
+    right: 0;
+  }
+}
+
+.publish-config-edit-inner {
+  float: right;
+  background-color: @white;
+  height: 100%;
+  width: 600px;
+  border-left: 1px solid #ccc;
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
+  &-inner {
+    padding: 40px;
+    fieldset {
+      margin: 0;
+      margin-bottom: 15px;
+    }
+  }
+  input,
+  textarea {
+    max-width: 440px;
+    width: 75%;
+  }
+}
+
+.config-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 500;
+  background-color: rgba(255, 255, 255, 0.6);
+  width: 100%;
+  height: 100%;
 }

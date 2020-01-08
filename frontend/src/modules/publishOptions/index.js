@@ -3,6 +3,7 @@ define(function(require) {
   var Origin = require('core/origin');
   var PublishOptionsView = require('./views/publishOptionsView.js');
   var PublishOptionsSidebarView = require('./views/publishOptionsSidebarView.js');
+  var ConfigModel = require('core/models/configModel');
 
   var data = {
     featurePermissions: ["*/*:create","*/*:read","*/*:update","*/*:delete"]
@@ -14,7 +15,14 @@ define(function(require) {
 
   Origin.on('router:publishoptions', function() {
     var route1 = Origin.location.route1;
-    Origin.contentPane.setView(PublishOptionsView, { model: new Backbone.Model({ _id: route1 }) });
-    Origin.sidebar.addView(new PublishOptionsSidebarView().$el);
+    console.log('route ID : ' + route1);
+    (new ConfigModel({ _courseId: route1 })).fetch({
+      success: function(model) {
+
+        Origin.contentPane.setView(PublishOptionsView, { model: model });
+        Origin.sidebar.addView(new PublishOptionsSidebarView().$el);
+
+      }
+    });
   });
 });

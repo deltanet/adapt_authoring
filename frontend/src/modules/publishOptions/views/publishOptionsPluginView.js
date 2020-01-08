@@ -1,11 +1,13 @@
 // LICENCE https://github.com/adaptlearning/adapt_authoring/blob/master/LICENSE
 define(function(require){
+  var Origin = require('core/origin');
   var OriginView = require('core/views/originView');
 
   var PublishOptionsPluginView = OriginView.extend({
     tagName: 'div',
     className: 'col-row tb-row',
     initialize: function(options) {
+      this.listenTo(Origin, 'publishOptions:pluginView:remove', this.remove);
       this.options = options;
       this.render();
     },
@@ -31,11 +33,18 @@ define(function(require){
     },
 
     onEditPlugin: function(event) {
-      console.log('onEditPlugin');
+      event && event.preventDefault();
+      var pluginId = $(event.currentTarget).attr('data-id');
+      var pluginName = $(event.currentTarget).attr('data-name');
+      var plugin = {
+        id: pluginId,
+        name: pluginName
+      }
+      Origin.trigger('publishOptions:editPlugin', plugin);
     },
 
     onTogglePlugin: function(event) {
-      console.log('onTogglePlugin');
+      Origin.trigger('publishOptions:togglePlugin', this.options.data);
     }
   }, {
     template: 'publishOptionsPluginView'

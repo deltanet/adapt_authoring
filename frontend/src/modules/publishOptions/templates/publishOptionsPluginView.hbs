@@ -1,8 +1,9 @@
 <div class="col-40">{{displayName}}</div>
 <div class="col-30 col-centered">{{version}}</div>
 <div class="col-30 col-centered" id="publish-controls">
-  <button class="edit-plugin" title="Edit"  data-id="{{_id}}"><i class="fa fa-cog"></i></button>
-  <button class="btn secondary toggle-plugin" data-displayname="{{extension}}" data-id="{{_id}}">Use</button>
+  {{#if pluginEnabled}}
+  <button class="edit-plugin" title="Edit" data-name="{{name}}" data-id="{{_id}}"><i class="fa fa-cog"></i></button>
+  {{else}}
+  <button class="btn secondary toggle-plugin" data-name="{{name}}" data-id="{{_id}}">Use</button>
+  {{/if}}
 </div>
-<input type="hidden" name="trackingPlugin" id="trackingPlugin" />
-<input type="hidden" name="trackingPluginJson" id="trackingPluginJson" />

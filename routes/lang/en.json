@@ -459,5 +459,9 @@
   "app.targetattributeexists": "There is a plugin already installed with a target attribute of '%{targetAttribute}'.",
   "app.versionexists": "You already have this version of the plugin installed.",
   "app.unknownuser": "Unknown User",
-  "app.publishPluginWarning": "Now using %{plugin} for publishing. Edit to change plugin settings."
+  "app.publishPluginWarning": "Now using %{plugin} for publishing. Edit to change plugin settings.",
+  "app.publishSettings": "Publish settings",
+  "app.publishSettingsDesc": "The following tracking plugins have been enabled for this course. Only one tracking plugin should be enabled for publish.",
+  "app.publishOptions": "Options",
+  "app.publishOptionsDesc": "The following plugins can also be used."
 }

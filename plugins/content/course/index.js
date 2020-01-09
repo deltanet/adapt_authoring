@@ -403,6 +403,10 @@ function duplicate (data, cb) {
                 contentData._courseId = newCourseId;
                 contentData._parentId = parentIdMap[oldParentId];
 
+                if (contenttype == 'config') {
+                  contentData = removeXapiActivity(contentData);
+                }
+
                 if(oldParentId && !contentData._parentId) {
                   logger.log('warn', `Cannot copy ${contenttype} '${oldId}', cannot find parent object with ID '${oldParentId}'`);
                   return next();
@@ -476,6 +480,21 @@ function duplicate (data, cb) {
     }
   });
 };
+
+/**
+ * Set activityId in any xAPI config to empty string.
+ * @param {array} data
+ * @param {callback} cb
+ */
+function removeXapiActivity(data) {
+
+  if (data._extensions && data._extensions._xapi) {
+    data._extensions._xapi._activityID = "";
+  }
+
+  return data;
+};
+
 
 /**
  * Sort contentObjects into correct creation order.

@@ -101,7 +101,7 @@ define([
           { name: 'paragraph', groups: [ 'list', 'indent', 'blocks', 'align', 'bidi' ], items: [ 'NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote', 'CreateDiv' ] },
           { name: 'direction', items: [ 'BidiLtr', 'BidiRtl' ] },
           '/',
-          { name: 'basicstyles', groups: [ 'basicstyles', 'cleanup' ], items: [ 'Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', '-', 'RemoveFormat'] },
+          { name: 'basicstyles', groups: [ 'basicstyles', 'cleanup' ], items: [ 'Font','FontSize', 'Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', '-', 'RemoveFormat'] },
           { name: 'styles', items: [ 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock' ] },
           { name: 'links', items: [ 'Link', 'Unlink' ] },
           { name: 'colors', items: [ 'TextColor', 'BGColor' ] },

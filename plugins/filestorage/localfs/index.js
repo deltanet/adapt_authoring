@@ -238,7 +238,7 @@ LocalFileStorage.prototype.processFileUpload = function (file, newPath, options,
           if (options.createMetadata) {
             return self.inspectFile(newPath, file.type, function (err, withMeta) {
               if (withMeta) {
-                data = _.extend(data, withMeta);
+                data = Object.assign(data, withMeta);
               }
               nextFunc();
             });

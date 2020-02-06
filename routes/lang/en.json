@@ -241,6 +241,7 @@
   "app.menus": "Menus",
   "app.getnewplugins": "Get new plugins",
   "app.required": "Required",
+  "app.excludePublish": "Exclude from publish",
   "app.options": "Options",
   "app.remove": "Remove",
   "app.add": "Add",

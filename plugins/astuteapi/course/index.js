@@ -7,6 +7,7 @@
 var contentmanager = require('../../../lib/contentmanager');
 var ContentPlugin = contentmanager.ContentPlugin;
 var ContentPermissionError = contentmanager.errors.ContentPermissionError;
+var ContentTypeError = contentmanager.errors.ContentTypeError;
 var configuration = require('../../../lib/configuration');
 var permissions = require('../../../lib/permissions');
 var util = require('util');

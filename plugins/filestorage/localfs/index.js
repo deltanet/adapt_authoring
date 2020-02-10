@@ -360,6 +360,12 @@ LocalFileStorage.prototype.copyAsset = function(asset, sourceTenantName, destina
  */
 
 LocalFileStorage.prototype.createThumbnail = function (filePath, fileType, options, next) {
+  if (!fileType) {
+    var fileTypeError = 'Failed to create ' + filePath + ' thumbnail: could not determine file extension';
+    logger.log('error', fileTypeError);
+    return next(fileTypeError, false);
+  }
+
   var fileFormat = fileType.split('/')[1];
   fileType = fileType.split('/')[0];
   // also check fileType is supported

@@ -5,7 +5,7 @@ All notable changes to the Adapt authoring tool are documented in this file.
 **IMPORTANT**: For information on how to **correctly and safely** update your installation, please consult **INSTALL.md**.<br/>
 _Note that we adhere to the [semantic versioning](http://semver.org/) scheme for release numbering._
 
-## [0.10.3] - 2020-02-21
+## [0.10.3] - 2020-02-25
 
 Bugfix release.
 
@@ -15,9 +15,13 @@ Bugfix release.
 - Incompatible versions of plugins are targetted if range specified in adapt.json ([#2479](https://github.com/adaptlearning/adapt_authoring/issues/2479))
 - Framework and AT use different default screen sizes ([#2485](https://github.com/adaptlearning/adapt_authoring/issues/2485))
 - Heavy course validation on front-end ([#2487](https://github.com/adaptlearning/adapt_authoring/issues/2487))
+- Duplicatecourse route does not copy course tags([#231](https://github.com/deltanet/adapt_authoring/issues/231))
+- Dashboard performance improvements
 
 ### Added
 - Generate a dependency lock on release ([#2301](https://github.com/adaptlearning/adapt_authoring/issues/2301))
+- Allow extensions to be excluded from publish and export ([#364] (https://github.com/deltanet/adapt_authoring/issues/364))
+- Remove xAPI activity ID when course is copied ([#370](https://github.com/deltanet/adapt_authoring/issues/370))
 
 ## [0.10.2] - 2019-11-08
 
@@ -451,7 +455,7 @@ Major theme update to match the new look and feel of [adaptlearning.org](www.ada
 - Caching issue related to course schemas
 - Tag autocomplete mechanism sometimes throws 500 error
 - Form validation
-- Saving course settings hangs if nothing has been changed  
+- Saving course settings hangs if nothing has been changed
 
 ## [0.1.7] - 2016-04-28
 

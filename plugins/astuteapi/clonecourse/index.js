@@ -158,19 +158,23 @@ function getChildType () {
       if (!isAllowed) {
         return next(new ContentPermissionError());
       }
-      return db.create(getModelName(), data, function(error, doc) {
-        // grant the creating user full editor permissions
-        permissions.createPolicy(user._id, function (err, policy) {
-          if (err) {
-            logger.log('error', 'there was an error granting editing permissions', err);
-          }
 
-          var resource = permissions.buildResourceString(tenantId, '/api/content/course/' + doc._id);
-          permissions.addStatement(policy, ['create', 'read', 'update', 'delete'], resource, 'allow', function (err) {
+      checkCourseTags(data, function(error, coursedata) {
+        if (error) logger.log('error', 'Error getting course tags.');
+        return db.create(getModelName(), coursedata, function(error, doc) {
+          // grant the creating user full editor permissions
+          permissions.createPolicy(user._id, function (err, policy) {
             if (err) {
               logger.log('error', 'there was an error granting editing permissions', err);
             }
-            return next(null, doc);
+
+            var resource = permissions.buildResourceString(tenantId, '/api/content/course/' + doc._id);
+            permissions.addStatement(policy, ['create', 'read', 'update', 'delete'], resource, 'allow', function (err) {
+              if (err) {
+                logger.log('error', 'there was an error granting editing permissions', err);
+              }
+              return next(null, doc);
+            });
           });
         });
       });
@@ -958,6 +962,50 @@ function createTags (tags, user, cb) {
     }, user._tenantId);
   } else {
     cb(null, newTags);
+  }
+};
+
+
+/**
+ * checks the passed object for tags and replaces tag ID's.
+ * @param {array} coursedata
+ * @param {callback} cb
+ */
+function checkCourseTags(coursedata, next) {
+  if (coursedata.tags) {
+    var user = coursedata.user || usermanager.getCurrentUser();
+
+    app.contentmanager.getContentPlugin('tag', function(error, plugin) {
+      if(error) return next(error, coursedata);
+      var courseTags = [];
+      async.each(coursedata.tags, function(tag, callback) {
+        var options = {
+          _tenantId: configuration.getConfig('masterTenantID')
+        };
+
+        // get the tag details from the master DB
+        plugin.retrieve({ _id: tag }, options, function(error, record) {
+          if(error) return callback(error);
+
+          createTags(record, user, function(error, newTags) {
+            if (error || !newTags) {
+              logger.log('error', "Error: cannot create course tags");
+              return callback(error);
+            }
+            courseTags.push(newTags[0]);
+            return callback(null);
+
+          }.bind(this));
+        });
+      }, function(error) {
+        if (error) return next(error, coursedata);
+        delete coursedata.tags;
+        coursedata.tags = courseTags;
+        return next(null, coursedata);
+      });
+    });
+  } else {
+    return next(null, coursedata);
   }
 };
 

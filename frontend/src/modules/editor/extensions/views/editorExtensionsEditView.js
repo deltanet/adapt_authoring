@@ -16,7 +16,8 @@ define(function(require) {
 
     events: {
       'click button.remove-extension': 'onRemoveExtensionClicked',
-      'click button.add-extension': 'onAddExtensionClicked'
+      'click button.add-extension': 'onAddExtensionClicked',
+      'change input.exclude-extension': 'toggleAddedToOutput',
     },
 
     preRender: function() {
@@ -36,7 +37,14 @@ define(function(require) {
     },
 
     setupExtensions: function(callback) {
-      var enabledExtensionNames = _.pluck(Origin.editor.data.config.get('_enabledExtensions'), 'name');
+      //var enabledExtensionNames = _.pluck(Origin.editor.data.config.get('_enabledExtensions'), 'name', '_excludeFromBuild');
+      var enabledExtensionNames = _.map(Origin.editor.data.config.get('_enabledExtensions'), function(extension, key) {
+        return {
+          name: extension.name,
+          _excludeFromBuild: extension._excludeFromBuild
+        }
+      });
+
       var enabledExtensions = [];
       var disabledExtensions = [];
       var _this = this;
@@ -52,9 +60,16 @@ define(function(require) {
         success: function() {
           extensionTypes.each(function(model) {
             var extension = model.toJSON();
-            if (_.indexOf(enabledExtensionNames, extension.name) > -1) {
-              enabledExtensions.push(extension);
-            } else if (extension._isAvailableInEditor) {
+            var extensionIsEnabled = false;
+            enabledExtensionNames.forEach(function(item) {
+              if (item.name === extension.name) {
+
+                extensionIsEnabled = true;
+                if(item._excludeFromBuild) extension._excludeFromBuild = item._excludeFromBuild;
+                enabledExtensions.push(extension);
+              }
+            });
+            if (!extensionIsEnabled && extension._isAvailableInEditor) {
               disabledExtensions.push(extension);
             }
           });
@@ -147,6 +162,24 @@ define(function(require) {
 
     onRemoveExtensionConfirmed: function(confirmed) {
       if(confirmed) Origin.trigger('editorExtensionsEdit:views:remove');
+    },
+
+    toggleAddedToOutput: function(events) {
+      var selectedOutputName = event.target.getAttribute('data-displayName');
+      var selectedOutputId = event.target.getAttribute('data-id');
+      var isExtensionSelected = $(event.target).prop("checked");
+      var selectedExtension = {
+        extensionId: selectedOutputId,
+        extensionName: selectedOutputName,
+        _excludeFromBuild: isExtensionSelected
+      }
+
+      $.post('api/extension/togglebuild/' + this.model.get('_id'), { extension: selectedExtension }, _.bind(function(result) {
+        if(!result.success) {
+          return Origin.Notify.alert({ type: 'error', text: Origin.l10n.t('app.errorgeneric') });
+        }
+        this.refreshData();
+      }, this));
     }
   }, {
     template: 'editorExtensionsEdit'

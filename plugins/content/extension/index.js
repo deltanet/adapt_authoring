@@ -472,6 +472,74 @@ function disableExtensions(courseId, extensions, cb) {
   });
 }
 
+/**toggle _excludeFromBuild for _enabledExtension in config
+ *
+ * @params courseId {string}
+ * @params action {string}
+ * @params extensions {object} [extension IDs]
+ * @param {callback} cb
+*/
+
+function toggleBuildExtension (courseId, extension, cb) {
+  if (!extension || 'object' !== typeof extension) {
+    return cb(new Error('Incorrect parameters passed'));
+  }
+
+  if (!extension.extensionName || !extension.extensionId || !extension._excludeFromBuild) {
+    return cb(new Error('Incorrect parameters passed'));
+  }
+
+  var toggleAction = (extension._excludeFromBuild === 'true');
+  var toggleType = typeof toggleAction;
+  var user = usermanager.getCurrentUser();
+  var usersTenantId;
+
+  if (user && user.tenant && user.tenant._id) {
+    usersTenantId = user.tenant._id || configuration.getConfig('dbName');
+    // Changes to extensions warrants a full course rebuild
+    app.emit('rebuildCourse', user.tenant._id, courseId);
+  } else {
+    return cb(new Error('Tenant could not be found'));
+  }
+
+  database.getDatabase(function (err, db) {
+    if (err) {
+      return cb(err);
+    }
+
+    db.retrieve('config', { _courseId : courseId }, { fields: '_id _enabledExtensions' }, function (err, results) {
+      if (err) {
+        return cb(err);
+      }
+
+      // iterate results and update _enabledExtensions attribute
+      async.eachSeries(results, function (result, next) {
+
+        // we need to store extra in the config object
+        if (!result._enabledExtensions) {
+          return cb(new Error('No enabled extensions'));
+        }
+        var delta  = {
+          _enabledExtensions: result._enabledExtensions
+        };
+
+        if ('object' !== typeof delta._enabledExtensions[extension.extensionName]) {
+          return cb(new Error('Could not update extension: ' + extension.extensionName));
+        }
+
+        delta._enabledExtensions[extension.extensionName]._excludeFromBuild = toggleAction;
+        db.update('config', { _id: result._id }, delta, next);
+      }, function(err) {
+        if (err) {
+          cb(err);
+        } else {
+          cb();
+        }
+      });
+    });
+  }, usersTenantId);
+}
+
 /**
  * Returns an array of course objects that use the Extension with the passed id
  * @param callback
@@ -544,6 +612,18 @@ function initialize () {
     // expects course ID and an array of extension id's
     rest.post('/extension/enable/:courseid', function (req, res, next) {
       enableExtensions(req.params.courseid, req.body.extensions, function(error) {
+        if(error) {
+          logger.log('error', error);
+          return res.status(error instanceof ContentTypeError ? 400 : 500).json({ success: false, message: error });
+        }
+        res.status(200).json({ success: true });
+      });
+    });
+
+    // add/remove extension from build includes
+    // expects course ID an extension id and a boolean
+    rest.post('/extension/togglebuild/:courseid', function (req, res, next) {
+      toggleBuildExtension(req.params.courseid, req.body.extension, function(error) {
         if(error) {
           logger.log('error', error);
           return res.status(error instanceof ContentTypeError ? 400 : 500).json({ success: false, message: error });

@@ -7,10 +7,13 @@
     <div class="extension-management-heading extension-management-heading-title col-20">
       <h4 class="extension-management-heading-title-inner tb-col-inner">{{t 'app.extension'}}</h4>
     </div>
-    <div class="extension-management-heading extension-management-heading-description col-60">
+    <div class="extension-management-heading extension-management-heading-description col-50">
       <h4 class="extension-management-heading-description-inner tb-col-inner">{{t 'app.description'}}</h4>
     </div>
-    <div class="extension-management-heading extension-management-heading-options col-20 col-centered">
+    <div class="extension-management-heading extension-management-heading-output col-15">
+      <h4 class="pluginType-heading-version-inner tb-col-inner">{{t 'app.excludePublish'}}</h4>
+    </div>
+    <div class="extension-management-heading extension-management-heading-options col-15 col-centered">
       <h4 class="pluginType-heading-version-inner tb-col-inner">{{t 'app.options'}}</h4>
     </div>
   </div>
@@ -26,6 +29,9 @@
             </div>
             <div class="extension-management-plugin-description col-60">
               <div class="extension-management-plugin-description-inner tb-col-inner">{{description}}</div>
+            </div>
+            <div class="extension-management-plugin-checkbox col-20 col-centered">
+              <input class="pluginType-excludeFromBuild exclude-extension" type="checkbox" data-displayName="{{extension}}" data-id="{{_id}}" {{#if _excludeFromBuild}} checked {{/if}}/>
             </div>
             <div class="extension-management-plugin-remove col-20 col-centered">
               <div class="extension-management-plugin-remove-inner tb-col-inner">

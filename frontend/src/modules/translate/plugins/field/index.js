@@ -13,20 +13,20 @@ define(function(require) {
 
     if (!data.text) {
       isError = true;
-      errorMessage = "No text to translate.";
+      errorMessage = Origin.l10n.t('app.translateNoText');
     }
 
     if (isError) {
       Origin.Notify.alert({
         type: 'error',
         title: 'Error',
-        text: 'An error occurred. ' + errorMessage
+        text: Origin.l10n.t('app.translateError') + errorMessage
       });
       return;
     }
     getTranslatedText(data.text, function(error, newText) {
       if (error) {
-        return data.callback('An error has occurred. ' + error);
+        return data.callback(Origin.l10n.t('app.translateError') + error);
       }
       return data.callback(error, newText);
     });
@@ -53,7 +53,7 @@ define(function(require) {
         var xhrError = jqXHR;
         Origin.Notify.alert({
           type: 'error',
-          text: xhrError
+          text: jqXHR.responseJSON.message
         });
         return cb(xhrError);
       }

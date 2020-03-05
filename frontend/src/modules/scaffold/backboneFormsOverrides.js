@@ -25,12 +25,21 @@ define([
       return false;
     },
     'click [data-action="translate"]': function() {
+      var fieldValue = this.editor.getValue();
+      if (!fieldValue) {
+        Origin.Notify.alert({
+          type: 'info',
+          title: 'Error',
+          text: Origin.l10n.t('app.translateErrorNoText')
+        });
+        return false;
+      }
+
       Origin.Translate.field({
-        text: this.editor.value,
+        text: fieldValue,
         callback: _.bind(function(error, newValue) {
-          console.log(error);
-          console.log(newValue);
           this.setValue(newValue);
+          this.editor.trigger('change', this);
         }, this)
       });
 

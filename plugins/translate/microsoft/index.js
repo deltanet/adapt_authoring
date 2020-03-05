@@ -46,8 +46,8 @@ function initialize () {
           return res.status(500).json({ success:false });
         }
         if (body.error) {
-          logger.log('error', 'Translation Text error: ' + body.error);
-          return res.status(500).json({ success:false, message: body.error });
+          logger.log('error', 'Translation Text error: ' + JSON.stringify(body.error));
+          return res.status(500).json({ success:false, message: body.error.message });
         }
         // return the translated text.
         // response will be an array, what should be done for multiple entries
@@ -65,8 +65,6 @@ function initialize () {
     });
   });
 }
-
-
 
 MicrosoftTranslate.prototype.translateText = function (id, text, req, res, next) {
   logger.log('info', 'Translating: ' + text);
@@ -89,7 +87,7 @@ function translate(req, res, cb) {
       'X-ClientTraceId': uuidv4().toString()
     },
     body: [{
-          'text': origText
+      'text': origText
     }],
     json: true,
   };

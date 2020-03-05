@@ -13,6 +13,11 @@
   <button class="field-default" data-action="default" title="{{t 'app.reset'}}">
     <i class="fa fa-undo"></i>
   </button>
+  {{#if translatable}}
+  <button class="field-translate" data-action="translate" title="{{t 'app.translate'}}">
+    <i class="fa fa-language"></i>
+  </button>
+  {{/if}}
   {{else}}
   {{#if legend}}
   <div class="legend">

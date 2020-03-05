@@ -23,6 +23,18 @@ define([
       this.editor.trigger('change', this);
 
       return false;
+    },
+    'click [data-action="translate"]': function() {
+      Origin.Translate.field({
+        text: this.editor.value,
+        callback: _.bind(function(error, newValue) {
+          console.log(error);
+          console.log(newValue);
+          this.setValue(newValue);
+        }, this)
+      });
+
+      return false;
     }
   };
 

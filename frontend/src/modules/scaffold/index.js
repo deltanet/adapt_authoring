@@ -118,6 +118,7 @@ define([
       subSchema: isFieldTypeObject ? field.properties : itemsProperties || items,
       title: getTitle(),
       titleHTML: field.titleHTML,
+      translatable: field.translatable,
       type: getType(),
       validators: getValidators()
     };

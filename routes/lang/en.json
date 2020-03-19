@@ -443,6 +443,7 @@
   "app.colourLabelTitle": "Colour Label",
   "app.colourLabelIntro": "The colours are <b>only</b> applied in the authoring tool and will <b>not affect the generated course</b>. The settings are synced with all users in the authoring tool.",
   "app.translate": "Translate",
+  "app.translatecourse": "Translate Course",
   "app.translateErrorNoText": "You must enter some text to translate.",
   "app.translateNoText": "No text to translate.",
   "app.translateError": "An error occurred translating text ",

@@ -29,7 +29,8 @@ define(function(require) {
         'contextMenu:course:delete': this.deleteProjectPrompt,
         'contextMenu:course:copy': this.duplicateProject,
         'contextMenu:course:copyID': this.copyIdToClipboard,
-        'contextMenu:course:cleanassets': this.cleanAssets
+        'contextMenu:course:cleanassets': this.cleanAssets,
+        'contextMenu:course:translateCourse': this.translateCourse,
       });
       this.listenTo(Origin, {
         'dashboard:dashboardView:removeSubViews': this.remove,
@@ -257,6 +258,11 @@ define(function(require) {
            });
          }
       });
+    },
+
+    translateCourse: function() {
+      event && event.preventDefault();
+      Origin.router.navigateTo('translatecourse/' + this.model.get('_id'));
     }
   }, {
     template: 'project'

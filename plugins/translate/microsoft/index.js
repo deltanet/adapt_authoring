@@ -6,12 +6,13 @@ const async = require('async');
 const exec = require('child_process').exec;
 const path = require('path');
 const fs = require('fs-extra');
+const _ = require('underscore');
 
 // internal
-const TranslationManager = require('../../../lib/translationmanager')
-const TranslationPlugin = TranslationManager.TranslationPlugin;
-const TranslationError = TranslationManager.errors.TranslationError;
-const TranslationPermissionError = TranslationManager.errors.TranslationPermissionError;
+const translationManager = require('../../../lib/translationmanager')
+const TranslationPlugin = translationManager.TranslationPlugin;
+const TranslationError = translationManager.errors.TranslationError;
+const TranslationPermissionError = translationManager.errors.TranslationPermissionError;
 const Constants = require('../../../lib/translationmanager').Constants;
 const logger = require('../../../lib/logger');
 const origin = require('../../../');
@@ -70,8 +71,22 @@ function initialize () {
      * API Endpoint to translate whole course
      */
     rest.post('/translatecourse/:courseid', function (req, res, next) {
-      const courseId = req.params.courseid;
-      translateCourse(courseId, req, res, function(error, record) {
+      let origCourseId = req.params.courseid;
+      let requestBody = req.body;
+      if (!origCourseId) {
+        res.statusCode = 400;
+        return res.json('Translate Course error, no course ID');
+      }
+      if (!requestBody || 'object' !== typeof requestBody) {
+        res.statusCode = 400;
+        return res.json({ success: false, message: 'request body was not a valid object' });
+      }
+      if (!requestBody.targetLang || 'string' !== typeof requestBody.targetLang) {
+        res.statusCode = 400;
+        return res.json({ success: false, message: 'could not determine target language' });
+      }
+      let targetLang = requestBody.targetLang;
+      translateCourse(origCourseId, targetLang, function(error, record) {
         if (error) {
           res.statusCode = 400;
           return res.json({success: false, message: error.message});
@@ -137,21 +152,28 @@ function translateText(origText, toLang, cb) {
 * TODO - convert to async await
 */
 
-function translateCourse(courseId, req, res, next) {
+function translateCourse(courseId, targetLang, next) {
   logger.log('info', 'Translating: ' + courseId);
 
-    processTranslation(courseId)
+  translationManager.getSourceLang(courseId, function(error, sourceLang) {
+    if (error || !sourceLang) {
+      let errorMessage = error ? error : 'Source language not found';
+      logger.log('error', errorMessage);
+      reject(error);
+    }
+
+    processTranslation(courseId, sourceLang, targetLang)
       .then(translatedCourse => {
         // need to update the database here
-
         next(null, translatedCourse);
       })
       .catch(error => next(error));
+  });
 };
 
 
 function getEndPoint() {
-  var endpoint = configuration.getConfig('microsoftTranslateEndpoint');
+  let endpoint = configuration.getConfig('microsoftTranslateEndpoint');
   if (!endpoint) {
       return new TranslationError('Please set/export the following environment variable: microsoftTranslateEndpoint');
   }
@@ -159,69 +181,55 @@ function getEndPoint() {
 }
 
 function getKey() {
-  var subscriptionKey = configuration.getConfig('microsoftTranslateKey');
+  let subscriptionKey = configuration.getConfig('microsoftTranslateKey');
   if (!subscriptionKey) {
       return new TranslationError('Please set/export the following environment variable: microsoftTranslateKey');
   }
   return subscriptionKey;
 }
 
-function translatable(obj) {
-  Object.keys(obj).forEach(function(key) {
-    var value = obj[key];
-    if (value) {
-      switch (typeof value) {
-        case "object":
-          translatable(value);
-          break;
-        case "string":
-          logger.log('info', 'key: ' + key + ' value: ' + value);
-          // test if translatable
-          break;
-      }
-    }
-  })
-}
-
-const getCourseJSON = function(courseId) {
+const processTranslation = function(origCourseId, sourceLang, targetLang) {
   return new Promise((resolve, reject) => {
-    app.contentmanager.getContentPlugin("course", function(error, plugin) {
-      if(error) return reject(error);
-      plugin.retrieve({ _id: courseId }, {}, function(error, docs) {
-        if(error) return reject(error);
-        if(docs.length !== 1) {
-          return reject("Failed to find course " + courseId);
-        }
-        resolve(docs[0]);
-      });
-    });
-  });
-};
+    if (!origCourseId || typeof origCourseId !== 'string') reject("No course to translate");
 
-const processTranslation = function(courseId) {
-  return new Promise((resolve, reject) => {
-    if (!courseId || typeof courseId !== 'string') reject("No course to translate");
-
-    let user = usermanager.getCurrentUser();
-    let tenantId = user.tenant._id;
+    let originalCourseData = {};
     let coursePublishJson = {};
     let gruntOutputJson = {};
     let translateResultObject = {};
     let cachedJson = {};
+    let metadata = {
+      idMap: {}
+    };
 
+    let pluginLocations = {};
     let dbInstance;
-    let sourceLang = 'en'; // TODO - use value from form input
-    let targetLang = 'fr'; // TODO - use value from form input
+    // TODO - Create file to indicate that translation is in progress for this course
 
-    // TODO - Create file in FS to indicate that translation is in progress for this course
-    let isInTranslation = false
+    const contentMap = {
+      course: 'course',
+      config: 'config',
+      contentobject: 'contentObjects',
+      article: 'articles',
+      block: 'blocks',
+      component: 'components'
+    };
 
+    const plugindata = {
+      pluginTypes: [
+        { type: 'component', folder: 'components' },
+        { type: 'extension', folder: 'extensions', attribute: '_extensions' },
+        { type: 'menu',      folder: 'menu',       attribute: 'menuSettings' },
+        { type: 'theme',     folder: 'theme',      attribute: 'themeSettings' }
+      ]
+    };
+
+    const user = usermanager.getCurrentUser();
+    const tenantId = user.tenant._id;
     const FRAMEWORK_ROOT_FOLDER = path.join(configuration.tempDir, configuration.getConfig('masterTenantID'), Constants.Folders.Framework);
-    const COURSE_FOLDER = path.join(FRAMEWORK_ROOT_FOLDER, Constants.Folders.AllCourses, tenantId, courseId);
+    const COURSE_FOLDER = path.join(FRAMEWORK_ROOT_FOLDER, Constants.Folders.AllCourses, tenantId, origCourseId);
     const TRANSLATE_FOLDER = path.join(COURSE_FOLDER, Constants.Folders.Languagefiles);
     const TRANSLATE_SOURCE_FOLDER = path.join(TRANSLATE_FOLDER, Constants.Folders.TranslationSource);
     const TRANSLATE_GRUNT_FOLDER = path.join(TRANSLATE_FOLDER, Constants.Folders.TranslationOutput);
-    const TRANSLATE_FINAL_FOLDER = path.join(TRANSLATE_FOLDER, Constants.Folders.TranslationFinal);
     const GRUNT_OUTPUT_FILE = path.join(TRANSLATE_GRUNT_FOLDER, sourceLang, Constants.Folders.TranslationJSONFile);
     const GRUNT_INPUT_FILE = path.join(TRANSLATE_GRUNT_FOLDER, targetLang, Constants.Folders.TranslationJSONFile);
     const getGruntFatalError = stdout => {
@@ -232,7 +240,140 @@ const processTranslation = function(courseId) {
       const indexEnd = stdout.indexOf('\n\nExecution Time');
 
       return stdout.substring(indexStart, indexEnd !== -1 ? indexEnd : stdout.length);
+    };
+
+    const storeComponentType = (cb) => {
+      dbInstance.retrieve('componenttype', {}, { jsonOnly: true }, function(error, results) {
+        if(error) {
+          return cb(error);
+        }
+        metadata['componentMap'] = {};
+        async.each(results, function(plugin, cb2) {
+          const properties = plugin.properties;
+          metadata['componentMap'][plugin['component']] = {
+            targetAttribute: plugin.targetAttribute,
+            version: plugin.version,
+            name: plugin.name,
+            _id: plugin._id
+          };
+          cb2();
+        }, cb);
+      });
+    };
+
+    const transformContent = (type, originalData) => {
+      return new Promise(async (resolve, reject) => {
+        let data = _.extend({}, originalData);
+        /**
+        * Basic prep of data
+        */
+        delete data._id;
+        delete data._trackingId;
+        delete data._latestTrackingId;
+        data.createdBy = app.usermanager.getCurrentUser()._id;
+        if(type !== 'course') {
+          data._courseId = newCourseId;
+        }
+        if(data._component) {
+          data._componentType = metadata.componentMap[data._component]._id;
+        }
+        if(data._parentId) {
+          if(metadata.idMap[data._parentId]) {
+            data._parentId = metadata.idMap[data._parentId];
+          } else {
+            logger.log('warn', 'Cannot update ' + originalData._id + '._parentId, ' +  originalData._parentId + ' not found in idMap');
+            return resolve();
+          }
+        }
+
+        /**
+        * Define the custom properties and and pluginLocations
+        */
+        let genericPropKeys = Object.keys(dbInstance.getModel(type).schema.paths);
+        let customProps = _.pick(data, _.difference(Object.keys(data), genericPropKeys));
+
+        if(_.isEmpty(customProps)) return resolve(data);
+
+        plugindata.pluginTypes.forEach(function(typeData) {
+          if(!pluginLocations[typeData.type]) return;
+
+          let pluginKeys = _.intersection(Object.keys(customProps), Object.keys(pluginLocations[typeData.type]));
+
+          if(pluginKeys.length === 0) return;
+
+          data[typeData.attribute] = _.pick(customProps, pluginKeys);
+          data = _.omit(data, pluginKeys);
+          customProps = _.omit(customProps, pluginKeys);
+        });
+        // everything else is a customer property
+        data.properties = customProps;
+        data = _.omit(data, Object.keys(customProps));
+
+        resolve(data);
+      });
+    };
+
+    const createContentItem = (type, originalData, done) => {
+      let data;
+      // TODO - re-organise flow
+      async.series([
+        function transform(cb) {
+          transformContent(type, originalData).then(transformedData => {
+            data = transformedData;
+            cb();
+          }).catch(cb);
+        }
+      ], function(error, results) {
+        if(error) return done(error);
+        app.contentmanager.getContentPlugin(type, function(error, plugin) {
+          if(error) return done(error);
+          plugin.create(data, function(error, record) {
+            if(error) {
+              logger.log('warn', 'Failed to create ' + type + ' ' + (originalData._id || '') + ' ' + error);
+              return done(error);
+            }
+            return done(null, record);
+          });
+        });
+      });
+    };
+
+    /**
+    * Stores plugin metadata for use later
+    */
+    const cacheMetadata = (done) => {
+      async.each(plugindata.pluginTypes, storePlugintype, done);
     }
+
+    const storePlugintype = (pluginTypeData, cb) => {
+      const type = pluginTypeData.type;
+      dbInstance.retrieve(`${type}type`, {}, { jsonOnly: true }, function(error, results) {
+        if(error) {
+          return cb(error);
+        }
+        async.each(results, function(plugin, cb2) {
+          const properties = plugin.properties;
+          const locations = properties && properties.pluginLocations;
+          if(!metadata[`${type}Map`]) {
+            metadata[`${type}Map`] = {};
+          }
+          metadata[`${type}Map`][plugin[type]] = {
+            targetAttribute: plugin.targetAttribute,
+            version: plugin.version,
+            name: plugin.name,
+            _id: plugin._id
+          };
+          if(locations) {
+            if(!pluginLocations[type]) {
+              pluginLocations[type] = {};
+            }
+            pluginLocations[type][plugin.targetAttribute] = locations;
+          }
+          cb2();
+        }, cb);
+      });
+    }
+
 
     //create DB instance
     database.getDatabase(function(error, db) {
@@ -243,13 +384,14 @@ const processTranslation = function(courseId) {
     async.waterfall([
       // get an object with all the course data
       function(callback) {
-        OutputPlugin.prototype.getCourseJSON(tenantId, courseId, function(err, data) {
+        OutputPlugin.prototype.getCourseJSON(tenantId, origCourseId, function(err, data) {
           if (err) {
             return callback(err);
           }
           // Store off the retrieved collections
           coursePublishJson = data;
-          callback(null);
+          originalCourseData = JSON.parse(JSON.stringify(data));  // clone course object in original form
+          callback();
         });
       },
       function(callback) {
@@ -257,18 +399,15 @@ const processTranslation = function(courseId) {
           if (err) {
             return callback(err);
           }
-          // Update the JSON object
           coursePublishJson = data;
-          callback(null);
+          callback();
         });
       },
-      // delete the existing build folder
       function(callback) {
         // Ensure that the build folder is empty
         fs.emptyDir(TRANSLATE_FOLDER, err => {
           logger.log('info', 'Translation directory emptied');
           if (err) logger.log('error', err);
-
           callback(err);
         })
       },
@@ -277,7 +416,7 @@ const processTranslation = function(courseId) {
           if (err) {
             return callback(err);
           }
-          callback(null);
+          callback();
         });
       },
       function(callback) {
@@ -311,7 +450,7 @@ const processTranslation = function(courseId) {
           });
       },
       function(callback) {
-        // make sure the grunt translate file buildFlagExists
+        // make sure the grunt translate file exists
         fs.exists(path.join(GRUNT_OUTPUT_FILE), function(exists) {
           if (!exists) return callback({ success:false, message: "Grunt translate file does not exist" });
           return callback();
@@ -321,7 +460,6 @@ const processTranslation = function(courseId) {
         // read grunt translate output and populate gruntOutputJson
         fs.readFile(GRUNT_OUTPUT_FILE, 'utf8', function(err, file) {
           if (err) {
-            logger.log('error', err);
             return callback(err);
           }
           gruntOutputJson = JSON.parse(file);
@@ -361,7 +499,6 @@ const processTranslation = function(courseId) {
           });
         }, function(err) {
           if (err) {
-            logger.log('error', err);
             callback(err);
           }
 
@@ -371,7 +508,6 @@ const processTranslation = function(courseId) {
             callback();
           })
           .catch(err => {
-            logger.log('error', err);
             callback(err);
           })
         });
@@ -414,26 +550,112 @@ const processTranslation = function(courseId) {
       },
       function(callback) {
         // retrieve translated JSON
-        return callback();
+        async.eachSeries(Object.keys(contentMap), function(type, cb) {
+          let jsonPath = path.join(TRANSLATE_SOURCE_FOLDER, Constants.Folders.Course, (type !== 'config') ? targetLang : '', `${contentMap[type] || type}.json`);
+          fs.readJson(jsonPath, function(error, jsonData) {
+            if(error) {
+              return callback(error);
+            }
+            cachedJson[type] = jsonData;
+            cb();
+          });
+        }, callback);
+      },
+      function(callback) {
+        cacheMetadata(function(error) {
+          if (error) callback(error);
+          return callback();
+        });
       },
       function(callback) {
         // create new course with cachedJson
-        return callback();
-      },
-      function(callback) {
-        // enable Plugins
-        return callback();
+        async.eachSeries(Object.keys(contentMap), function(type, cb2) {
+          let contentJson = cachedJson[type];
+          switch(type) {
+            case 'course': {
+              let origCourseJson = originalCourseData.course[0];
+              let themeSettings = origCourseJson.themeSettings || {};
+              let customStyle = origCourseJson.customStyle || "";
+              contentJson.themeSettings = themeSettings;
+              contentJson.customStyle = customStyle;
 
+              createContentItem(type, contentJson, function(error, courseRec) {
+                if(error) return cb2(error);
+                metadata.idMap[contentJson._id] = courseRec._id;
+                newCourseId = metadata.idMap[origCourseId] = courseRec._id;
+                cb2();
+              });
+              return;
+            }
+            case 'config': {
+              let origCourseJson = originalCourseData.config[0];
+              let editorOnlyConfig = {
+                _theme: origCourseJson._theme,
+                _menu: origCourseJson._menu,
+                _enabledExtensions: origCourseJson._enabledExtensions,
+                _enabledComponents: origCourseJson._enabledComponents
+              }
+              _.extend(contentJson, editorOnlyConfig);
+              createContentItem(type, contentJson, cb2);
+              return;
+            }
+            case 'contentobject': { // Sorts in-place the content objects to make sure processing can happen
+              let byParent = _.groupBy(contentJson, '_parentId');
+              Object.keys(byParent).forEach(id => {
+                byParent[id].forEach((item, index) => item._sortOrder = index + 1);
+              });
+              let groups = _.groupBy(contentJson, '_type');
+              let sortedSections = translationManager.sortContentObjects(groups.menu, origCourseId, []);
+              contentJson = sortedSections.concat(groups.page);
+            }
+          }
+          // assume we're using arrays
+          async.eachSeries(contentJson, function(item, cb3) {
+            createContentItem(type, item, function(error, contentRec) {
+              if(error) {
+                return cb3(error);
+              }
+              if(!contentRec || !contentRec._id) {
+                logger.log('warn', 'Failed to create map for '+ item._id);
+                return cb3();
+              }
+              metadata.idMap[item._id] = contentRec._id;
+              cb3();
+            });
+          }, cb2);
+        }, function(err) {
+          callback(err);
+        });
       },
       function(callback) {
-        // copy assets
-        return callback();
+        // clone courseassets
+        dbInstance.retrieve('courseasset', {_courseId: origCourseId}, { jsonOnly: true }, function(error, results) {
+          if(error) {
+            return callback(error);
+          }
+
+          async.each(results, function(courseAsset, cb2) {
+            let newCourseAsset = {
+              _courseId: metadata.idMap[courseAsset._courseId],
+              _contentTypeParentId: metadata.idMap[courseAsset._contentTypeParentId]
+            };
+            newCourseAsset = _.extend(courseAsset, newCourseAsset);
+            delete newCourseAsset._id;
+            dbInstance.create('courseasset', newCourseAsset, function(err, courseAssetRecord) {
+              if (err) {
+                return cb2(err);
+              }
+              cb2();
+            })
+          }, callback);
+        });
       }
     ], function(err) {
       if (err) {
         logger.log('error', err);
         reject(err);
       }
+      // TODO - clean up temp folders
       resolve(translateResultObject);
     });
   });

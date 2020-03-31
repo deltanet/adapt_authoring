@@ -20,6 +20,7 @@ define(function(require) {
       'click button.editor-common-sidebar-download': 'downloadProject',
       'click button.editor-common-sidebar-preview': 'previewProject',
       'click button.editor-common-sidebar-preview-force': 'forcePreviewProject',
+      'click button.editor-common-sidebar-translate': 'translateProject',
       'click button.editor-common-sidebar-export': 'exportProject',
       'click button.editor-common-sidebar-close': 'closeProject',
       'click .editor-common-sidebar-preview-wrapper .dropdown button': 'toggleDropdown'
@@ -137,6 +138,10 @@ define(function(require) {
 
     forcePreviewProject: function() {
       Origin.trigger('editorCommon:preview', true);
+    },
+
+    translateProject: function() {
+      Origin.trigger('editorCommon:translate');
     },
 
     exportProject: function() {

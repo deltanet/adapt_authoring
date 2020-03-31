@@ -49,7 +49,8 @@ define(function(require) {
           var previewWindow = window.open('loading', 'preview');
           this.previewProject(previewWindow, isForceRebuild);
         },
-        'editorCommon:export': this.exportProject
+        'editorCommon:export': this.exportProject,
+        'editorCommon:translate': this.translateProject
       });
       this.render();
       this.setupEditor();
@@ -97,6 +98,12 @@ define(function(require) {
         Origin.Notify.alert({ type: 'error', text: Origin.l10n.t('app.errorgeneric') });
         previewWindow.close();
       }.bind(this));
+    },
+
+    translateProject: function() {
+      event && event.preventDefault();
+      var courseId = Origin.editor.data.course.get('_id');
+      Origin.router.navigateTo('translatecourse/' + courseId);
     },
 
     exportProject: function(error) {

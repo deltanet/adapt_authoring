@@ -5,15 +5,23 @@ define(function(require) {
   var ProjectsSidebarView = SidebarItemView.extend({
 
     events: {
-      'click button.translate': 'translateCourse',
-      'click button.cancel': 'goBack'
-    }
+      'click .editor-project-translate-sidebar-translate': 'translateCourse',
+      'click .editor-project-translate-sidebar-cancel': 'cancel'
+    },
 
+    translateCourse: function(event) {
+      event && event.preventDefault();
+      Origin.trigger('translateCourseSidebar:views:translate', this);
+    },
+
+    cancel: function(event) {
+      event && event.preventDefault();
+      Backbone.history.history.back();
+    }
 
   }, {
     template: 'translateCourseSidebar'
   });
 
-  console.log('translate course sidebar view');
   return ProjectsSidebarView;
 });

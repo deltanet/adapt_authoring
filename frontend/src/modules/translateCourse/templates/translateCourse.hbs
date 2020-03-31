@@ -1,5 +1,28 @@
 <div id="translate-course" class="inner">
   <form class="translateCourse forms" action="translate" method="post" autocomplete="off">
-    <h1>Trannnnslaaaate</h1>
+    <div class="lang-container">
+      <div class="course-title">{{{courseTitle}}}</div>
+    </div>
+    <div class="lang-container">
+      <div class="lang-container-title"><label for="languageSelection">{{t 'app.availablelanguages'}}</label><span class="error"></span></div>
+      <div class="lang-help">
+        {{t 'app.availablelanguagesinstruction'}}
+      </div>
+      {{#each languages}}
+        <div class="lang-field col-row">
+          <div class="lang-field-name col-30">{{{name}}}</div>
+          <div class="lang-field-nativename col-30">{{{nativeName}}} </div>
+          <div class="lang-field-dir col-20">
+            {{#ifValueEquals dir 'ltr'}}
+            {{t 'app.translateltr'}}
+            {{/ifValueEquals}}
+            {{#ifValueEquals dir 'rtl'}}
+            {{t 'app.translatertl'}}
+            {{/ifValueEquals}}
+            </div>
+          <div class="lang-field-input col-20"><input type="radio" autocomplete="off" class="width-30" id="targetLang" name="targetLang" value="{{{langCode}}}" /></div>
+        </div>
+      {{/each}}
+    </div>
   </form>
 </div>

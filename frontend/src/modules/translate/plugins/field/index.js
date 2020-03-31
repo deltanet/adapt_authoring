@@ -13,7 +13,7 @@ define(function(require) {
 
     if (!data.text) {
       isError = true;
-      errorMessage = Origin.l10n.t('app.translateNoText');
+      errorMessage = Origin.l10n.t('app.translateErrorNoText');
     }
 
     if (isError) {
@@ -44,7 +44,7 @@ define(function(require) {
     }
     $.ajax({
       type: 'POST',
-      url: 'api/translate',
+      url: 'api/translate/text',
       data: formText,
       success: function (data, textStatus, jqXHR) {
         cb(null, data);
@@ -53,7 +53,7 @@ define(function(require) {
         var xhrError = jqXHR;
         Origin.Notify.alert({
           type: 'error',
-          text: jqXHR.responseJSON.message
+          text: errorThrown
         });
         return cb(xhrError);
       }

@@ -23,6 +23,13 @@
     </span>
   </button>
 
+  <button class="editor-common-sidebar-translate action-secondary">
+    <span class="editor-common-sidebar-translate-inner">{{ t 'app.translatecourse'}}</span>
+    <span class="editor-common-sidebar-translating display-none">
+      <i class="fa fa-circle-o-notch fa-spin"></i>{{ t 'app.translating'}}
+    </span>
+  </button>
+
   {{#ifHasPermissions "*/*:create,*/*:read,*/*:update,*/*:delete"}}
   <button class="editor-common-sidebar-export action-secondary">
     <span class="editor-common-sidebar-export-inner">{{ t 'app.export'}}</span>

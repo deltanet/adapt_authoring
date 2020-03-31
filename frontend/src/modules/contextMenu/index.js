@@ -65,11 +65,6 @@ define(function(require) {
         callbackEvent: "copyID"
       },
       {
-        title: Origin.l10n.t('app.translatecourse'),
-        className: 'context-menu-item',
-        callbackEvent: "translateCourse"
-      },
-      {
         title: Origin.l10n.t('app.delete'),
         className: 'context-menu-item',
         callbackEvent: "delete"

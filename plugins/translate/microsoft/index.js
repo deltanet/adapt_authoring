@@ -29,6 +29,8 @@ util.inherits(MicrosoftTranslate, TranslationPlugin);
 
 const translateServiceEndpoint = getEndPoint();
 const translateServiceKey = getKey();
+const translateTextApiUri = 'https://api.cognitive.microsofttranslator.com/languages?api-version=3.0';
+const API_OPTIONS = {};
 
 /**
  * essential setup
@@ -39,10 +41,31 @@ function initialize () {
   let app = origin();
 
   app.once('serverStarted', function(server) {
+
+    /**
+     * API Endpoint to get available languages
+     */
+    rest.get('/translate/languages', function (req, res, next) {
+      // should return an object list or language objects
+      let options = API_OPTIONS;
+      getLanguages(options, function(error, languages) {
+        if (error) {
+          logger.log('error', error);
+          return res.status(500).json(error);
+        }
+
+        if (languages && typeof languages === 'object') {
+          return res.status(200).json(languages);
+        } else {
+          return res.status(404).json({ success:false });
+        }
+      });
+    });
+
     /**
      * API Endpoint to translate text
      */
-    rest.post('/translate', function (req, res, next) {
+    rest.post('/translate/text', function (req, res, next) {
       let origText = req.body.text;
       let toLang = req.body.to;
 
@@ -70,7 +93,7 @@ function initialize () {
     /**
      * API Endpoint to translate whole course
      */
-    rest.post('/translatecourse/:courseid', function (req, res, next) {
+    rest.post('/translate/course/:courseid', function (req, res, next) {
       let origCourseId = req.params.courseid;
       let requestBody = req.body;
       if (!origCourseId) {
@@ -100,12 +123,41 @@ function initialize () {
          * @event courseDuplicated
          * @type object
          */
-        app.emit('courseDuplicated', record);
         res.statusCode = 200;
         return res.json({success: true, newCourseId: record._id});
       });
     });
   });
+}
+
+/*
+*
+*
+*/
+
+function getLanguages(options, cb) {
+
+  let translateTextOptions = {
+    method: 'get',
+    uri: translateTextApiUri,
+    qs: {
+      'scope': 'translation'
+    },
+    json: true,
+  };
+
+  request(translateTextOptions, function(error, response) {
+    if (error) return cb(error);
+    if (typeof response !== 'object' || !response.body) {
+      logger.log('error', 'Translation Text error, response body is not an object: ' + JSON.stingify(response));
+      error = 'Translation Text error, response body is not an object: ' + JSON.stringify(response);
+    }
+    if (response.error) {
+      error = 'Translation Text error: ' + JSON.stringify(response.error);
+    }
+    return cb(error, response.body);
+  });
+
 }
 
 /*
@@ -192,6 +244,7 @@ const processTranslation = function(origCourseId, sourceLang, targetLang) {
   return new Promise((resolve, reject) => {
     if (!origCourseId || typeof origCourseId !== 'string') reject("No course to translate");
 
+    let availableLanguages = {};
     let originalCourseData = {};
     let coursePublishJson = {};
     let gruntOutputJson = {};
@@ -381,6 +434,19 @@ const processTranslation = function(origCourseId, sourceLang, targetLang) {
       dbInstance = db;
     });
 
+    getLanguages({}, function(error, languages) {
+      if (error) {
+        logger.log('error', error);
+        return;
+      }
+
+      if (!languages || typeof languages !== 'object') return;
+      if (languages.hasOwnProperty('translation')) {
+        availableLanguages = languages['translation'];
+      }
+      return;
+    });
+
     async.waterfall([
       // get an object with all the course data
       function(callback) {
@@ -435,7 +501,7 @@ const processTranslation = function(origCourseId, sourceLang, targetLang) {
               logger.log('error', 'exec error: ' + error);
               logger.log('error', 'stdout error: ' + stdout);
               error.message += getGruntFatalError(stdout) || '';
-              translateResultObject.success = true;
+              translateResultObject.success = false;
               return callback(error, 'Error running translation export');
             }
 
@@ -530,7 +596,7 @@ const processTranslation = function(origCourseId, sourceLang, targetLang) {
               logger.log('error', 'exec error: ' + error);
               logger.log('error', 'stdout error: ' + stdout);
               error.message += getGruntFatalError(stdout) || '';
-              translateResultObject.success = true;
+              translateResultObject.success = false;
               return callback(error, 'Error running translation import');
             }
 
@@ -543,7 +609,6 @@ const processTranslation = function(origCourseId, sourceLang, targetLang) {
             // clean up source Folders
             fs.remove(path.join(TRANSLATE_SOURCE_FOLDER, Constants.Folders.Course, sourceLang) , err => {
               if (err) return callback(err);
-              translateResultObject.success = true;
               return callback();
             })
           });
@@ -583,13 +648,20 @@ const processTranslation = function(origCourseId, sourceLang, targetLang) {
                 if(error) return cb2(error);
                 metadata.idMap[contentJson._id] = courseRec._id;
                 newCourseId = metadata.idMap[origCourseId] = courseRec._id;
+                translateResultObject._id = newCourseId;
                 cb2();
               });
               return;
             }
             case 'config': {
               let origCourseJson = originalCourseData.config[0];
+              let targetDirection = origCourseJson._defaultDirection;
+              if (availableLanguages[targetLang] && availableLanguages[targetLang].dir) {
+                targetDirection = availableLanguages[targetLang].dir;
+              }
               let editorOnlyConfig = {
+                _defaultLanguage: targetLang,
+                _defaultDirection: targetDirection,
                 _theme: origCourseJson._theme,
                 _menu: origCourseJson._menu,
                 _enabledExtensions: origCourseJson._enabledExtensions,
@@ -655,6 +727,7 @@ const processTranslation = function(origCourseId, sourceLang, targetLang) {
         logger.log('error', err);
         reject(err);
       }
+      translateResultObject.success = true;
       // TODO - clean up temp folders
       resolve(translateResultObject);
     });

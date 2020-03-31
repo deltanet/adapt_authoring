@@ -488,12 +488,12 @@ const processTranslation = function(origCourseId, sourceLang, targetLang) {
       function(callback) {
         let args = [];
 
-        args.push('--targetLang=' + sourceLang);
+        args.push('--masterLang=' + sourceLang);
         args.push('--format=json');
         args.push('--languagedir=' + TRANSLATE_GRUNT_FOLDER);
         args.push('--outputdir=' + TRANSLATE_SOURCE_FOLDER);
 
-        logger.log('info', 'grunt translate:export --format=json --languagedir=' + TRANSLATE_SOURCE_FOLDER + ' --outputdir=' + TRANSLATE_GRUNT_FOLDER);
+        logger.log('info', 'grunt translate:export --format=json --masterLang=' + sourceLang + ' --languagedir=' + TRANSLATE_GRUNT_FOLDER + ' --outputdir=' + TRANSLATE_SOURCE_FOLDER);
 
         child = exec('grunt translate:export ' + args.join(' '), {cwd: path.join(FRAMEWORK_ROOT_FOLDER)},
           function(error, stdout, stderr) {
@@ -583,12 +583,13 @@ const processTranslation = function(origCourseId, sourceLang, targetLang) {
         let args = [];
 
         args.push('--targetLang=' + targetLang);
+        args.push('--masterLang=' + sourceLang);
         args.push('--format=json');
         args.push('--replace');
         args.push('--languagedir=' + TRANSLATE_GRUNT_FOLDER);
         args.push('--outputdir=' + TRANSLATE_SOURCE_FOLDER);
 
-        logger.log('info', 'grunt translate:import --format=json --replace --targetLang=' + targetLang + ' --languagedir=' + TRANSLATE_GRUNT_FOLDER + ' --outputdir=' + TRANSLATE_SOURCE_FOLDER);
+        logger.log('info', 'grunt translate:import --format=json --replace --targetLang=' + targetLang + ' --masterLang=' + sourceLang + ' --languagedir=' + TRANSLATE_GRUNT_FOLDER + ' --outputdir=' + TRANSLATE_SOURCE_FOLDER);
 
         child = exec('grunt translate:import ' + args.join(' '), {cwd: path.join(FRAMEWORK_ROOT_FOLDER)},
           function(error, stdout, stderr) {

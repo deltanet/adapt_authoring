@@ -7,9 +7,10 @@ define(function(require) {
     var isError = null;
     var errorMessage = "";
 
-    if(!data.callback || typeof data.callback !== 'function') isError = true;
-
-    if (_.isString(data)) isError = true;
+    if(!data.callback || typeof data.callback !== 'function') {
+      isError = true;
+      errorMessage = Origin.l10n.t('app.translateError');
+    }
 
     if (!data.text) {
       isError = true;
@@ -26,7 +27,11 @@ define(function(require) {
     }
     getTranslatedText(data.text, function(error, newText) {
       if (error) {
-        return data.callback(Origin.l10n.t('app.translateError') + error);
+        Origin.Notify.alert({
+          type: 'error',
+          text: error.message + Origin.l10n.t('app.translateLangCodeHelp')
+        });
+        return;
       }
       return data.callback(error, newText);
     });
@@ -50,11 +55,7 @@ define(function(require) {
         cb(null, data);
       },
       error: function(jqXHR, textStatus, errorThrown) {
-        var xhrError = jqXHR;
-        Origin.Notify.alert({
-          type: 'error',
-          text: errorThrown
-        });
+        var xhrError = jqXHR.responseJSON;
         return cb(xhrError);
       }
     });

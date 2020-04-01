@@ -50,7 +50,7 @@ define(function(require) {
     onAjaxError: function(data, status, error) {
       var resJson = data.responseJSON || {};
       var title = resJson.title || Origin.l10n.t('app.translateErrorTitle');
-      var msg = resJson.body && resJson.body.replace(/\n/g, "<br />") || error;
+      var msg = resJson.message && resJson.message.replace(/\n/g, "<br />") || error;
       this.promptUser(title, msg, true);
       this.sidebarView.resetButtons();
     },

@@ -72,7 +72,8 @@ function initialize () {
       translateText(origText, toLang, function(error, body) {
         if (error) {
           logger.log('error', error);
-          return res.status(500).json(error);
+          res.statusCode = 500;
+          return res.json({success: false, message: error});
         }
 
         // return the translated text.
@@ -111,8 +112,12 @@ function initialize () {
       let targetLang = requestBody.targetLang;
       translateCourse(origCourseId, targetLang, function(error, record) {
         if (error) {
+          let errorMessage = error;
+          if (typeof error === 'object') {
+            errorMessage = error.message;
+          }
           res.statusCode = 400;
-          return res.json({success: false, message: error.message});
+          return res.json({success: false, message: errorMessage});
         }
         if (typeof record !== 'object') {
           logger.log('error', 'Translate Course error, response body is not an object: ' + JSON.stingify(body));
@@ -187,13 +192,16 @@ function translateText(origText, toLang, cb) {
   };
 
   request(options, function(error, response) {
-    if (error) return cb(error);
-    if (typeof response !== 'object' || !response.body) {
-      logger.log('error', 'Translation Text error, response body is not an object: ' + JSON.stingify(response));
-      error = 'Translation Text error, response body is not an object: ' + JSON.stringify(response);
+    if (error) {
+      return cb(error);
     }
-    if (response.error) {
-      error = 'Translation Text error: ' + JSON.stringify(response.error);
+    if (typeof response !== 'object' || !response.body) {
+      error = 'Translation Text error, response body is not an object: ' + JSON.stringify(response);
+      return cb(error);
+    }
+    if (response.body && response.body.error && response.body.error.code) {
+      error = 'Translator Text error. Code: ' + response.body.error.code + ' message: ' + response.body.error.message;
+      return cb(error);
     }
     return cb(error, response.body);
   });
@@ -206,17 +214,21 @@ function translateText(origText, toLang, cb) {
 
 function translateCourse(courseId, targetLang, next) {
   logger.log('info', 'Translating: ' + courseId);
-
+  let errorMessage = "";
   translationManager.getSourceLang(courseId, function(error, sourceLang) {
     if (error || !sourceLang) {
-      let errorMessage = error ? error : 'Source language not found';
+      errorMessage = error ? error : app.polyglot.t('app.translateSourceLangError');;
       logger.log('error', errorMessage);
-      reject(error);
+      return next(error);
+    }
+
+    if (sourceLang === targetLang) {
+      errorMessage = app.polyglot.t('app.translateSameLangError');
+      return next(errorMessage);
     }
 
     processTranslation(courseId, sourceLang, targetLang)
       .then(translatedCourse => {
-        // need to update the database here
         next(null, translatedCourse);
       })
       .catch(error => next(error));

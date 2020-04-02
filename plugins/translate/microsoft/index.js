@@ -27,8 +27,8 @@ function MicrosoftTranslate() {
 }
 util.inherits(MicrosoftTranslate, TranslationPlugin);
 
-const translateServiceEndpoint = getEndPoint();
-const translateServiceKey = getKey();
+let translateServiceEndpoint;
+let translateServiceKey;
 const translateTextApiUri = 'https://api.cognitive.microsofttranslator.com/languages?api-version=3.0';
 const API_OPTIONS = {};
 
@@ -39,7 +39,8 @@ const API_OPTIONS = {};
  */
 function initialize () {
   let app = origin();
-
+  translateServiceEndpoint = getEndPoint();
+  translateServiceKey = getKey();
   app.once('serverStarted', function(server) {
 
     /**
@@ -226,9 +227,12 @@ function translateCourse(courseId, targetLang, next) {
       errorMessage = app.polyglot.t('app.translateSameLangError');
       return next(errorMessage);
     }
+    const start = process.hrtime();
 
     processTranslation(courseId, sourceLang, targetLang)
       .then(translatedCourse => {
+        let end = process.hrtime(start)
+        console.info('Translate course execution time (hr): %ds %dms', end[0], end[1] / 1000000)
         next(null, translatedCourse);
       })
       .catch(error => next(error));
@@ -569,7 +573,7 @@ const processTranslation = function(origCourseId, sourceLang, targetLang) {
           return callback('Translation file is not JSON');
         }
 
-        async.eachSeries(gruntOutputJson, function(item, cb) {
+        async.each(gruntOutputJson, function(item, cb) {
           translateText(item.value, targetLang, function(error, body) {
             if (error) return callback(error);
             let translatedText = "";

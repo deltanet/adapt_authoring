@@ -256,6 +256,7 @@ const processTranslation = function(origCourseId, sourceLang, targetLang) {
   return new Promise((resolve, reject) => {
     if (!origCourseId || typeof origCourseId !== 'string') reject("No course to translate");
 
+    let sanitisedOrigCourseId;
     let availableLanguages = {};
     let originalCourseData = {};
     let coursePublishJson = {};
@@ -346,8 +347,9 @@ const processTranslation = function(origCourseId, sourceLang, targetLang) {
           if(metadata.idMap[data._parentId]) {
             data._parentId = metadata.idMap[data._parentId];
           } else {
-            logger.log('warn', 'Cannot update ' + originalData._id + '._parentId, ' +  originalData._parentId + ' not found in idMap');
-            return resolve();
+            let errorMessage = 'Cannot update ' + originalData._id + '._parentId, ' +  originalData._parentId + ' not found in idMap';
+            logger.log('error', errorMessage);
+            return reject(errorMessage);
           }
         }
 
@@ -394,7 +396,7 @@ const processTranslation = function(origCourseId, sourceLang, targetLang) {
           if(error) return done(error);
           plugin.create(data, function(error, record) {
             if(error) {
-              logger.log('warn', 'Failed to create ' + type + ' ' + (originalData._id || '') + ' ' + error);
+              logger.log('error', 'Failed to create ' + type + ' ' + (originalData._id || '') + ' ' + error);
               return done(error);
             }
             return done(null, record);
@@ -408,7 +410,7 @@ const processTranslation = function(origCourseId, sourceLang, targetLang) {
     */
     const cacheMetadata = (done) => {
       async.each(plugindata.pluginTypes, storePlugintype, done);
-    }
+    };
 
     const storePlugintype = (pluginTypeData, cb) => {
       const type = pluginTypeData.type;
@@ -437,7 +439,23 @@ const processTranslation = function(origCourseId, sourceLang, targetLang) {
           cb2();
         }, cb);
       });
-    }
+    };
+
+    /**
+    * Recursively sorts list to ensure parents come before children
+    */
+    const sortContentObjects = (list, parentId, sorted) => {
+      // remove parent
+      var parentIndex = _.findIndex(list, { _id: parentId });
+      if(parentIndex > -1) list.splice(_.findIndex(list, { _id: parentId }), 1);
+      // recursively store children
+      var thisChildren = _.where(list, { _parentId: parentId });
+      _.each(thisChildren, function(child, index) {
+        sorted.push(child);
+        sortContentObjects(list, child._id, sorted);
+      });
+      return sorted;
+    };
 
 
     //create DB instance
@@ -659,8 +677,10 @@ const processTranslation = function(origCourseId, sourceLang, targetLang) {
 
               createContentItem(type, contentJson, function(error, courseRec) {
                 if(error) return cb2(error);
-                metadata.idMap[contentJson._id] = courseRec._id;
-                newCourseId = metadata.idMap[origCourseId] = courseRec._id;
+                //metadata.idMap[contentJson._id] = courseRec._id;
+                sanitisedOrigCourseId = contentJson._id;
+                metadata.idMap[origCourseId] = courseRec._id;
+                newCourseId = metadata.idMap[sanitisedOrigCourseId] = courseRec._id;
                 translateResultObject._id = newCourseId;
                 cb2();
               });
@@ -690,7 +710,7 @@ const processTranslation = function(origCourseId, sourceLang, targetLang) {
                 byParent[id].forEach((item, index) => item._sortOrder = index + 1);
               });
               let groups = _.groupBy(contentJson, '_type');
-              let sortedSections = translationManager.sortContentObjects(groups.menu, origCourseId, []);
+              let sortedSections = sortContentObjects(groups.menu, sanitisedOrigCourseId, []);
               contentJson = sortedSections.concat(groups.page);
             }
           }
@@ -701,8 +721,9 @@ const processTranslation = function(origCourseId, sourceLang, targetLang) {
                 return cb3(error);
               }
               if(!contentRec || !contentRec._id) {
-                logger.log('warn', 'Failed to create map for '+ item._id);
-                return cb3();
+                let errorMessage = 'Failed to create content for '+ item._id;
+                logger.log('error', errorMessage);
+                return cb3(errorMessage);
               }
               metadata.idMap[item._id] = contentRec._id;
               cb3();

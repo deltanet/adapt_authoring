@@ -143,6 +143,7 @@ LocalAuth.prototype.authenticate = function (req, res, next) {
               email: user.email,
               tenantId: user._tenantId,
               tenantName: req.session.passport.user.tenant.name,
+              translationEnabled: req.session.passport.user.tenant.translationEnabled,
               permissions: userPermissions
             });
           });

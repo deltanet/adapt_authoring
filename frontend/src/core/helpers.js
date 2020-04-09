@@ -143,6 +143,19 @@ define(function(require){
       return new Handlebars.SafeString(html);
     },
 
+    renderBooleanText: function(selectedValue) {
+      var options = ["true", "false"];
+      var displayOption = "false";
+
+      for (var i = 0; i < options.length; i++) {
+        if(selectedValue == options[i]) {
+          displayOption = options[i];
+        }
+      }
+      var html = '<span class="read">' + displayOption + '</span>';
+      return new Handlebars.SafeString(html);
+    },
+
     pickCSV: function(list, key, separator) {
       if (!list || !list.length) {
         return '';
@@ -175,6 +188,10 @@ define(function(require){
     ifHasPermissions: function(permissions, block) {
       var hasPermission = Origin.permissions.hasPermissions(permissions.split(','));
       return hasPermission ? block.fn(this) : block.inverse(this);
+    },
+
+    ifTranslationEnabled: function(block) {
+      return Origin.sessionModel.get('translationEnabled') === "true" ? block.fn(this) : block.inverse(this);
     },
 
     ifMailEnabled: function(block) {

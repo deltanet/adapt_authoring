@@ -26,6 +26,7 @@ define(['require', 'backbone', 'core/origin'], function(require, Backbone, Origi
           tenantId: jqXHR.tenantId,
           email: jqXHR.email,
           isAuthenticated: true,
+          translationEnabled: jqXHR.translationEnabled,
           permissions: jqXHR.permissions
         });
 

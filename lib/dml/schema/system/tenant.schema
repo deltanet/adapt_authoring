@@ -18,6 +18,11 @@
       "required": true,
       "default": false
     },
+    "translationEnabled": {
+      "type": "string",
+      "required": true,
+      "default": "false"
+    },
     "createdAt": {
       "type": "date",
       "required": true

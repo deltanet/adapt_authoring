@@ -447,6 +447,7 @@
   "app.translating": "Translating",
   "app.translateltr": "Left to right",
   "app.translatertl": "Right to left",
+  "app.translationEnabled": "Translation Enabled",
   "app.availablelanguages": "Available languages",
   "app.translateErrorNoText": "You must enter some text to translate.",
   "app.translateErrorTitle": "Translation Error",

@@ -31,6 +31,7 @@ let translateServiceEndpoint;
 let translateServiceKey;
 const translateTextApiUri = 'https://api.cognitive.microsofttranslator.com/languages?api-version=3.0';
 const API_OPTIONS = {};
+const masterTenantID = configuration.getConfig('masterTenantID');
 
 /**
  * essential setup
@@ -232,6 +233,7 @@ function translateCourse(courseId, targetLang, next) {
     processTranslation(courseId, sourceLang, targetLang)
       .then(translatedCourse => {
         let end = process.hrtime(start)
+        // TODO - remove this an the process.hrtime code
         console.info('Translate course execution time (hr): %ds %dms', end[0], end[1] / 1000000)
         next(null, translatedCourse);
       })
@@ -272,7 +274,6 @@ const processTranslation = function(origCourseId, sourceLang, targetLang) {
     };
 
     let pluginLocations = {};
-    let dbInstance;
     // TODO - Create file to indicate that translation is in progress for this course
 
     const contentMap = {
@@ -295,7 +296,7 @@ const processTranslation = function(origCourseId, sourceLang, targetLang) {
 
     const user = usermanager.getCurrentUser();
     const tenantId = user.tenant._id;
-    const FRAMEWORK_ROOT_FOLDER = path.join(configuration.tempDir, configuration.getConfig('masterTenantID'), Constants.Folders.Framework);
+    const FRAMEWORK_ROOT_FOLDER = path.join(configuration.tempDir, masterTenantID, Constants.Folders.Framework);
     const COURSE_FOLDER = path.join(FRAMEWORK_ROOT_FOLDER, Constants.Folders.AllCourses, tenantId, origCourseId);
     const TRANSLATE_FOLDER = path.join(COURSE_FOLDER, Constants.Folders.Languagefiles);
     const TRANSLATE_SOURCE_FOLDER = path.join(TRANSLATE_FOLDER, Constants.Folders.TranslationSource);
@@ -310,25 +311,6 @@ const processTranslation = function(origCourseId, sourceLang, targetLang) {
       const indexEnd = stdout.indexOf('\n\nExecution Time');
 
       return stdout.substring(indexStart, indexEnd !== -1 ? indexEnd : stdout.length);
-    };
-
-    const storeComponentType = (cb) => {
-      dbInstance.retrieve('componenttype', {}, { jsonOnly: true }, function(error, results) {
-        if(error) {
-          return cb(error);
-        }
-        metadata['componentMap'] = {};
-        async.each(results, function(plugin, cb2) {
-          const properties = plugin.properties;
-          metadata['componentMap'][plugin['component']] = {
-            targetAttribute: plugin.targetAttribute,
-            version: plugin.version,
-            name: plugin.name,
-            _id: plugin._id
-          };
-          cb2();
-        }, cb);
-      });
     };
 
     const transformContent = (type, originalData) => {
@@ -360,27 +342,30 @@ const processTranslation = function(origCourseId, sourceLang, targetLang) {
         /**
         * Define the custom properties and and pluginLocations
         */
-        let genericPropKeys = Object.keys(dbInstance.getModel(type).schema.paths);
-        let customProps = _.pick(data, _.difference(Object.keys(data), genericPropKeys));
+        database.getDatabase(function(error, db) {
+          if(error) return reject(error);
+          let genericPropKeys = Object.keys(db.getModel(type).schema.paths);
+          let customProps = _.pick(data, _.difference(Object.keys(data), genericPropKeys));
 
-        if(_.isEmpty(customProps)) return resolve(data);
+          if(_.isEmpty(customProps)) return resolve(data);
 
-        plugindata.pluginTypes.forEach(function(typeData) {
-          if(!pluginLocations[typeData.type]) return;
+          plugindata.pluginTypes.forEach(function(typeData) {
+            if(!pluginLocations[typeData.type]) return;
 
-          let pluginKeys = _.intersection(Object.keys(customProps), Object.keys(pluginLocations[typeData.type]));
+            let pluginKeys = _.intersection(Object.keys(customProps), Object.keys(pluginLocations[typeData.type]));
 
-          if(pluginKeys.length === 0) return;
+            if(pluginKeys.length === 0) return;
 
-          data[typeData.attribute] = _.pick(customProps, pluginKeys);
-          data = _.omit(data, pluginKeys);
-          customProps = _.omit(customProps, pluginKeys);
-        });
-        // everything else is a customer property
-        data.properties = customProps;
-        data = _.omit(data, Object.keys(customProps));
+            data[typeData.attribute] = _.pick(customProps, pluginKeys);
+            data = _.omit(data, pluginKeys);
+            customProps = _.omit(customProps, pluginKeys);
+          });
+          // everything else is a customer property
+          data.properties = customProps;
+          data = _.omit(data, Object.keys(customProps));
 
-        resolve(data);
+          resolve(data);
+        }, masterTenantID);
       });
     };
 
@@ -418,31 +403,36 @@ const processTranslation = function(origCourseId, sourceLang, targetLang) {
 
     const storePlugintype = (pluginTypeData, cb) => {
       const type = pluginTypeData.type;
-      dbInstance.retrieve(`${type}type`, {}, { jsonOnly: true }, function(error, results) {
-        if(error) {
-          return cb(error);
-        }
-        async.each(results, function(plugin, cb2) {
-          const properties = plugin.properties;
-          const locations = properties && properties.pluginLocations;
-          if(!metadata[`${type}Map`]) {
-            metadata[`${type}Map`] = {};
+      database.getDatabase(function(error, db) {
+        if(error) return cb(error);
+
+        db.retrieve(`${type}type`, {}, { jsonOnly: true }, function(error, results) {
+          if(error) {
+            return cb(error);
           }
-          metadata[`${type}Map`][plugin[type]] = {
-            targetAttribute: plugin.targetAttribute,
-            version: plugin.version,
-            name: plugin.name,
-            _id: plugin._id
-          };
-          if(locations) {
-            if(!pluginLocations[type]) {
-              pluginLocations[type] = {};
+          async.each(results, function(plugin, cb2) {
+            const properties = plugin.properties;
+            const locations = properties && properties.pluginLocations;
+            if(!metadata[`${type}Map`]) {
+              metadata[`${type}Map`] = {};
             }
-            pluginLocations[type][plugin.targetAttribute] = locations;
-          }
-          cb2();
-        }, cb);
-      });
+            metadata[`${type}Map`][plugin[type]] = {
+              targetAttribute: plugin.targetAttribute,
+              version: plugin.version,
+              name: plugin.name,
+              _id: plugin._id
+            };
+
+            if(locations) {
+              if(!pluginLocations[type]) {
+                pluginLocations[type] = {};
+              }
+              pluginLocations[type][plugin.targetAttribute] = locations;
+            }
+            cb2();
+          }, cb);
+        });
+      }, masterTenantID);
     };
 
     /**
@@ -460,13 +450,6 @@ const processTranslation = function(origCourseId, sourceLang, targetLang) {
       });
       return sorted;
     };
-
-
-    //create DB instance
-    database.getDatabase(function(error, db) {
-      if(error) return reject(error);
-      dbInstance = db;
-    });
 
     getLanguages({}, function(error, languages) {
       if (error) {
@@ -739,25 +722,31 @@ const processTranslation = function(origCourseId, sourceLang, targetLang) {
       },
       function(callback) {
         // clone courseassets
-        dbInstance.retrieve('courseasset', {_courseId: origCourseId}, { jsonOnly: true }, function(error, results) {
-          if(error) {
-            return callback(error);
-          }
+        database.getDatabase(function(error, db) {
+          if(error) return cb(error);
+          db.retrieve('courseasset', {_courseId: origCourseId}, { jsonOnly: true }, function(error, records) {
+            if(error) {
+              return cb(error);
+            }
+            app.contentmanager.getContentPlugin('courseasset', function(error, plugin) {
+              if(error) return callback(error);
 
-          async.each(results, function(courseAsset, cb2) {
-            let newCourseAsset = {
-              _courseId: metadata.idMap[courseAsset._courseId],
-              _contentTypeParentId: metadata.idMap[courseAsset._contentTypeParentId]
-            };
-            newCourseAsset = _.extend(courseAsset, newCourseAsset);
-            delete newCourseAsset._id;
-            dbInstance.create('courseasset', newCourseAsset, function(err, courseAssetRecord) {
-              if (err) {
-                return cb2(err);
-              }
-              cb2();
-            })
-          }, callback);
+              async.each(records, function(courseAsset, cb) {
+                let newCourseAsset = {
+                  _courseId: metadata.idMap[courseAsset._courseId],
+                  _contentTypeParentId: metadata.idMap[courseAsset._contentTypeParentId]
+                };
+                newCourseAsset = _.extend(courseAsset, newCourseAsset);
+                delete newCourseAsset._id;
+                plugin.create(newCourseAsset, function(error, record) {
+                  if (error) {
+                    return cb(err);
+                  }
+                  cb();
+                });
+              }, callback);
+            });
+          });
         });
       }
     ], function(err) {

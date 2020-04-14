@@ -48,19 +48,26 @@ function initialize () {
      * API Endpoint to get available languages
      */
     rest.get('/translate/languages', function (req, res, next) {
-      // should return an object list or language objects
-      let options = API_OPTIONS;
-      getLanguages(options, function(error, languages) {
-        if (error) {
-          logger.log('error', error);
-          return res.status(500).json(error);
-        }
 
-        if (languages && typeof languages === 'object') {
-          return res.status(200).json(languages);
-        } else {
-          return res.status(404).json({ success:false });
+      checkPermissions(function(translationAllowed) {
+        if (!translationAllowed) {
+          logger.log('error', 'Permission denied to list translation languages');
+          return res.status(403).json({ success:false });
         }
+        // should return an object list or language objects
+        let options = API_OPTIONS;
+        getLanguages(options, function(error, languages) {
+          if (error) {
+            logger.log('error', error);
+            return res.status(500).json(error);
+          }
+
+          if (languages && typeof languages === 'object') {
+            return res.status(200).json(languages);
+          } else {
+            return res.status(404).json({ success:false });
+          }
+        });
       });
     });
 
@@ -71,25 +78,32 @@ function initialize () {
       let origText = req.body.text;
       let toLang = req.body.to;
 
-      translateText(origText, toLang, function(error, body) {
-        if (error) {
-          logger.log('error', error);
-          res.statusCode = 500;
-          return res.json({success: false, message: error});
-        }
 
-        // return the translated text.
-        // response will be an array, what should be done for multiple entries
-        if (body.length && body.length > 0) {
-          let translationsArray = body[0].translations;
-          if (translationsArray.length && translationsArray.length > 0) {
-            return res.status(200).json(translationsArray[0].text);
+      checkPermissions(function(translationAllowed) {
+        if (!translationAllowed) {
+          logger.log('error', 'Permission denied to translate text');
+          return res.status(403).json({ success:false });
+        }
+        translateText(origText, toLang, function(error, body) {
+          if (error) {
+            logger.log('error', error);
+            res.statusCode = 500;
+            return res.json({success: false, message: error});
+          }
+
+          // return the translated text.
+          // response will be an array, what should be done for multiple entries
+          if (body.length && body.length > 0) {
+            let translationsArray = body[0].translations;
+            if (translationsArray.length && translationsArray.length > 0) {
+              return res.status(200).json(translationsArray[0].text);
+            } else {
+              return res.status(404).json({ success:false });
+            }
           } else {
             return res.status(404).json({ success:false });
           }
-        } else {
-          return res.status(404).json({ success:false });
-        }
+        });
       });
     });
 
@@ -99,6 +113,7 @@ function initialize () {
     rest.post('/translate/course/:courseid', function (req, res, next) {
       let origCourseId = req.params.courseid;
       let requestBody = req.body;
+
       if (!origCourseId) {
         res.statusCode = 400;
         return res.json('Translate Course error, no course ID');
@@ -111,30 +126,50 @@ function initialize () {
         res.statusCode = 400;
         return res.json({ success: false, message: 'could not determine target language' });
       }
-      let targetLang = requestBody.targetLang;
-      translateCourse(origCourseId, targetLang, function(error, record) {
-        if (error) {
-          let errorMessage = error;
-          if (typeof error === 'object') {
-            errorMessage = error.message;
-          }
-          res.statusCode = 400;
-          return res.json({success: false, message: errorMessage});
-        }
-        if (typeof record !== 'object') {
-          logger.log('error', 'Translate Course error, response body is not an object: ' + JSON.stingify(body));
-          return res.status(500).json({ success:false });
-        }
 
-        /**
-         * @event courseDuplicated
-         * @type object
-         */
-        res.statusCode = 200;
-        return res.json({success: true, newCourseId: record._id});
+      checkPermissions(function(translationAllowed) {
+        if (!translationAllowed) {
+          logger.log('error', 'Permission denied to translate courseId: ' + origCourseId);
+          return res.status(403).json({ success:false });
+        }
+        let targetLang = requestBody.targetLang;
+        translateCourse(origCourseId, targetLang, function(error, record) {
+          if (error) {
+            let errorMessage = error;
+            if (typeof error === 'object') {
+              errorMessage = error.message;
+            }
+            res.statusCode = 400;
+            return res.json({success: false, message: errorMessage});
+          }
+          if (typeof record !== 'object') {
+            logger.log('error', 'Translate Course error, response body is not an object: ' + JSON.stingify(body));
+            return res.status(500).json({ success:false });
+          }
+
+          /**
+           * @event courseDuplicated
+           * @type object
+           */
+          res.statusCode = 200;
+          return res.json({success: true, newCourseId: record._id});
+        });
       });
     });
   });
+}
+
+/*
+* permissions check
+*/
+
+function checkPermissions(cb) {
+  var user = usermanager.getCurrentUser();
+  var translationEnabled = user.tenant.translationEnabled;
+
+  if (translationEnabled === 'true') return cb(true);
+
+  return cb(false);
 }
 
 /*
